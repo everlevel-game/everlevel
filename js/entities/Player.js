@@ -1,31 +1,31 @@
 // ผู้เล่น: เดินด้วยคีย์บอร์ด / จอย / คลิกตามเส้นทาง + เลเวล EXP และค่าสถานะ
-import { cleanOutfit } from '../data/outfits.js?v=0.93.0-p4.7';   // v0.91 สีชุด
-import { equipmentDesign } from '../data/equipmentDesigns.js?v=0.93.0-p4.7';
-import { Entity } from './Entity.js?v=0.93.0-p4.7';
-import { PLAYER_SPEED, TILE } from '../config.js?v=0.93.0-p4.7';
+import { cleanOutfit } from '../data/outfits.js?v=0.93.0-p4.9';   // v0.91 สีชุด
+import { equipmentDesign } from '../data/equipmentDesigns.js?v=0.93.0-p4.9';
+import { Entity } from './Entity.js?v=0.93.0-p4.9';
+import { PLAYER_SPEED, TILE } from '../config.js?v=0.93.0-p4.9';
 import {
   derive, baseExpToNext, jobExpToNext, statPointsForLevel, statCost,
   START_STAT_POINTS, MAX_STAT, STAT_KEYS, JOBS, jobStatBonus, JOB_CHANGE_JOB_LEVEL, FIRST_JOBS, SECOND_OF, JOB2_JOB_LEVEL, jobTier,
   THIRD_OF, JOB3_JOB_LEVEL, JOB3_BASE_LEVEL, parentJob,
-} from '../data/progression.js?v=0.93.0-p4.7';
-import { ITEMS, EQUIP_SLOTS, START_INVENTORY, START_EQUIP, START_HOTBAR, canJobUse } from '../data/items.js?v=0.93.0-p4.7';
-import { setInfo } from '../data/affixes.js?v=0.93.0-p4.7';
-import { DURA_MAX, DURA_LOW, DURA_LOSS, duraOf } from '../data/durability.js?v=0.93.0-p4.7';   // v0.89 ความทนทาน
-import { CARD_COMBOS, toBonus } from '../data/cardCatalog.js?v=0.93.0-p4.7';
-import { SKILLS, skillTrees, LEGACY_JOB2 } from '../data/skills.js?v=0.93.0-p4.7';
-import { Inventory } from '../systems/Inventory.js?v=0.93.0-p4.7';
-import { START_ZENY, MAX_ZENY } from '../data/shops.js?v=0.93.0-p4.7';
-import { COSTUME_BY_ID } from '../data/costumes.js?v=0.93.0-p4.7';
-import { CONSUMABLES } from '../data/consumables.js?v=0.93.0-p4.7';
-import { PETS, STAR_MAX, PET_DUP_ZENY } from '../data/pets.js?v=0.93.0-p4.7';
-import { normAuto } from '../systems/AutoHunt.js?v=0.93.0-p4.7';
-import { normPick } from '../systems/PetPick.js?v=0.93.0-p4.7';
-import { normDungeon } from '../data/dungeons.js?v=0.93.0-p4.7';
-import { normCol } from '../systems/Collection.js?v=0.93.0-p4.7';
-import { ACH_BY_ID } from '../data/collection.js?v=0.93.0-p4.7';
-import { titleInfo, titlesOf } from '../data/seasonTitles.js?v=0.93.0-p4.7';   // v0.76 ฉายา 3 อัน + ฉายาฤดูกาล
-import { normMail } from '../data/mail.js?v=0.93.0-p4.7';
-import { AR, syncAttr } from '../data/arena.js?v=0.93.0-p4.7';   // v0.78
+} from '../data/progression.js?v=0.93.0-p4.9';
+import { ITEMS, EQUIP_SLOTS, START_INVENTORY, START_EQUIP, START_HOTBAR, canJobUse } from '../data/items.js?v=0.93.0-p4.9';
+import { setInfo } from '../data/affixes.js?v=0.93.0-p4.9';
+import { DURA_MAX, DURA_LOW, DURA_LOSS, duraOf } from '../data/durability.js?v=0.93.0-p4.9';   // v0.89 ความทนทาน
+import { CARD_COMBOS, toBonus } from '../data/cardCatalog.js?v=0.93.0-p4.9';
+import { SKILLS, skillTrees, LEGACY_JOB2 } from '../data/skills.js?v=0.93.0-p4.9';
+import { Inventory } from '../systems/Inventory.js?v=0.93.0-p4.9';
+import { START_ZENY, MAX_ZENY } from '../data/shops.js?v=0.93.0-p4.9';
+import { COSTUME_BY_ID } from '../data/costumes.js?v=0.93.0-p4.9';
+import { CONSUMABLES } from '../data/consumables.js?v=0.93.0-p4.9';
+import { PETS, STAR_MAX, PET_DUP_ZENY } from '../data/pets.js?v=0.93.0-p4.9';
+import { normAuto } from '../systems/AutoHunt.js?v=0.93.0-p4.9';
+import { normPick } from '../systems/PetPick.js?v=0.93.0-p4.9';
+import { normDungeon } from '../data/dungeons.js?v=0.93.0-p4.9';
+import { normCol } from '../systems/Collection.js?v=0.93.0-p4.9';
+import { ACH_BY_ID } from '../data/collection.js?v=0.93.0-p4.9';
+import { titleInfo, titlesOf } from '../data/seasonTitles.js?v=0.93.0-p4.9';   // v0.76 ฉายา 3 อัน + ฉายาฤดูกาล
+import { normMail } from '../data/mail.js?v=0.93.0-p4.9';
+import { AR, syncAttr } from '../data/arena.js?v=0.93.0-p4.9';   // v0.78
 
 // v0.15: รหัสสุ่มประจำตัวละคร (ตัวละครใหม่ = รหัสใหม่ · รับจดหมาย "ทุกตัวละคร" ได้ตัวละ 1 ครั้ง)
 export const newCid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 16);
@@ -285,7 +285,10 @@ export class Player extends Entity {
     this.speed = PLAYER_SPEED * (1 + (input.bonus.speedPct || 0) / 100);
     // ธนูยิงได้ไกล 5 ช่อง (+ สกิลสายตาไกล) อาวุธอื่นตีระยะประชิด
     const w = this.equip.weapon && duraOf(this, this.equip.weapon) > 0 && ITEMS[this.equip.weapon];
-    this.attackRange = this.weaponType === 'bow' ? Math.max(2, 5 + (input.bonus.rangeTiles || 0)) * TILE : 24 + ((w && w.reach) || 0) * TILE;   // v0.25: หอกเอื้อมไกลขึ้น
+    // v0.94 สายระยะไกล: ธนู 7 ช่อง · ไม้เท้ายิงลูกเวท 6 ช่อง (ไม่ต้องเดินเข้าไปตีประชิด)
+    this.attackRange = this.weaponType === 'bow' ? Math.max(2, 7 + (input.bonus.rangeTiles || 0)) * TILE
+      : this.weaponType === 'staff' ? 6 * TILE
+      : 24 + ((w && w.reach) || 0) * TILE;   // v0.25: หอกเอื้อมไกลขึ้น
     this.maxHp = d.maxHp; this.maxSp = d.maxSp;
     this.hp = Math.min(this.hp ?? d.maxHp, d.maxHp);
     this.sp = Math.min(this.sp ?? d.maxSp, d.maxSp);

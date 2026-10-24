@@ -1,8 +1,11 @@
 // หน้าจอข้อมูล (DOM): สถานะตัวละคร, แชท, ชื่อแผนที่, FPS, บัฟ
-import { SKILLS } from '../data/skills.js?v=0.93.0-p4.7';
-import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.7';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.7';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.7';
+import { SKILLS } from '../data/skills.js?v=0.93.0-p4.9';
+import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.9';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.9';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.9';
+// v0.94 หลอดเลือดใหญ่เฉพาะบอส/ผู้เล่นในสนามประลอง · มอนทั่วไปดูหลอดเล็กใต้ตัว (มีตัวเลข)
+const bigMob = (mob) => !!(mob && mob.data && (mob.data.mvp || mob.data.boss || mob.data.worldBoss || mob.data.dgBoss || mob.data.festBoss || mob.arenaProxy || mob.worldRun || mob.pdRun));
+
 export class HUD {
   constructor(root) {
     this.el = {
@@ -98,7 +101,7 @@ export class HUD {
       if (m) { el.bossName.textContent = m.name; el.bossLv.textContent = `Lv.${m.level}`; const tg = el.boss.querySelector('.bb-tag'); if (tg) tg.textContent = m.data && m.data.festBoss ? 'เทศกาล' : m.data && m.data.dgBoss ? 'BOSS' : 'MVP'; }   // v0.32: บอสดันเจี้ยน
     }
     // ถ้าเลือกบอสเป็นเป้าหมายอยู่ ใช้แถบบอสแทนกรอบเป้าหมายปกติ
-    if (this.targetMob) el.target.hidden = !!m && this.targetMob === m;
+    if (this.targetMob) el.target.hidden = (!!m && this.targetMob === m) || !bigMob(this.targetMob);   // v0.94
     if (!m) return;
     el.boss.classList.toggle('enraged', !!m.enraged);
     if (m.hp !== this.bossHp) {
@@ -111,7 +114,7 @@ export class HUD {
   // กรอบเป้าหมายด้านบนกลางจอ
   setTarget(mob) {
     this.targetMob = mob; this.targetHp = -1;
-    this.el.target.hidden = !mob || mob === this.bossMob;
+    this.el.target.hidden = !mob || mob === this.bossMob || !bigMob(mob);
     if (mob) { this.el.targetName.textContent = `${mob.name}`; this.el.targetLv.textContent = `Lv.${mob.level}`; this.updateTarget(); }
   }
 
@@ -129,6 +132,9 @@ export class HUD {
     b.classList.remove('show', 'lv', 'lvx'); void b.offsetWidth;
     b.innerHTML = '<i class="lvx-rays" aria-hidden="true"></i><i class="lvx-wing l" aria-hidden="true"></i><i class="lvx-wing r" aria-hidden="true"></i><b class="lvx-t">LEVEL UP!</b><span class="lvx-n"></span><small></small>';
     b.querySelector('.lvx-n').textContent = title;
+    // v0.94 คำว่า LEVEL UP! เฉพาะตอนเลเวลขึ้นจริง (ป้ายอื่น เช่น เทศกาล/ขึ้นชั้นหอคอย/ฉายาใหม่ ไม่ขึ้นคำนี้)
+    const isLv = /^(Base|Job) Lv\./.test(String(title));
+    const head = b.querySelector('.lvx-t'); if (head) { head.textContent = isLv ? 'LEVEL UP!' : ''; head.hidden = !isLv; }
     b.querySelector('small').textContent = sub;
     b.classList.add('show', 'lv', 'lvx');
     clearTimeout(this.bannerTimer);

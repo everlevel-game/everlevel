@@ -1,41 +1,41 @@
 // ตัววาดโลก 3 มิติ: แสงเงา, กล้อง, สร้างฉากจากข้อมูลแผนที่, ป้ายชื่อ
-import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.7';
-import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.7';   // fix21 NPC ภาพพิกเซล
+import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.9';
+import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.9';   // fix21 NPC ภาพพิกเซล
 for (const [k, d] of Object.entries(NPC_SHEETS)) registerSheet(k, npcSheetDef(d));
-import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.7';
-import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.7';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
-import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.7';
-import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.7';
-import { THREE } from './three.js?v=0.93.0-p4.7';
-import { TILE } from '../config.js?v=0.93.0-p4.7';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.7';
-import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.7';
-import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.7';   // fix15
-import { PXAA } from './PixelGround.js?v=0.93.0-p4.7';
-import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.7';
-import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.7';
-import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.7';
+import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.9';
+import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.9';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
+import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.9';
+import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.9';
+import { THREE } from './three.js?v=0.93.0-p4.9';
+import { TILE } from '../config.js?v=0.93.0-p4.9';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.9';
+import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.9';
+import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.9';   // fix15
+import { PXAA } from './PixelGround.js?v=0.93.0-p4.9';
+import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.9';
+import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.9';
+import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.9';
 import {
   BUILDERS, cityWalls, bridges, setPixelModels, glowSprite, roundTreeGeometry, pineGeometry, treeMaterial, snowPineGeometry, snowTreeGeometry, deadTreeGeometry,
   grassTuftGeometry, flowerGeometry, rockGeometry,
-} from './Models.js?v=0.93.0-p4.7';
-import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.7';
-import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.7';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.7';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.7';
-import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.7';
-import { SkillFX } from './SkillFX.js?v=0.93.0-p4.7';
-import { BossFX } from './BossFX.js?v=0.93.0-p4.7';
-import { PostFX } from './PostFX.js?v=0.93.0-p4.7';
-import { Weather } from './Weather.js?v=0.93.0-p4.7';   // v0.91 สภาพอากาศ
-import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.7';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.7';
-import { PetView } from './Pets.js?v=0.93.0-p4.7';
-import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.7';
-import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.7';
-import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.7';
-import { gradientMap } from './Toon.js?v=0.93.0-p4.7';
-import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.7';
+} from './Models.js?v=0.93.0-p4.9';
+import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.9';
+import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.9';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.9';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.9';
+import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.9';
+import { SkillFX } from './SkillFX.js?v=0.93.0-p4.9';
+import { BossFX } from './BossFX.js?v=0.93.0-p4.9';
+import { PostFX } from './PostFX.js?v=0.93.0-p4.9';
+import { Weather } from './Weather.js?v=0.93.0-p4.9';   // v0.91 สภาพอากาศ
+import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.9';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.9';
+import { PetView } from './Pets.js?v=0.93.0-p4.9';
+import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.9';
+import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.9';
+import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.9';
+import { gradientMap } from './Toon.js?v=0.93.0-p4.9';
+import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.9';
 // v0.86 กลางวัน · ตอนเย็น · กลางคืน · รุ่งสาง — ตัวคูณแสง (h=ฟ้า s=แดด e=exposure) + สีที่ผสมเข้าไป (mix)
 const DAY_PRESETS = {
   day: { name: 'กลางวัน', icon: '☀', h: 1, s: 1, e: 1, mix: 0, glow: 1, tint: [0, 0, 0, 0] },
@@ -871,8 +871,9 @@ export class Renderer3D {
     hb.position.y = (h + 0.4) / 2; hb.userData.actor = mob; view.root.add(hb); this.hitboxes.push(hb);
     const label = document.createElement('div'); label.className = 'tag tag-mob' + (mob.data.mvp || mob.data.dgBoss ? ' tag-mvp' : ''); label.textContent = `${mob.data.mvp ? 'MVP · ' : mob.data.dgBoss ? 'BOSS · ' : ''}${mob.name} Lv.${mob.level}`; label.hidden = true;
     const hpbar = document.createElement('div'); hpbar.className = 'hpbar' + (mob.data.mvp || mob.data.dgBoss ? ' hpbar-mvp' : ''); hpbar.innerHTML = '<i></i>'; hpbar.hidden = true;
-    this.labelLayer.append(label, hpbar);
-    this.characters.set(mob, { view, label, hpbar, kind: 'mob', head: h * bossK, lastHp: -1, aura: bossK > 1 ? this.bossAura(mob, bossK) : null });
+    const hpnum = document.createElement('div'); hpnum.className = 'hpnum'; hpnum.hidden = true;   // v0.94 ตัวเลขเลือดที่เหลือใต้หลอดเล็ก
+    this.labelLayer.append(label, hpbar, hpnum);
+    this.characters.set(mob, { view, label, hpbar, hpnum, kind: 'mob', head: h * bossK, lastHp: -1, aura: bossK > 1 ? this.bossAura(mob, bossK) : null });
     if (mob.champ || mob.golden) this.eliteFx(mob);   // fix17
     this.actorQuality(this.characters.get(mob));
     view.update(0, mob);
@@ -977,7 +978,7 @@ export class Renderer3D {
     disposeOwned(c.view.root);
     if (c.costume) { c.costume.dispose(); c.costume = null; }
     if (c.aura) { this.scene.remove(c.aura); c.aura.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); c.aura = null; }
-    for (const el of [c.label, c.bubble, c.hpbar, c.castbar, ...(c.honorEls || [])]) if (el) el.remove();
+    for (const el of [c.label, c.bubble, c.hpbar, c.hpnum, c.castbar, ...(c.honorEls || [])]) if (el) el.remove();
     this.characters.delete(entity);
   }
 
@@ -1168,7 +1169,7 @@ export class Renderer3D {
   posOf(entity) { const o = { x: 0, z: 0 }; return () => { o.x = entity.x * S; o.z = entity.y * S; return o; }; }
   warpIn(entity, color = '#8fd8ff') {
     if (this.safe) { this.circles.spawn(entity.x * S, entity.y * S, { color, size: 2.4, life: 1.8, pillar: true }); this.bursts.spawn(entity.x * S, 0.3, entity.y * S, color, 24, 1.4, 3); return; }   // fix14 โหมดประหยัด
-    this.grand.warp(this.posOf(entity), color);
+    this.grand.warp(this.posOf(entity), color, 0.62);   // v0.94 วาร์ปเล็กลง ไม่ให้ดูเหมือนเลเวลอัป
     this.bursts.spawn(entity.x * S, 0.3, entity.y * S, color, 24, 1.4, 3);
     screenFlash(color, 0.5);   // เรียกเฉพาะตัวเราเอง (วาร์ป/ฟื้น)
   }
@@ -1808,12 +1809,17 @@ export class Renderer3D {
       const p = show ? this.project(x, -0.05, z) : null;
       const labelOn = p && (this.hover === entity || this.target === entity);
       const barOn = p && (entity.hp < entity.maxHp || this.target === entity);
-      setH(c.label, !labelOn); setH(c.hpbar, !barOn);
+      const numOn = barOn && !entity.data.dummy;   // v0.94 ตัวเลขเลือดที่เหลือ (หุ่นฝึกซ้อมไม่ต้อง)
+      setH(c.label, !labelOn); setH(c.hpbar, !barOn); if (c.hpnum) setH(c.hpnum, !numOn);
       const mk = this.tagScale(), msc = mk === 1 ? '' : ` scale(${mk})`;   // v0.88 ย่อตามระยะกล้อง
-      if (labelOn) setT(c.label, `translate3d(${p[0]}px, ${p[1] + 14 * mk}px, 0) translate(-50%, 0)${msc}`);
+      if (labelOn) setT(c.label, `translate3d(${p[0]}px, ${p[1] + (numOn ? 26 : 14) * mk}px, 0) translate(-50%, 0)${msc}`);
       if (barOn) {
         setT(c.hpbar, `translate3d(${p[0]}px, ${p[1] + 6 * mk}px, 0) translate(-50%, 0)${msc}`);
-        if (c.lastHp !== entity.hp) { c.hpbar.firstChild.style.width = `${Math.max(0, entity.hp / entity.maxHp) * 100}%`; c.lastHp = entity.hp; }
+        if (numOn) setT(c.hpnum, `translate3d(${p[0]}px, ${p[1] + 13 * mk}px, 0) translate(-50%, 0)${msc}`);
+        if (c.lastHp !== entity.hp) {
+          c.hpbar.firstChild.style.width = `${Math.max(0, entity.hp / entity.maxHp) * 100}%`; c.lastHp = entity.hp;
+          if (c.hpnum) c.hpnum.textContent = `${Math.max(0, Math.ceil(entity.hp)).toLocaleString()} / ${Math.round(entity.maxHp).toLocaleString()}`;
+        }
       }
       return;
     }
