@@ -2,12 +2,12 @@
 // · หัวหน้าเปิดรอบ (เซิร์ฟเวอร์สร้างรอบ + เลือดบอสกลาง) → ส่งคำเชิญทางช่องปาร์ตี้ → ทุกคนเข้าแผนที่เดียวกัน (pd_<id>) เห็นกันผ่านห้องแผนที่
 // · ดาเมจทุกคนส่งไปหักเลือดกลางที่เซิร์ฟเวอร์ (pd_hit) · บอสตายจริงตามเซิร์ฟเวอร์ · รางวัล/โควตาสัปดาห์ส่งทางจดหมาย
 // · กลไกบอส (วงอัญเชิญ · ตราแยก · ตราแบ่งรับ) คำนวณจากเวลาเซิร์ฟเวอร์ + seed ของรอบ → ทุกเครื่องเห็นตรงกันโดยไม่ต้องส่งข้อมูลเพิ่ม
-import { TILE } from '../config.js?v=0.93.0-p4.6';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.6';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.6';
-import { START_MAP } from '../data/maps/index.js?v=0.93.0-p4.6';
-import { scaledData, refExp } from '../data/dungeons.js?v=0.93.0-p4.6';
-import { PD, PD_BOSS_NAME, PD_SHOP, PD_REWARD_TEXT, pdMapDef, pdRng, pdBossOk } from '../data/partyDungeon.js?v=0.93.0-p4.6';
+import { TILE } from '../config.js?v=0.93.0-p4.7';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.7';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.7';
+import { START_MAP } from '../data/maps/index.js?v=0.93.0-p4.7';
+import { scaledData, refExp } from '../data/dungeons.js?v=0.93.0-p4.7';
+import { PD, PD_BOSS_NAME, PD_SHOP, PD_REWARD_TEXT, pdMapDef, pdRng, pdBossOk } from '../data/partyDungeon.js?v=0.93.0-p4.7';
 
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');
 const fmtT = (s) => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -47,7 +47,7 @@ export class PartyDungeon {
       { label: 'เปิดวิหาร (หัวหน้าปาร์ตี้)', sub: why || `ชวนเพื่อนในปาร์ตี้ที่อยู่แผนที่เดียวกันเข้าพร้อมกัน · บอส Lv.${Math.max(PD.minLv, Math.min(150, pl.baseLevel))}`, disabled: !!why, onSelect: () => this.open() },
       { label: 'แลกเหรียญผนึก', sub: `มีอยู่ ${fmt(this.coins())} เหรียญ`, keepOpen: true, onSelect: () => this.shop(npc, greet) },
       { label: 'กติกาและรางวัล', keepOpen: true, onSelect: () => g.dialog.show(npc || NPC,
-        `• หัวหน้าปาร์ตี้เปิดวิหาร เพื่อนในปาร์ตี้จะได้คำเชิญ กดเข้าร่วมได้ภายใน 1 นาทีหลังบอสตื่น\n• บอสเลือดเพิ่มตามจำนวนคน · ทุกคนตีบอสตัวเดียวกัน\n• วงม่วงกระจาย = หลบออก · ตราม่วงบนหัวเพื่อน = อยู่ห่างคนนั้น · ตราทองบนหัวเพื่อน = ทุกคนเข้าไปยืนรวม (ยิ่งหลายคนยิ่งเบา)\n• ${fmtT(PD.enrage)} นาทีขึ้นไปบอสคลั่ง · ครบ ${fmtT(PD.time)} นาทีถือว่าล้มเหลว\n• ต้องมีผู้ทำดาเมจอย่างน้อย ${PD.minPlayers} คนจึงได้รางวัล · สัปดาห์ละ ${PD.weekly} รอบต่อบัญชี\n\nรางวัล (ทางจดหมาย): ${PD_REWARD_TEXT} + EXP บอส`, [bye]) },
+        `• หัวหน้าปาร์ตี้เป็นคนกดเปิดวิหารคนเดียว เพื่อนในปาร์ตี้ที่อยู่แผนที่เดียวกันจะถูกพาเข้าอัตโนมัติใน 3 วินาที (กด "ไม่เข้า" เพื่อยกเลิกได้)\n• บอสเลือดเพิ่มตามจำนวนคน · ทุกคนตีบอสตัวเดียวกัน\n• วงม่วงกระจาย = หลบออก · ตราม่วงบนหัวเพื่อน = อยู่ห่างคนนั้น · ตราทองบนหัวเพื่อน = ทุกคนเข้าไปยืนรวม (ยิ่งหลายคนยิ่งเบา)\n• ${fmtT(PD.enrage)} นาทีขึ้นไปบอสคลั่ง · ครบ ${fmtT(PD.time)} นาทีถือว่าล้มเหลว\n• ต้องมีผู้ทำดาเมจอย่างน้อย ${PD.minPlayers} คนจึงได้รางวัล · สัปดาห์ละ ${PD.weekly} รอบต่อบัญชี\n\nรางวัล (ทางจดหมาย): ${PD_REWARD_TEXT} + EXP บอส`, [bye]) },
       bye,
     ]);
     void s;
@@ -100,12 +100,20 @@ export class PartyDungeon {
     const g = this.g, id = Math.floor(+p.run);
     if (!Number.isFinite(id) || id <= 0 || !g.started || (this.run && this.run.id === id)) return;
     if (g.player.baseLevel < PD.minLv) { g.hud.log(`${who} เปิด${PD.name} (ต้อง Base Lv.${PD.minLv} ขึ้นไปจึงเข้าร่วมได้)`, 'party'); return; }
-    g.hud.log(`🌙 ${who} เปิด${PD.name} — เปิดคำเชิญเพื่อเข้าร่วม (ภายใน 1 นาทีหลังบอสตื่น)`, 'party');
+    // v0.94 หัวหน้าปาร์ตี้กดเข้าคนเดียว → สมาชิกถูกพาเข้าตามอัตโนมัติใน 3 วิ (กด "ไม่เข้า" เพื่อยกเลิกได้)
+    g.hud.log(`🌙 ${who} (หัวหน้าปาร์ตี้) เปิด${PD.name} — กำลังพาคุณเข้าไปด้วยใน 3 วินาที`, 'party');
     g.sfx('questDone');
-    g.dialog.show({ name: PD.name, title: `คำเชิญจาก ${who}` }, `${who} เปิด${PD.name} (บอส Lv.${Math.floor(+p.lv) || '?'})\nเข้าร่วมเลยไหม? · ใช้โควตา 1 ใน ${PD.weekly} รอบของสัปดาห์เมื่อปราบสำเร็จ`, [
-      { label: 'เข้าร่วม', onSelect: () => this.join(id) },
-      { label: 'ไม่เข้า', cls: 'ghost', onSelect: () => {} },
+    const tk = this.autoJoin = { id, cancel: false };
+    g.dialog.show({ name: PD.name, title: `หัวหน้าปาร์ตี้ ${who}` }, `${who} พาปาร์ตี้เข้า${PD.name} (บอส Lv.${Math.floor(+p.lv) || '?'})\nจะเข้าร่วมอัตโนมัติใน 3 วินาที · ใช้โควตา 1 ใน ${PD.weekly} รอบของสัปดาห์เมื่อปราบสำเร็จ`, [
+      { label: 'เข้าเลย', onSelect: () => { tk.cancel = true; this.join(id); } },
+      { label: 'ไม่เข้า', cls: 'ghost', onSelect: () => { tk.cancel = true; g.hud.log(`ไม่เข้าร่วม${PD.name}รอบนี้`, 'party'); } },
     ]);
+    setTimeout(() => {
+      if (tk.cancel || this.autoJoin !== tk || (this.run && this.run.id === id)) return;
+      if (g.dialog.open) g.dialog.close();
+      if (g.arena && g.arena.inMatch) { g.hud.log(`อยู่ในสนามประลอง — ไม่ได้เข้า${PD.name}`, 'party'); return; }
+      this.join(id);
+    }, 3000);
   }
 
   async join(id) {

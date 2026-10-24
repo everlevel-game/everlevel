@@ -2485,3 +2485,19 @@ body.touch #chatWrap.open[data-size="s"] .chat { max-height: 90px; }
   .banner.lvx .lvx-wing { width: 84px; height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) { .banner.lvx *, .scr-flash { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; } }
+
+/* v0.94 กล่องรายละเอียดไอเทมแบบลอย (ตลาด) */
+.item-tip { position: fixed; z-index: 10050; max-width: 300px; font-family: Kanit, system-ui, sans-serif; padding: 10px 12px; border-radius: 10px; pointer-events: none; font-size: 12.5px; line-height: 1.5; color: var(--text, #f3e7c4);
+  background: rgba(20, 14, 30, 0.96); border: 1px solid var(--edge-strong, #a07a3a); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
+.item-tip .it-head { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.item-tip .it-head img { width: 34px; height: 34px; image-rendering: pixelated; }
+.item-tip .it-head b { display: block; font-size: 13.5px; }
+.item-tip .it-head small { opacity: 0.75; }
+.item-tip .it-desc { margin: 2px 0 4px; opacity: 0.8; font-size: 12px; }
+.item-tip .it-stats { margin: 0; }
+.item-tip .it-up { color: #6dff7a; font-weight: 700; }
+.item-tip .bad { color: #ff7a7a; }
+.tm-row .slot, .tm-row .tm-info { cursor: help; }
+/* v0.94 ปุ่มออโต้หอคอยในกล่องดันเจี้ยน */
+.dg-hud .dg-auto { font-size: 12px; padding: 2px 8px; margin-left: 6px; border-radius: 8px; }
+.dg-hud .dg-auto.on { color: #6dff7a; border-color: rgba(109, 255, 122, 0.6); box-shadow: 0 0 8px rgba(109, 255, 122, 0.3); }

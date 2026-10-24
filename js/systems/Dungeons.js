@@ -1,15 +1,15 @@
 // v0.32: ระบบดันเจี้ยนถ้ำ (เป็นชั้น · บอสท้ายชั้น · จำกัดรอบต่อวัน) + หอคอยไต่ชั้นไม่รู้จบ (อันดับชั้นสูงสุด)
 // แต่ละรอบเป็นแผนที่ส่วนตัว (instance) สร้างใหม่ทุกชั้น · มอนปรับเลเวลตามผู้เล่น/ชั้น · ไม่เกิดใหม่
-import { TILE } from '../config.js?v=0.93.0-p4.6';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.6';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.6';
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.6';
-import { START_MAP } from '../data/maps/index.js?v=0.93.0-p4.6';
+import { TILE } from '../config.js?v=0.93.0-p4.7';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.7';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.7';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.7';
+import { START_MAP } from '../data/maps/index.js?v=0.93.0-p4.7';
 import {
   CAVE, TOWER, todayKey, rngOf, pickRoster, scaledData, refHp, refExp, BOSS_MOBS,
   caveFloorDef, towerFloorDef, towerFloorPlan, towerFloorReward, towerLevel,
   CAVE_MOB_DROPS, CAVE_BOSS_DROPS, CAVE_FINAL_DROPS, TOWER_MOB_DROPS, caveChest, normDungeon,
-} from '../data/dungeons.js?v=0.93.0-p4.6';
+} from '../data/dungeons.js?v=0.93.0-p4.7';
 export { normDungeon };
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -103,7 +103,7 @@ export class Dungeons {
     // ประตูออก (กลับเมือง) ใกล้จุดเกิด
     const sp = R.def.spawn;
     R.def.portals = [{ x: Math.floor(sp.x) - 3, y: Math.floor(sp.y) + (R.kind === 'tower' ? 1 : 2), w: 2, h: 2, exit: true, label: 'ออกจากดันเจี้ยน' }];
-    g.warp(R.def, null, () => this.spawnFloor());
+    g.warp(R.def, null, () => { this.spawnFloor(); this.towerAutoKick(); });
   }
 
   /* ---------- มอนสเตอร์ในชั้น ---------- */
@@ -271,9 +271,38 @@ export class Dungeons {
     g.hud.log(`ผ่าน${TOWER.name}ชั้น ${R.floor} ในเวลา ${fmtT(R.floorT)}${newBest ? ' · สถิติใหม่!' : ''}${msg}`, newBest ? 'r-legend' : 'lv');
     g.sfx('levelUp', { gap: 0 });
     this.openPortal(A.cx + 0.5, A.cy + 0.5, `ขึ้นชั้น ${R.floor + 1}`, () => { R.floor++; this.goFloor(); });
+    if (this.towerAuto) { if (g.auto.on && g.auto.tower) g.auto.stop('', { silent: true }); this.towerAutoNext(R.floor); }   // v0.94
     if (newBest) { this.submit(); g.collection?.evaluate?.(); }
     g.dirty = true;
     this.renderHud(true);
+  }
+
+  /* ---------- v0.94 ออโต้หอคอย: ตีทุกตัวในชั้นเอง · ผ่านชั้นแล้วขึ้นชั้นถัดไปเอง ---------- */
+  get towerAuto() { const a = this.g.player.auto; return !!(a && a.tower); }
+  setTowerAuto(on) {
+    const g = this.g, a = g.player.auto; if (!a) return;
+    a.tower = !!on; g.dirty = true;
+    g.hud.log(on ? '🤖 ออโต้หอคอย: เปิด — ตีเองและขึ้นชั้นเอง' : '🤖 ออโต้หอคอย: ปิด', on ? 'lv' : 'info');
+    const R = this.run;
+    if (!R || R.kind !== 'tower') { this.renderHud(true); return; }
+    if (on) { if (R.cleared) this.towerAutoNext(R.floor); else this.towerAutoKick(); }
+    else if (g.auto.on && g.auto.tower) g.auto.stop('ปิดออโต้หอคอย');
+    this.renderHud(true);
+  }
+  towerAutoKick() {
+    const R = this.run, g = this.g;
+    if (!R || R.kind !== 'tower' || !this.towerAuto) return;
+    g.schedule(1.0, () => { if (this.run === R && !R.cleared && this.towerAuto && !g.auto.on && !g.player.dead) g.auto.start({ tower: true }); });
+  }
+  towerAutoNext(floor) {
+    const R = this.run, g = this.g;
+    if (!R || R.kind !== 'tower' || !this.towerAuto) return;
+    g.hud.log(`🤖 ขึ้นชั้น ${floor + 1} อัตโนมัติใน 3 วินาที (ปิดออโต้หอคอยเพื่ออยู่ต่อ)`, 'info');
+    g.schedule(3, () => {
+      if (this.run !== R || R.floor !== floor || !R.cleared || !this.towerAuto || g.player.dead || g.warping) return;
+      if (g.auto.on) g.auto.stop('', { silent: true });
+      R.floor++; this.goFloor();
+    });
   }
 
   /* ---------- จบรอบ ---------- */
@@ -336,10 +365,14 @@ export class Dungeons {
       el.className = 'panel dg-hud'; el.setAttribute('aria-live', 'polite');
       el.innerHTML = '<b class="dg-t"></b><span class="dg-o"></span><span class="dg-m"></span><div class="dg-hp" hidden><i></i></div><button type="button" class="ghost dg-x" title="ออกจากดันเจี้ยน">ออก</button>';
       el.querySelector('.dg-x').addEventListener('click', () => this.leaveConfirm());
+      const ab = document.createElement('button'); ab.type = 'button'; ab.className = 'ghost dg-auto'; ab.title = 'ออโต้หอคอย: ตีเองและขึ้นชั้นเอง';   // v0.94
+      ab.addEventListener('click', () => this.setTowerAuto(!this.towerAuto));
+      el.querySelector('.dg-x').before(ab);
       for (const ev of ['pointerdown', 'touchstart', 'wheel']) el.addEventListener(ev, (e) => e.stopPropagation(), { passive: true });
       g.root.append(el);
     }
     const el = this.hudEl; el.hidden = false;
+    { const ab = el.querySelector('.dg-auto'); if (ab) { ab.hidden = R.kind !== 'tower'; ab.textContent = this.towerAuto ? '🤖 ออโต้: เปิด' : '🤖 ออโต้: ปิด'; ab.classList.toggle('on', this.towerAuto); } }
     let t, o, m;
     if (R.kind === 'cave') {
       t = `${CAVE.name} · B${R.floor}/${CAVE.floors}`;

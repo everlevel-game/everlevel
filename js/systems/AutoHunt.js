@@ -4,13 +4,13 @@
 // · ยาเลือดหมดหรือกระเป๋าเต็ม → ใช้ใบกลับเมืองแล้วหยุด
 // · v0.17.1: เอาการเดินเก็บของอัตโนมัติออกแล้ว (เก็บเองด้วยการแตะของ หรือใช้สัตว์เลี้ยงช่วยเก็บ)
 // · เดินเองระหว่างออโต้ = ย้ายจุดตีไปที่ที่หยุดเดิน · แตะมอนเอง = ตีตัวนั้นก่อน
-import { TILE } from '../config.js?v=0.93.0-p4.6';
-import { START_MAP } from '../data/maps/index.js?v=0.93.0-p4.6';
-import { isBroken } from '../data/durability.js?v=0.93.0-p4.6';   // fix20
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.6';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.6';
-import { SKILLS, skillSp } from '../data/skills.js?v=0.93.0-p4.6';
-import { SHOPS, buyPrice } from '../data/shops.js?v=0.93.0-p4.6';
+import { TILE } from '../config.js?v=0.93.0-p4.7';
+import { START_MAP } from '../data/maps/index.js?v=0.93.0-p4.7';
+import { isBroken } from '../data/durability.js?v=0.93.0-p4.7';   // fix20
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.7';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.7';
+import { SKILLS, skillSp } from '../data/skills.js?v=0.93.0-p4.7';
+import { SHOPS, buyPrice } from '../data/shops.js?v=0.93.0-p4.7';
 
 export const AUTO_RANGE = [3, 25];          // ช่อง
 export const AUTO_DEFAULT = {
@@ -54,6 +54,7 @@ export function normAuto(a) {
   o.spItem = SP_POTS.includes(a.spItem) ? a.spItem : 'auto';
   if (Number.isFinite(a.buyMin)) o.buyMin = Math.max(1, Math.min(500, Math.round(a.buyMin)));
   if (Number.isFinite(a.buyTo)) o.buyTo = Math.max(o.buyMin + 1, Math.min(999, Math.round(a.buyTo)));
+  o.tower = !!a.tower;   // v0.94 ออโต้หอคอย (ตีเอง + ขึ้นชั้นเอง)
   if (Number.isFinite(a.range)) o.range = Math.max(AUTO_RANGE[0], Math.min(AUTO_RANGE[1], Math.round(a.range)));
   if (a.pick && typeof a.pick === 'object') for (const [k, v] of Object.entries(a.pick)) if (MONSTERS[k] && typeof v === 'boolean') o.pick[k] = v;
   if (Array.isArray(a.skills)) o.skills = a.skills.filter((id) => SKILLS[id] && autoSkillRole(SKILLS[id])).slice(0, 30);
@@ -112,7 +113,8 @@ export class AutoHunt {
     return null;
   }
 
-  start() {
+  start({ tower = false } = {}) {
+    this.tower = !!tower;   // v0.94 โหมดออโต้หอคอย (ตีทุกตัว ไม่จำกัดระยะ)
     const err = this.canStart();
     const g = this.g, pl = g.player;
     if (err) { g.hud.log(err, 'sys'); this.setStatus(''); if (this.onChange) this.onChange(); return false; }
@@ -134,7 +136,7 @@ export class AutoHunt {
   stop(reason = '', { silent = false } = {}) {
     if (!this.on) return;
     const g = this.g, pl = g.player;
-    this.on = false; this.leaving = null; this.forced = null; this.track = null;
+    this.on = false; this.leaving = null; this.forced = null; this.track = null; this.tower = false;
     g.gfx.hideAutoZone();
     if (pl.target && !pl.dead) g.clearTarget();
     if (!silent) g.hud.log(`■ หยุดตีมอนออโต้${reason ? ` (${reason})` : ''}`, 'info');
@@ -170,7 +172,7 @@ export class AutoHunt {
     this.g.dirty = true;
   }
 
-  pickOk(type) { const p = this.cfg.pick[type]; return p != null ? p : !(MONSTERS[type] && MONSTERS[type].mvp); }
+  pickOk(type) { if (this.tower) return true; const p = this.cfg.pick[type]; return p != null ? p : !(MONSTERS[type] && MONSTERS[type].mvp); }   // v0.94 ออโต้หอคอย = ตีทุกตัวในชั้น
 
   allows(m) {
     if (!m || m.dead) return false;
@@ -183,6 +185,7 @@ export class AutoHunt {
 
   inZone(e, extra = 0) {
     const a = this.anchor;
+    if (this.tower) return true;   // v0.94 ออโต้หอคอย: ทั้งลานคือโซนตี
     return !!a && Math.hypot(e.x - a.x, e.y - a.y) <= this.cfg.range * TILE + extra;
   }
 

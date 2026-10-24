@@ -1,9 +1,10 @@
 // v0.42 แลกของตัวต่อตัว + ตลาดฝากขาย
 // ทุกอย่างผ่านฟังก์ชันบนเซิร์ฟเวอร์ (supabase/trade.sql) — เครื่องผู้เล่นแค่ส่งคำขอ แล้วดึงผล (ledger) มาปรับกระเป๋า
-import { ITEMS, RARITY, describeBonus } from '../data/items.js?v=0.93.0-p4.6';
-import { rollScore, rollGrade } from '../data/affixes.js?v=0.93.0-p4.6';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.6';
-import { buyPrice, sellPrice } from '../data/shops.js?v=0.93.0-p4.6';
+import { ITEMS, RARITY, describeBonus } from '../data/items.js?v=0.93.0-p4.7';
+import { attachItemTip, hideItemTip } from './ItemTip.js?v=0.93.0-p4.7';   // v0.94 ชี้ดูค่าสถานะ
+import { rollScore, rollGrade } from '../data/affixes.js?v=0.93.0-p4.7';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.7';
+import { buyPrice, sellPrice } from '../data/shops.js?v=0.93.0-p4.7';
 
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -282,7 +283,7 @@ export class MarketWindow {
   }
 
   get open() { return !this.el.hidden; }
-  close() { this.el.hidden = true; if (this.onClose) this.onClose(); }
+  close() { hideItemTip(); this.el.hidden = true; if (this.onClose) this.onClose(); }
   // v0.45 เงื่อนไขตลาดของฉัน: ทั่วไป 2 รายการ 7% · VIP 5 รายการ 3% (ค่าจริงมาจากเซิร์ฟเวอร์)
   terms() { const m = this.g.vip && this.g.vip.market, v = this.g.vipActive; return { max: (m && +m.max) || (v ? 5 : 2), tax: (m && +m.tax) || (v ? 3 : 7), vip: v }; }
   syncTerms() { const T = this.terms(); this.el.querySelector('.st-head p').textContent = `ฝากขายได้แม้ออฟไลน์ · ขายได้เงินเข้ากระเป๋าทันที (หักค่าธรรมเนียม ${T.tax}%${T.vip ? ' · 👑 VIP' : ' · VIP เหลือ 3%'})`; }
@@ -369,6 +370,7 @@ export class MarketWindow {
   setTab(t) { this.tab = t; this.msg = ''; this.sel = null; this.render(); this.load(); }
 
   render() {
+    hideItemTip();
     if (!this.open) return;
     const pl = this.g.player;
     const tabs = [['buy', 'ซื้อ'], ['sell', 'ลงขาย'], ['mine', 'รายการของฉัน']];
@@ -392,6 +394,7 @@ export class MarketWindow {
     r.querySelector('b').textContent = itemName(id); r.querySelector('b').style.color = rar.color;
     r.querySelector('small').textContent = sub || (it.bonus ? (it.rolled && it.rolled.length ? `ค่าสุ่ม${rollGrade(rollScore(it, it.rolled))[0]} · ` : '') + describeBonus(it.bonus) : it.desc || '');
     r.querySelector('.tm-right').append(...right);
+    attachItemTip(r.querySelector('.slot'), id, () => this.g.player); attachItemTip(r.querySelector('.tm-info'), id, () => this.g.player);   // v0.94 ชี้เมาส์ดูค่าสถานะของชิ้นนี้
     return r;
   }
 
