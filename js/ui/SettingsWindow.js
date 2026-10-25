@@ -56,6 +56,17 @@ export class SettingsWindow {
       seg.append(b);
     }
     gfx.append(qrow);
+    // v0.94 fix32 เพดานเฟรมเรต
+    const frow = document.createElement('div'); frow.className = 'set-row set-seg';
+    frow.innerHTML = '<span>เฟรมเรตสูงสุด<small>30 = เครื่องเย็น แบตอึด เหมาะมือถือรุ่นเก่า · ไม่จำกัด = จอ 120/144 Hz</small></span><div class="seg"></div>';
+    const fseg = frow.querySelector('.seg');
+    for (const [v, name] of [['auto', 'อัตโนมัติ'], ['30', '30'], ['45', '45'], ['60', '60'], ['0', 'ไม่จำกัด']]) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = name; b.dataset.v = v;
+      b.setAttribute('aria-pressed', String(String(this.s.fpsCap || 'auto') === v));
+      b.addEventListener('click', () => { this.act.change('fpsCap', v); fseg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === v))); });
+      fseg.append(b);
+    }
+    gfx.append(frow);
     toggle(gfx, 'hd', '✨ ภาพ HD', 'ฉากคมชัด ขอบเรียบ แสงเรือง ฉากไกลเบลอ · ปิด = ภาพพิกเซลแบบเดิม (ลื่นกว่าบนมือถือรุ่นเก่า)');   // v0.89
     toggle(gfx, 'weather', '✨ หิ่งห้อยกลางคืน', 'แสงหิ่งห้อยลอยตอนเย็น/กลางคืนในเมืองและป่า');   // v0.91
     toggle(gfx, 'othersFx', 'ออร่า/ปีกของผู้เล่นคนอื่น', 'ปิดเพื่อให้ลื่นขึ้นเมื่อคนเยอะ · ปิดให้อัตโนมัติเมื่อเครื่องลดคุณภาพภาพ');   // v0.94

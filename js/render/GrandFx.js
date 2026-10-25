@@ -1,7 +1,7 @@
 // v0.93 fix7 เอฟเฟกต์อลังการ: วงเวทจุดวาร์ป (ถาวรบนแผนที่) · ตอนวาร์ปมาถึง · ตอนเลเวลอัป
 // ทุกชิ้นใช้ภาพที่วาดด้วยโค้ด (สีขาว แล้วย้อมสีด้วยวัสดุ) + อนุภาคเชดเดอร์ (ขนาด/สี/ความจางต่อเม็ด) วาดเป็นชุดเดียว
-import { THREE } from './three.js?v=0.93.0-p4.10';
-import { LightSpot } from './Effects.js?v=0.93.0-p4.10';
+import { THREE } from './three.js?v=0.93.0-p4.11';
+import { LightSpot } from './Effects.js?v=0.93.0-p4.11';
 
 const TAU = Math.PI * 2;
 const ADD = THREE.AdditiveBlending;
@@ -345,7 +345,7 @@ export class GrandPortal {
   update(t, low = false) {
     // fix15 เครื่องช้า (มือถือเฟรมตก): อนุภาคเหลือ 1/3 · ซ่อนสายพลังงาน/สายฟ้า/วงลอย
     const nAct = low ? Math.ceil(this.n / 3) : this.n;
-    if (this.lowNow !== low) { this.lowNow = low; this.cloud.points.geometry.setDrawRange(0, nAct); for (const h of this.halos) h.m.visible = !low; for (const c of this.crystals) c.tether.visible = !low; this.bolt.visible = !low; for (const o of this.orbit) o.sp.visible = !low; }
+    if (this.lowNow !== low) { this.lowNow = low; this.cloud.points.geometry.setDrawRange(0, nAct); for (const h of this.halos) h.m.visible = !low; for (const c of this.crystals) { c.tether.visible = !low; c.inner.visible = !low; c.halo.visible = !low; c.base.visible = !low; } for (const w of this.waves) w.m.visible = !low; this.vortex2.visible = !low; this.gate2.visible = !low; this.rays.visible = !low; this.bolt.visible = !low; for (const o of this.orbit) o.sp.visible = !low; }
     const L = this.locked, sp = L ? 0.4 : 1, k = L ? 0.45 : 1, pulse = 0.82 + Math.sin(t * 2.4) * 0.18, dt = Math.min(0.1, Math.max(0, t - this.lt)); this.lt = t;
     // พื้น
     this.outer.rotation.z = t * 0.16 * sp; this.mid.rotation.z = -t * 0.4 * sp; this.core.rotation.z = t * 0.9 * sp; this.rays.rotation.z = -t * 0.08;

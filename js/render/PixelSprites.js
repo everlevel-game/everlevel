@@ -5,7 +5,7 @@
 // แล้วลงสีแบบพิกเซลอาร์ตด้วยเชดเดอร์: แรเงา 4 ระดับ (เงาอมม่วง ไฮไลต์อมเหลือง) · เส้นขอบนอกสีเข้มของชิ้นนั้น ·
 // เส้นในระหว่างชิ้นที่ซ้อนกัน · ลบจุดแสงเดี่ยว ๆ · วาดตาอนิเมะทีละพิกเซล · กระพริบขาวตอนโดนตี
 // ผลลัพธ์เป็นภาพเล็กแปะบนแผ่นป้ายที่หันหาหน้ากล้องเสมอ (ขยายแบบไม่เบลอ) · หันได้ 8 ทิศตามมุมกล้อง
-import { THREE } from './three.js?v=0.93.0-p4.10';
+import { THREE } from './three.js?v=0.93.0-p4.11';
 
 export const PX_LAYER = 1;
 export const PIXEL = { on: true };            // โหมดภาพพิกเซล (ตั้งค่า → กราฟิก) · ใช้กับรูปย่อในหน้าต่างด้วย
@@ -438,7 +438,9 @@ export class PixelSprites {
     const due = [];
     for (const s of this.list.values()) {
       // แผ่นป้าย: ตามตำแหน่งเท้า หันหากล้อง ดันเข้าหากล้องเล็กน้อยกันจมพื้น
-      const vis = s.root.visible && this.visibleUp(s.root);
+      let vis = s.root.visible && this.visibleUp(s.root);
+      // v0.94 fix32 ตัวที่อยู่นอกจอ → ไม่วาดแผ่นสไปรต์ (เดิมวาดทุกตัวในแมพ ~90 ครั้ง/เฟรม)
+      if (vis) { s.root.getWorldPosition(this.tmpV); if (!this.cullS) this.cullS = new THREE.Sphere(); this.cullS.center.copy(this.tmpV); this.cullS.radius = Math.max(2.5, Math.max(s.w, s.h) * (s.px || PX) * 0.75); if (s.key !== this.focus && !this.frustum.intersectsSphere(this.cullS)) vis = false; }
       s.board.visible = vis; if (s.xray && !vis) s.xray.visible = false;
       if (!vis) continue;
       s.board.material.color.copy(this.tint);
@@ -457,7 +459,6 @@ export class PixelSprites {
         }
         s.xray.visible = true; s.xray.position.copy(s.board.position); s.xray.quaternion.copy(s.board.quaternion); s.xray.scale.copy(s.board.scale); s.xray.updateMatrixWorld();
       } else if (s.xray) s.xray.visible = false;
-      if (!this.frustum.intersectsSphere(new THREE.Sphere(this.tmpV, 2.5))) continue;
       s.t += dt;
       const rel = s.root.rotation.y - yaw;
       const dir = Math.round(rel / DIR);

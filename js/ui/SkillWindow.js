@@ -1,7 +1,7 @@
 // หน้าต่างสกิล (K หรือ Alt+S): เรียนสกิลด้วย Skill Point ดูผลแต่ละเลเวล ตั้งปุ่มลัด
-import { SKILLS, jobSkills, skillTrees, skillSp, skillCast, KIND_NAME, skillCd } from '../data/skills.js?v=0.93.0-p4.10';
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.10';
-import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.10';
+import { SKILLS, jobSkills, skillTrees, skillSp, skillCast, KIND_NAME, skillCd } from '../data/skills.js?v=0.93.0-p4.11';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.11';
+import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.11';
 
 export class SkillWindow {
   constructor(root, player, { onLearn, onAssign, onUse } = {}) {

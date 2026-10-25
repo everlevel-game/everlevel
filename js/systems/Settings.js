@@ -3,6 +3,7 @@ const KEY = typeof window !== 'undefined' && window.__contentPreview ? 'everleve
 
 export const DEFAULT_SETTINGS = {
   quality: 'auto',      // auto | 0 สูงสุด | 1 สูง | 2 กลาง | 3 ประหยัด
+  fpsCap: 'auto',       // v0.94 fix32 เพดานเฟรมเรต auto(60) | 30 | 45 | 60 | 0 ไม่จำกัด
   othersFx: true,       // v0.94 ออร่า/ปีกของผู้เล่นคนอื่น
   othersSkills: true,   // v0.94 เอฟเฟกต์สกิลของผู้เล่นคนอื่น
   weather: true,        // v0.91 ฝน หิมะ ใบไม้ หิ่งห้อย
@@ -31,6 +32,7 @@ export function loadSettings() {
   out.uiScale = Math.min(1.3, Math.max(0.8, out.uiScale));
   for (const k of ['master', 'music', 'sfx']) out[k] = Math.min(1, Math.max(0, out[k]));
   if (!['auto', '0', '1', '2', '3'].includes(String(out.quality))) out.quality = 'auto';
+  if (!['auto', '30', '45', '60', '0'].includes(String(out.fpsCap))) out.fpsCap = 'auto';
   return out;
 }
 
