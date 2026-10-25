@@ -2,16 +2,46 @@
 // v0.11: หน้าเข้าเกม (เลือก/สร้างตัวละคร หรือเล่นออฟไลน์) ก่อนเริ่มโลก
 // v0.12: ถ้าตั้งค่าเซิร์ฟเวอร์ Supabase ไว้ (js/net/server-config.js) → สมัคร/เข้าสู่ระบบด้วยอีเมล + รหัสผ่าน เล่นบนเบราว์เซอร์ไหนก็ได้
 // v0.13: โหลดไฟล์ตั้งค่าแบบไม่บังคับ — ถ้าไม่มีไฟล์นี้ เกมยังเปิดได้ (โหมดออฟไลน์/บัญชี Claude)
-import { hookErrors, report, attachReporter } from './net/ErrorReporter.js?v=0.93.0-p4.9';   // v0.93 fix15 รายงานปัญหาอัตโนมัติ
+import { hookErrors, report, attachReporter } from './net/ErrorReporter.js?v=0.93.0-p4.10';   // v0.93 fix15 รายงานปัญหาอัตโนมัติ
 hookErrors();
 
 async function serverConfig() {
   if(window.__contentPreview)return {};
-  try { return await import('./net/server-config.js?v=0.93.0-p4.9'); } catch (e) { return {}; }
+  try { return await import('./net/server-config.js?v=0.93.0-p4.10'); } catch (e) { return {}; }
 }
 
 const root = document.getElementById('game');
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+
+// v0.94 fix31 เบราว์เซอร์เปิด 3D (WebGL) ไม่ได้ → บอกวิธีแก้ที่ได้ผลจริงตามเครื่อง (รีเฟรช/ล้างแคชไม่ช่วย)
+function fatalWebGL() {
+  const ua = navigator.userAgent || '', ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const android = /Android/.test(ua), safari = /Safari/.test(ua) && !/Chrome|CriOS|Edg|Firefox/.test(ua);
+  const tips = ios ? [
+    'ปิด "โหมดล็อกดาวน์" (การตั้งค่า → ความเป็นส่วนตัวและความปลอดภัย → โหมดล็อกดาวน์) หรือยกเว้นเว็บ everlevel.net',
+    'ปิดแอป Safari/Chrome ให้หมด (ปัดทิ้ง) แล้วเปิดใหม่',
+    'ปิดแท็บอื่นที่เปิดค้างไว้เยอะ ๆ',
+  ] : android ? [
+    'ปิดแอปเบราว์เซอร์ให้หมด (ปัดทิ้ง) แล้วเปิดใหม่',
+    'ปิดแอป/แท็บอื่นที่เปิดค้าง ให้เครื่องมีหน่วยความจำว่าง',
+    'ลองใช้ Chrome เวอร์ชันล่าสุด',
+  ] : [
+    'ปิด Chrome ให้หมดทุกหน้าต่าง (รวมไอคอนมุมขวาล่าง) แล้วเปิดใหม่ — กดรีเฟรชอย่างเดียวไม่หาย',
+    'เปิด "ใช้การเร่งฮาร์ดแวร์เมื่อพร้อมใช้งาน" ที่ chrome://settings/system แล้วกดเปิดใหม่',
+    'อัปเดตไดรเวอร์การ์ดจอ (NVIDIA / AMD / Intel) แล้วรีสตาร์ทเครื่อง',
+  ];
+  if (safari && !ios) tips.unshift('Safari: เมนู Safari → การตั้งค่า → ขั้นสูง → เปิด "แสดงคุณสมบัติสำหรับนักพัฒนาเว็บ" แล้วตรวจว่าไม่ได้ปิด WebGL');
+  const el = document.createElement('div');
+  el.className = 'fatal fatal-gl';
+  const h = document.createElement('b'); h.textContent = 'เบราว์เซอร์ปิดกราฟิก 3D ของเครื่องนี้ไว้ชั่วคราว เกมจึงเปิดไม่ได้';
+  const p = document.createElement('div'); p.style.cssText = 'margin:8px 0 6px;opacity:.85'; p.textContent = 'มักเกิดเมื่อการ์ดจอรีเซ็ตหลายครั้งติดกัน ลองทำตามนี้:';
+  const ol = document.createElement('ol'); ol.style.cssText = 'text-align:left;margin:0 auto;max-width:520px;padding-left:22px;line-height:1.6';
+  for (const t of tips) { const li = document.createElement('li'); li.textContent = t; ol.append(li); }
+  const bt = document.createElement('button'); bt.className = 'btn'; bt.style.marginTop = '10px'; bt.textContent = 'ลองใหม่'; bt.onclick = () => location.reload();
+  el.append(h, p, ol, bt);
+  root.append(el);
+  root.classList.add('ready');
+}
 
 function fatal(msg) {
   const el = document.createElement('div');
@@ -104,7 +134,7 @@ async function createOnline({ Online }) {
   if (configured && !window.__noServer) {
     if (window.supabase || await loadScript(SUPABASE_JS)) {
       try {
-        const { SupabaseOnline } = await import('./net/SupabaseOnline.js?v=0.93.0-p4.9');
+        const { SupabaseOnline } = await import('./net/SupabaseOnline.js?v=0.93.0-p4.10');
         const client = window.supabase.createClient(url, key, {
           auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
         });
@@ -121,7 +151,7 @@ async function createOnline({ Online }) {
 if (!window.THREE) {
   fatal('โหลดกราฟิก 3 มิติ (Three.js) ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วรีเฟรชหน้า');
 } else {
-  staleGuard().then((went) => { if (went) return new Promise(() => {}); }).then(() => Promise.all([import('./core/Game.js?v=0.93.0-p4.9'), import('./net/Online.js?v=0.93.0-p4.9'), import('./audio/AudioEngine.js?v=0.93.0-p4.9'), import('./ui/TitleScreen.js?v=0.93.0-p4.9'), import('./core/Save.js?v=0.93.0-p4.9'), import('./render/CardPortraits.js?v=0.93.0-p4.9')])
+  staleGuard().then((went) => { if (went) return new Promise(() => {}); }).then(() => Promise.all([import('./core/Game.js?v=0.93.0-p4.10'), import('./net/Online.js?v=0.93.0-p4.10'), import('./audio/AudioEngine.js?v=0.93.0-p4.10'), import('./ui/TitleScreen.js?v=0.93.0-p4.10'), import('./core/Save.js?v=0.93.0-p4.10'), import('./render/CardPortraits.js?v=0.93.0-p4.10')])
     .then(async ([{ Game }, OnlineMod, { AudioEngine }, { TitleScreen }, { SaveManager }, Portraits]) => {
       const step = (v, t) => { try { if (window.__loadStep) window.__loadStep(v, t); } catch (e) { /* หน้าโหลดไม่มีก็ได้ */ } };
       step(30, 'กำลังวาดตัวละครและมอนสเตอร์…');
@@ -149,6 +179,10 @@ if (!window.THREE) {
     .catch(async (err) => {
       console.error(err);
       report('start_fail', err && err.message ? err.message : String(err), err && err.stack);
+      if ((err && err.webgl) || /WebGL/i.test(String(err && err.message))) {   // v0.94 fix31 ล้างแคช/โหลดวนไม่ช่วย → บอกวิธีแก้ · ครั้งหน้าเริ่มแบบภาพประหยัด
+        try { localStorage.setItem(SAFE, '1'); const k = 'asteria.settings', st = JSON.parse(localStorage.getItem(k) || '{}') || {}; Object.assign(st, { hd: false, bloom: false, quality: '3' }); localStorage.setItem(k, JSON.stringify(st)); } catch (e) { /* */ }
+        return fatalWebGL();
+      }
       if (await healCache()) return;   // กำลังโหลดไฟล์ใหม่แล้วรีเฟรช
       fatal('เริ่มเกมไม่สำเร็จ: ' + (err && err.message ? err.message : err) + ' — ลองกด Ctrl+Shift+R (มือถือ: ล้างแคชเบราว์เซอร์) แล้วเปิดใหม่');
     }));
