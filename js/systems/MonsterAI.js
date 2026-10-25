@@ -1,9 +1,9 @@
 // จัดการมอนสเตอร์ในแผนที่: เกิด, เดินเล่น, ไล่ล่า, โจมตี, ตาย, เกิดใหม่
-import { TILE } from '../config.js?v=0.93.0-p4.12';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.12';
-import { Monster } from '../entities/Monster.js?v=0.93.0-p4.12';
-import { findPath, smoothPath, lineClear } from '../core/Pathfinder.js?v=0.93.0-p4.12';
-import { rollChampion, goldenAI } from './Elites.js?v=0.93.0-p4.12';   // v0.93 fix17 แชมเปี้ยน · มอนทองคำ
+import { TILE } from '../config.js?v=0.93.0-p4.13';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.13';
+import { Monster } from '../entities/Monster.js?v=0.93.0-p4.13';
+import { findPath, smoothPath, lineClear } from '../core/Pathfinder.js?v=0.93.0-p4.13';
+import { rollChampion, goldenAI } from './Elites.js?v=0.93.0-p4.13';   // v0.93 fix17 แชมเปี้ยน · มอนทองคำ
 
 // fix24 โดนผู้เล่นตีภายใน 8 วิล่าสุด (Game ใส่ m.hitAt ทุกครั้งที่ทำดาเมจ)
 const hurtRecent = (m) => m.hitAt && performance.now() - m.hitAt < 8000;
@@ -14,6 +14,15 @@ const WANDER_R = 4;           // รัศมีเดินเล่นรอ�
 export const SPAWN_MUL = 2, RESPAWN_MUL = 0.25;   // v0.72 เกิดเยอะขึ้น (×2) และเร็วขึ้น (เวลาเกิดใหม่ ×0.25 · ต่ำสุด 2 วิ)
 const NEAR_CHANCE = 0.7, NEAR_CHANCE_AUTO = 1, NEAR_ZONE = 18, AUTO_CAP = 14;   // v0.88 ออโต้: เกิดในวงเสมอ (มีมอนในวงไม่เกิน AUTO_CAP ตัว)
 //   // v0.72.1 โอกาสที่มอนธรรมดาจะเกิดใหม่ในวงรอบผู้เล่น/วงออโต้ (ถ้าโซนเกิดของมันทับวงนั้น)
+// fix34 สายตีไกลแอบยืนตีบอสโดยบอสไม่ตอบโต้ → บอส (MVP/บอสโลก/บอสอีเวนต์) ยิงสวนเป้าที่อยู่ไกลเกินระยะตีประชิด (ไม่เกิน 11 ช่อง)
+const BOSS_REACH = 11 * TILE;
+function bossRanged(m, t, d, hooks) {
+  if (!(m.data.mvp || m.data.worldBoss || m.data.boss) || !hooks.onRanged) return;
+  if (d > BOSS_REACH || m.attackCd > 0) return;
+  m.attackCd = (m.attackDelay || m.data.attackDelay) * 1.2;
+  m.face(t.x - m.x, t.y - m.y);
+  hooks.onRanged(m, t);
+}
 const isBossDef = (def) => { const d = MONSTERS[def.mob]; return !d || d.mvp || d.worldBoss || d.boss; };
 
 export class MonsterManager {
@@ -118,10 +127,14 @@ export class MonsterManager {
       // Shared world boss remains in its arena. Server owns HP; no leash healing.
       if (m.worldRun || (m.shared && !m.dead)) {   // v0.53 MVP ร่วม ยืนประจำจุดเหมือนบอสโลก (ทุกเครื่องเห็นตรงกัน)
         m.moving=false;m.path=[];m.attackCd-=dt;
-        if(player&&!player.dead&&Math.hypot(player.x-m.x,player.y-m.y)<m.data.aggroRange){
-          m.target=player;m.face(player.x-m.x,player.y-m.y);
-          if(Math.hypot(player.x-m.x,player.y-m.y)<=m.data.attackRange&&m.attackCd<=0){m.attackCd=m.data.attackDelay;hooks.onAttack(m,player);}
-        } else m.target=null;
+        const dB = player && !player.dead ? Math.hypot(player.x - m.x, player.y - m.y) : Infinity;
+        if (dB < Math.max(m.data.aggroRange, BOSS_REACH)) {   // fix34 ยืนตีไกล ๆ ก็โดน: บอสยิงสวนถึง 11 ช่อง
+          m.target = player; m.face(player.x - m.x, player.y - m.y);
+          if (m.attackCd <= 0) {
+            if (dB <= m.data.attackRange) { m.attackCd = m.data.attackDelay; hooks.onAttack(m, player); }
+            else if (hooks.onRanged) { m.attackCd = m.data.attackDelay * 1.2; hooks.onRanged(m, player); }
+          }
+        } else m.target = null;
         continue;
       }
       // สถานะผิดปกติจากสกิล: แช่แข็ง / มึน → ขยับไม่ได้
@@ -162,6 +175,7 @@ export class MonsterManager {
           if (Math.hypot(m.x - m.home.x, m.y - m.home.y) > (m.data.leash ? m.data.leash * TILE : LEASH) * (hurtRecent(m) ? 2.5 : 1)) { m.state = 'return'; m.target = null; m.path = []; break; }
           const d = Math.hypot(t.x - m.x, t.y - m.y);
           if (d <= m.data.attackRange) { m.state = 'attack'; m.moving = false; m.path = []; break; }
+          bossRanged(m, t, d, hooks);   // fix34 บอสไล่ไม่ทัน/ติดสิ่งกีดขวาง → ยิงสวนระหว่างไล่
           m.repath -= dt;
           if (m.repath <= 0) {
             m.repath = 0.6;
@@ -197,6 +211,7 @@ export class MonsterManager {
           m.face(t.x - m.x, t.y - m.y);
           const d = Math.hypot(t.x - m.x, t.y - m.y);
           if (d <= m.data.attackRange) { m.state = 'attack'; break; }
+          bossRanged(m, t, d, hooks);   // fix34
           m.timer -= dt;
           if (m.timer <= 0) {
             if (hurtRecent(m)) { m.state = 'chase'; m.repath = 0; }   // ลองหาทางใหม่ (เป้าอาจขยับแล้ว)
