@@ -1,41 +1,41 @@
 // ตัววาดโลก 3 มิติ: แสงเงา, กล้อง, สร้างฉากจากข้อมูลแผนที่, ป้ายชื่อ
-import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.11';
-import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.11';   // fix21 NPC ภาพพิกเซล
+import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.12';
+import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.12';   // fix21 NPC ภาพพิกเซล
 for (const [k, d] of Object.entries(NPC_SHEETS)) registerSheet(k, npcSheetDef(d));
-import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.11';
-import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.11';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
-import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.11';
-import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.11';
-import { THREE } from './three.js?v=0.93.0-p4.11';
-import { TILE } from '../config.js?v=0.93.0-p4.11';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.11';
-import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.11';
-import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.11';   // fix15
-import { PXAA } from './PixelGround.js?v=0.93.0-p4.11';
-import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.11';
-import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.11';
-import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.11';
+import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.12';
+import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.12';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
+import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.12';
+import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.12';
+import { THREE } from './three.js?v=0.93.0-p4.12';
+import { TILE } from '../config.js?v=0.93.0-p4.12';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.12';
+import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.12';
+import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.12';   // fix15
+import { PXAA } from './PixelGround.js?v=0.93.0-p4.12';
+import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.12';
+import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.12';
+import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.12';
 import {
   BUILDERS, cityWalls, bridges, setPixelModels, glowSprite, roundTreeGeometry, pineGeometry, treeMaterial, snowPineGeometry, snowTreeGeometry, deadTreeGeometry,
   grassTuftGeometry, flowerGeometry, rockGeometry,
-} from './Models.js?v=0.93.0-p4.11';
-import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.11';
-import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.11';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.11';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.11';
-import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.11';
-import { SkillFX } from './SkillFX.js?v=0.93.0-p4.11';
-import { BossFX } from './BossFX.js?v=0.93.0-p4.11';
-import { PostFX } from './PostFX.js?v=0.93.0-p4.11';
-import { Weather } from './Weather.js?v=0.93.0-p4.11';   // v0.91 สภาพอากาศ
-import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.11';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.11';
-import { PetView } from './Pets.js?v=0.93.0-p4.11';
-import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.11';
-import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.11';
-import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.11';
-import { gradientMap } from './Toon.js?v=0.93.0-p4.11';
-import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.11';
+} from './Models.js?v=0.93.0-p4.12';
+import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.12';
+import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.12';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.12';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.12';
+import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.12';
+import { SkillFX } from './SkillFX.js?v=0.93.0-p4.12';
+import { BossFX } from './BossFX.js?v=0.93.0-p4.12';
+import { PostFX } from './PostFX.js?v=0.93.0-p4.12';
+import { Weather } from './Weather.js?v=0.93.0-p4.12';   // v0.91 สภาพอากาศ
+import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.12';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.12';
+import { PetView } from './Pets.js?v=0.93.0-p4.12';
+import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.12';
+import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.12';
+import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.12';
+import { gradientMap } from './Toon.js?v=0.93.0-p4.12';
+import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.12';
 // v0.86 กลางวัน · ตอนเย็น · กลางคืน · รุ่งสาง — ตัวคูณแสง (h=ฟ้า s=แดด e=exposure) + สีที่ผสมเข้าไป (mix)
 const DAY_PRESETS = {
   day: { name: 'กลางวัน', icon: '☀', h: 1, s: 1, e: 1, mix: 0, glow: 1, tint: [0, 0, 0, 0] },
@@ -71,6 +71,15 @@ const SPRITE_TREES = true, TREE_PX = 0.021;   // ต้นไม้ภาพ Pix
 const TREE_SPRITES = {   // [ไฟล์, กว้าง, สูง] · สุ่มตาม seed ของต้นไม้
   round: [['assets/flora/oak1.png', 128, 160], ['assets/flora/oak2.png', 128, 160], ['assets/flora/oak1.png', 128, 160], ['assets/flora/oak2.png', 128, 160], ['assets/flora/oak3.png', 128, 160]],   // ต้นแอปเปิ้ล 1 ใน 5
   pine: [['assets/flora/pine1.png', 112, 176], ['assets/flora/pine2.png', 112, 176]],
+  // v0.94 fix33 แผนที่หิมะ / ภูเขาไฟ
+  snow: {
+    round: [['assets/flora/snowoak1.png', 128, 160], ['assets/flora/snowpine1.png', 112, 176], ['assets/flora/snowpine2.png', 112, 176]],
+    pine: [['assets/flora/snowpine1.png', 112, 176], ['assets/flora/snowpine2.png', 112, 176]],
+  },
+  dead: {
+    round: [['assets/flora/dead1.png', 128, 160], ['assets/flora/dead2.png', 112, 176]],
+    pine: [['assets/flora/dead2.png', 112, 176], ['assets/flora/dead1.png', 128, 160]],
+  },
 };   // ต้นไม้ใหญ่ขึ้นให้สมส่วนกับตัวละคร
 const S = 1 / TILE; // พิกัดโลก (px) → หน่วย 3 มิติ
 const isRareDrop = (it) => !!it && (it.type === 'card' || it.type === 'box' || ['rare', 'epic', 'legend', 'mythic', 'celestial', 'abyssal', 'divine', 'eternal'].includes(it.rarity));
@@ -365,16 +374,17 @@ export class Renderer3D {
     const keep = (map.portals || []).map((p) => [p.cx / TILE, p.cy / TILE]).concat(((map.def && map.def.npcs) || []).map((n) => [n.x + 0.5, n.y + 0.5]));
     const near = (t, big) => { let d = 99; for (const [kx, kz] of keep) d = Math.min(d, Math.hypot(t.x - kx, t.z - kz)); const k = Math.min(1, Math.max(0, (d - 3.5) / 4)); return 1 + (big - 1) * k; };
     // ทดลอง: ต้นไม้ภาพ PixelLab (แผ่นหันหน้าเข้ากล้อง) · เฉพาะโหมดพิกเซล + ธีมต้นไม้ปกติ
-    if (PXW && !TT && SPRITE_TREES && !globalThis.__tree3d) {
+    if (PXW && (!TT || TREE_SPRITES[TT]) && SPRITE_TREES && !globalThis.__tree3d) {
+      const TS = TT ? TREE_SPRITES[TT] : TREE_SPRITES;
       // ใกล้ประตูวาร์ป/NPC: ย่อเล็กลง (ภาพแผ่นสูงบังง่ายกว่าโมเดล) · ชิดมากซ่อนไปเลย
       const sn = (t) => { let d = 99; for (const [kx, kz] of keep) d = Math.min(d, Math.hypot(t.x - kx, t.z - kz)); return d < 2.2 ? 0 : 0.55 + 0.45 * Math.min(1, Math.max(0, (d - 2.2) / 4.5)); };
-      const stint = (c, v) => c.setRGB(0.8 + v * 0.14, 0.84 + v * 0.12, 0.8 + v * 0.12);
+      const stint = TT ? (c, v) => c.setRGB(0.9 + v * 0.1, 0.9 + v * 0.1, 0.92 + v * 0.08) : (c, v) => c.setRGB(0.8 + v * 0.14, 0.84 + v * 0.12, 0.8 + v * 0.12);
       const put = (src, sets, k) => sets.forEach((d, i) => {
         const list = src.filter((t) => (Math.abs(Math.floor(t.x * 7.3 + t.z * 13.7) + t.seed) % sets.length) === i).map((t) => ({ ...t, s: (0.9 + ((t.seed * k) % 10) / 25) * (t.vs || 1) * sn(t) })).filter((t) => t.s > 0);
-        this.spriteTrees(world, d[0], d[1], d[2], list, stint);
+        this.spriteTrees(world, d[0], d[1], d[2], list, stint, TT === 'snow' ? 0x2a3a52 : TT === 'dead' ? 0x080404 : 0x0a1a08);
       });
-      put(trees.round, TREE_SPRITES.round, 37);
-      put(trees.pine, TREE_SPRITES.pine, 13);
+      put(trees.round, TS.round, 37);
+      put(trees.pine, TS.pine, 13);
       trees.round.length = 0; trees.pine.length = 0;
     }
     roundGeos.forEach((geo, gi) => {
@@ -515,7 +525,7 @@ export class Renderer3D {
   }
 
   // ต้นไม้ภาพ 2 มิติ: แผ่นสี่เหลี่ยมหันหน้าเข้ากล้องเสมอ (ทำใน vertex shader) · ฐานภาพแตะพื้นที่จุดต้นไม้ · มีเงาวงรีบนพื้น
-  spriteTrees(parent, url, w, h, list, tint) {
+  spriteTrees(parent, url, w, h, list, tint, shadeCol = 0x0a1a08) {
     if (!list.length) return;
     const px = TREE_PX, gw = w * px, gh = h * px;
     const geo = new THREE.PlaneGeometry(gw, gh).translate(0, gh / 2 - 6 * px, 0);
@@ -544,7 +554,7 @@ export class Renderer3D {
     this.instanced(parent, geo, mat, list.map((t) => ({ ...t, rot: 0 })), { cast: false, tint });
     // เงาวงรีใต้ต้น
     const sg = new THREE.CircleGeometry(gw * 0.36, 20).rotateX(-Math.PI / 2).scale(1, 1, 0.6).translate(0, 0.02, 0);
-    const sm = new THREE.MeshBasicMaterial({ color: 0x0a1a08, transparent: true, opacity: 0.32, depthWrite: false });
+    const sm = new THREE.MeshBasicMaterial({ color: shadeCol, transparent: true, opacity: shadeCol === 0x0a1a08 ? 0.32 : shadeCol === 0x2a3a52 ? 0.26 : 0.4, depthWrite: false });
     this.instanced(parent, sg, sm, list.map((t) => ({ x: t.x + 0.25 * (t.s || 1), z: t.z + 0.15, s: t.s, rot: 0 })), { cast: false });
   }
 
