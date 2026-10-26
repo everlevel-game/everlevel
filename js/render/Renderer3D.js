@@ -1,41 +1,41 @@
 // ตัววาดโลก 3 มิติ: แสงเงา, กล้อง, สร้างฉากจากข้อมูลแผนที่, ป้ายชื่อ
-import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.13';
-import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.13';   // fix21 NPC ภาพพิกเซล
+import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.24';
+import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.24';   // fix21 NPC ภาพพิกเซล
 for (const [k, d] of Object.entries(NPC_SHEETS)) registerSheet(k, npcSheetDef(d));
-import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.13';
-import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.13';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
-import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.13';
-import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.13';
-import { THREE } from './three.js?v=0.93.0-p4.13';
-import { TILE } from '../config.js?v=0.93.0-p4.13';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.13';
-import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.13';
-import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.13';   // fix15
-import { PXAA } from './PixelGround.js?v=0.93.0-p4.13';
-import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.13';
-import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.13';
-import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.13';
+import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.24';
+import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.24';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
+import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.24';
+import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.24';
+import { THREE } from './three.js?v=0.93.0-p4.24';
+import { TILE } from '../config.js?v=0.93.0-p4.24';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.24';
+import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.24';
+import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.24';   // fix15
+import { PXAA } from './PixelGround.js?v=0.93.0-p4.24';
+import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.24';
+import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.24';
+import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.24';
 import {
   BUILDERS, cityWalls, bridges, setPixelModels, glowSprite, roundTreeGeometry, pineGeometry, treeMaterial, snowPineGeometry, snowTreeGeometry, deadTreeGeometry,
   grassTuftGeometry, flowerGeometry, rockGeometry,
-} from './Models.js?v=0.93.0-p4.13';
-import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.13';
-import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.13';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.13';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.13';
-import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.13';
-import { SkillFX } from './SkillFX.js?v=0.93.0-p4.13';
-import { BossFX } from './BossFX.js?v=0.93.0-p4.13';
-import { PostFX } from './PostFX.js?v=0.93.0-p4.13';
-import { Weather } from './Weather.js?v=0.93.0-p4.13';   // v0.91 สภาพอากาศ
-import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.13';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.13';
-import { PetView } from './Pets.js?v=0.93.0-p4.13';
-import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.13';
-import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.13';
-import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.13';
-import { gradientMap } from './Toon.js?v=0.93.0-p4.13';
-import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.13';
+} from './Models.js?v=0.93.0-p4.24';
+import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.24';
+import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.24';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.24';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.24';
+import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.24';
+import { SkillFX } from './SkillFX.js?v=0.93.0-p4.24';
+import { BossFX } from './BossFX.js?v=0.93.0-p4.24';
+import { PostFX } from './PostFX.js?v=0.93.0-p4.24';
+import { Weather } from './Weather.js?v=0.93.0-p4.24';   // v0.91 สภาพอากาศ
+import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.24';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.24';
+import { PetView } from './Pets.js?v=0.93.0-p4.24';
+import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.24';
+import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.24';
+import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.24';
+import { gradientMap } from './Toon.js?v=0.93.0-p4.24';
+import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.24';
 // v0.86 กลางวัน · ตอนเย็น · กลางคืน · รุ่งสาง — ตัวคูณแสง (h=ฟ้า s=แดด e=exposure) + สีที่ผสมเข้าไป (mix)
 const DAY_PRESETS = {
   day: { name: 'กลางวัน', icon: '☀', h: 1, s: 1, e: 1, mix: 0, glow: 1, tint: [0, 0, 0, 0] },
@@ -80,7 +80,21 @@ const TREE_SPRITES = {   // [ไฟล์, กว้าง, สูง] · สุ
     round: [['assets/flora/dead1.png', 128, 160], ['assets/flora/dead2.png', 112, 176]],
     pine: [['assets/flora/dead2.png', 112, 176], ['assets/flora/dead1.png', 128, 160]],
   },
-};   // ต้นไม้ใหญ่ขึ้นให้สมส่วนกับตัวละคร
+  // fix40 ป่าผีสิง · หุบผลึก · ชายฝั่ง (theme.treeSprites เลือกชุด · theme.trees ยังใช้เป็นโมเดลสำรอง)
+  haunted: {
+    round: [['assets/flora/haunt1.png', 128, 160], ['assets/flora/haunt2.png', 112, 176]],
+    pine: [['assets/flora/haunt2.png', 112, 176], ['assets/flora/haunt1.png', 128, 160]],
+  },
+  crystal: {
+    round: [['assets/flora/crystal1.png', 128, 160], ['assets/flora/crystal1.png', 128, 160], ['assets/flora/crystal2.png', 112, 176]],
+    pine: [['assets/flora/crystal2.png', 112, 176], ['assets/flora/crystal1.png', 128, 160]],
+  },
+  palm: {
+    round: [['assets/flora/palm1.png', 128, 160], ['assets/flora/palm1.png', 128, 160], ['assets/flora/oak2.png', 128, 160]],
+    pine: [['assets/flora/palm1.png', 128, 160], ['assets/flora/palm1.png', 128, 160], ['assets/flora/oak3.png', 128, 160]],
+  },
+};
+const TREE_SHADE = { snow: 0x2a3a52, dead: 0x080404, haunted: 0x0a0414, crystal: 0x2a1a4a, palm: 0x1a2408 };   // ต้นไม้ใหญ่ขึ้นให้สมส่วนกับตัวละคร
 const S = 1 / TILE; // พิกัดโลก (px) → หน่วย 3 มิติ
 const isRareDrop = (it) => !!it && (it.type === 'card' || it.type === 'box' || ['rare', 'epic', 'legend', 'mythic', 'celestial', 'abyssal', 'divine', 'eternal'].includes(it.rarity));
 
@@ -361,7 +375,7 @@ export class Renderer3D {
     }
     const tm = PXW ? floraMaterial() : treeMaterial(); this.addWind(tm, 0.035, 0.9, !PXW);   // v0.27.1: โหมดพิกเซลไม่เจาะตาข่ายต้นไม้ (เกิดเส้นขอบดำเป็นลายหมากรุก) → ใช้เงาทะลุของตัวละครแทน
     // v0.11: ต้นไม้ตามธีม — สนหิมะ / ต้นไม้ไหม้เกรียม
-    const TT = theme.trees;
+    const TT = theme.trees === 'normal' ? undefined : theme.trees;   // fix40 'normal' = ต้นไม้ปกติ (เดิมหลุดไปใช้โมเดล 3D)
     const roundGeos = PXW
       ? (TT === 'snow' ? [snowTreePx(11), snowTreePx(23), snowTreePx(37)] : TT === 'dead' ? [deadTreePx(11), deadTreePx(23), deadTreePx(37)] : [roundTreePx(11), roundTreePx(23), roundTreePx(37), roundTreePx(51)])
       : (TT === 'snow' ? [snowTreeGeometry(11), snowTreeGeometry(23)] : TT === 'dead' ? [deadTreeGeometry(11), deadTreeGeometry(23), deadTreeGeometry(37)] : [roundTreeGeometry(11), roundTreeGeometry(23), roundTreeGeometry(37)]);
@@ -374,14 +388,15 @@ export class Renderer3D {
     const keep = (map.portals || []).map((p) => [p.cx / TILE, p.cy / TILE]).concat(((map.def && map.def.npcs) || []).map((n) => [n.x + 0.5, n.y + 0.5]));
     const near = (t, big) => { let d = 99; for (const [kx, kz] of keep) d = Math.min(d, Math.hypot(t.x - kx, t.z - kz)); const k = Math.min(1, Math.max(0, (d - 3.5) / 4)); return 1 + (big - 1) * k; };
     // ทดลอง: ต้นไม้ภาพ PixelLab (แผ่นหันหน้าเข้ากล้อง) · เฉพาะโหมดพิกเซล + ธีมต้นไม้ปกติ
-    if (PXW && (!TT || TREE_SPRITES[TT]) && SPRITE_TREES && !globalThis.__tree3d) {
-      const TS = TT ? TREE_SPRITES[TT] : TREE_SPRITES;
+    const TK = theme.treeSprites || TT;   // fix40 ชุดภาพต้นไม้ (แยกจากโมเดลสำรอง)
+    if (PXW && (!TK || TREE_SPRITES[TK]) && SPRITE_TREES && !globalThis.__tree3d) {
+      const TS = TK ? TREE_SPRITES[TK] : TREE_SPRITES;
       // ใกล้ประตูวาร์ป/NPC: ย่อเล็กลง (ภาพแผ่นสูงบังง่ายกว่าโมเดล) · ชิดมากซ่อนไปเลย
       const sn = (t) => { let d = 99; for (const [kx, kz] of keep) d = Math.min(d, Math.hypot(t.x - kx, t.z - kz)); return d < 2.2 ? 0 : 0.55 + 0.45 * Math.min(1, Math.max(0, (d - 2.2) / 4.5)); };
-      const stint = TT ? (c, v) => c.setRGB(0.9 + v * 0.1, 0.9 + v * 0.1, 0.92 + v * 0.08) : (c, v) => c.setRGB(0.8 + v * 0.14, 0.84 + v * 0.12, 0.8 + v * 0.12);
+      const stint = TK ? (c, v) => c.setRGB(0.9 + v * 0.1, 0.9 + v * 0.1, 0.92 + v * 0.08) : (c, v) => c.setRGB(0.8 + v * 0.14, 0.84 + v * 0.12, 0.8 + v * 0.12);
       const put = (src, sets, k) => sets.forEach((d, i) => {
         const list = src.filter((t) => (Math.abs(Math.floor(t.x * 7.3 + t.z * 13.7) + t.seed) % sets.length) === i).map((t) => ({ ...t, s: (0.9 + ((t.seed * k) % 10) / 25) * (t.vs || 1) * sn(t) })).filter((t) => t.s > 0);
-        this.spriteTrees(world, d[0], d[1], d[2], list, stint, TT === 'snow' ? 0x2a3a52 : TT === 'dead' ? 0x080404 : 0x0a1a08);
+        this.spriteTrees(world, d[0], d[1], d[2], list, stint, TREE_SHADE[TK] ?? 0x0a1a08);
       });
       put(trees.round, TS.round, 37);
       put(trees.pine, TS.pine, 13);
@@ -554,7 +569,7 @@ export class Renderer3D {
     this.instanced(parent, geo, mat, list.map((t) => ({ ...t, rot: 0 })), { cast: false, tint });
     // เงาวงรีใต้ต้น
     const sg = new THREE.CircleGeometry(gw * 0.36, 20).rotateX(-Math.PI / 2).scale(1, 1, 0.6).translate(0, 0.02, 0);
-    const sm = new THREE.MeshBasicMaterial({ color: shadeCol, transparent: true, opacity: shadeCol === 0x0a1a08 ? 0.32 : shadeCol === 0x2a3a52 ? 0.26 : 0.4, depthWrite: false });
+    const sm = new THREE.MeshBasicMaterial({ color: shadeCol, transparent: true, opacity: shadeCol === 0x0a1a08 ? 0.32 : shadeCol === 0x2a3a52 ? 0.26 : 0.36, depthWrite: false });
     this.instanced(parent, sg, sm, list.map((t) => ({ x: t.x + 0.25 * (t.s || 1), z: t.z + 0.15, s: t.s, rot: 0 })), { cast: false });
   }
 

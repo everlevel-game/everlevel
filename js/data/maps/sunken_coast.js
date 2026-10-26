@@ -1,11 +1,11 @@
 // v0.46 Sunken Coast · หาดปะการังจม Lv.100–117 · MVP ไทดาลอส ราชันย์คลื่น
 // หาดทรายขาวริมทะเลทางใต้-ตะวันออก · ทะเลสาบน้ำเค็มกลางแผนที่ · ซากเรือ · ซากวิหารจมทางเหนือ
-import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.13';
+import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.24';
 const W=80,H=64,lanes=[[0,30,70,4],[38,0,4,30],[22,30,4,20],[22,44,40,4],[56,30,4,18]],camp=[2,25,11,15],arena=[56,40,12,12],sea=[[0,54,80,10],[70,0,10,64]];
 const look={hair:'#3fe6d0',skin:'#e8c4a8',eye:'#1f6a78',tunic:'#2a8a9a',pants:'#244a5a',boot:'#2a2a3a',hairStyle:'ponytail',accessory:'wizard',hatColor:'#1f6a78',orbColor:'#9afff0',weapon:'staff'};
 const RAW = {
  id:'sunken_coast',name:'Sunken Coast',subtitle:'หาดปะการังจม · Lv.100–117 · MVP ไทดาลอส',levelRange:[100,114],eliteRange:[114,117],width:W,height:H,fill:'GRASS',spawn:{x:5.5,y:31.5},music:'coast',
- theme:{fog:'#a8dce4',fogNear:26,fogFar:74,outer:'#2a8aa8',light:{hemi:.95,sky:'#e8fbff',ground:'#c8b890',sun:1.25,sunColor:'#fff4dc',exposure:1.02},
+ theme:{treeSprites:'palm',fog:'#a8dce4',fogNear:26,fogFar:74,outer:'#2a8aa8',light:{hemi:.95,sky:'#e8fbff',ground:'#c8b890',sun:1.25,sunColor:'#fff4dc',exposure:1.02},
   grass:{base:'#dccb9a',blobs:['#e8d8a8','#cfbd8a','#e2d3a6','#c8b680'],blades:['#9ab878','#b8c888','#c8d898'],litter:['#ff9ab0','#ffffff','#9afff0']},
   dirt:{base:'#c8b58a',blobs:['#b8a47a','#d4c296','#bfae82'],pebble:'#f4ecd8',cracks:'#a8946a'},water:'water',tufts:true,flowers:['#ff8a9a','#ffd0e0','#9afff0'],
   motes:'#ffffff',moteCount:70,moteSize:.07,sunbeams:6,fx:{gain:.7,glow:.75,flash:.7},mini:{grass:'#dccb9a',dirt:'#b8a47a',water:'#3a9ac8',flowers:'#ff9ab0',bridge:'#9b6b3e'}},

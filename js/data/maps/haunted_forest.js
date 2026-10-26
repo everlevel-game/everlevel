@@ -1,9 +1,9 @@
-import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.13';
+import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.24';
 const W=80,H=64,lanes=[[0,30,80,4],[16,7,4,50],[38,8,4,49],[60,8,4,49],[16,10,49,4],[16,50,55,4]],camp=[2,25,11,15],arena=[64,40,12,18];
 const look={hair:'#a59ab4',skin:'#e5c4b4',eye:'#684a89',tunic:'#676581',pants:'#353746',boot:'#282635',hairStyle:'long',accessory:'wizard',hatColor:'#45405d',orbColor:'#c2a8ff',weapon:'staff'};
 const RAW = {
  id:'haunted_forest',name:'Haunted Forest',subtitle:'ป่าวิญญาณ · Lv.75–90 · เขตลึก Lv.90–99 · MVP น็อคธาร์',levelRange:[75,90],eliteRange:[90,99],width:W,height:H,fill:'GRASS',spawn:{x:5.5,y:31.5},music:'haunted',
- theme:{fog:'#3d405c',fogNear:25,fogFar:70,outer:'#191d2b',light:{hemi:.85,sky:'#b5b9eb',ground:'#35314b',sun:1.05,sunColor:'#c4d5fa',exposure:1.07},grass:{base:'#465c58',blobs:['#3c514d','#536662','#4c5b67'],blades:['#739387','#4a7169','#77989c'],litter:['#b8a7ce','#72d5bc','#667a88']},dirt:{base:'#746b82',blobs:['#82758e','#625e77','#898298'],pebble:'#bbb4c8',cracks:'#4c455a'},trees:'dead',tufts:true,flowers:['#bb9bdf','#b4e0d4','#7db8d1'],motes:'#c2b4ff',moteCount:85,moteSize:.06,fx:{gain:.75,glow:.8,flash:.75},mini:{grass:'#465c58',dirt:'#8b7b9d',water:'#586ca2',flowers:'#bf9fdf',bridge:'#a894b4'}},
+ theme:{fog:'#3d405c',fogNear:25,fogFar:70,outer:'#191d2b',light:{hemi:.85,sky:'#b5b9eb',ground:'#35314b',sun:1.05,sunColor:'#c4d5fa',exposure:1.07},grass:{base:'#465c58',blobs:['#3c514d','#536662','#4c5b67'],blades:['#739387','#4a7169','#77989c'],litter:['#b8a7ce','#72d5bc','#667a88']},dirt:{base:'#746b82',blobs:['#82758e','#625e77','#898298'],pebble:'#bbb4c8',cracks:'#4c455a'},trees:'dead',treeSprites:'haunted',tufts:true,flowers:['#bb9bdf','#b4e0d4','#7db8d1'],motes:'#c2b4ff',moteCount:85,moteSize:.06,fx:{gain:.75,glow:.8,flash:.75},mini:{grass:'#465c58',dirt:'#8b7b9d',water:'#586ca2',flowers:'#bf9fdf',bridge:'#a894b4'}},
  prune:true,
  // v0.27 รีมาสเตอร์: ทางดินคดเคี้ยวในป่าหลอน · บึงหมอก · ลานคราสทรงกลม
  regions:[

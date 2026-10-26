@@ -1,6 +1,6 @@
 // v0.46 Crystal Valley · หุบเขาคริสตัล Lv.118–134 · MVP คริสธาร์ มังกรผลึก
 // หุบเขาผลึกเจ็ดสี ทะเลสาบน้ำแข็งใส · ทางขึ้นปราสาทลอยฟ้าทางตะวันออก
-import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.13';
+import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.24';
 const W=80,H=64,lanes=[[0,30,80,4],[18,8,4,46],[40,6,4,48],[60,8,4,44],[18,8,46,4],[18,50,46,4]],camp=[2,25,11,15],arena=[62,40,14,16],lakes=[[24,14,12,8],[46,40,10,8]];
 const look={hair:'#e0c8ff',skin:'#f0d4c4',eye:'#6a4ab8',tunic:'#8a6ac8',pants:'#3a2a5a',boot:'#2a2238',hairStyle:'long',accessory:'wizard',hatColor:'#6a4ab8',orbColor:'#e0c8ff',weapon:'staff'};
 const CRY=['#c8a8ff','#7fe0ff','#ff9ae8','#9affe0'];
@@ -8,7 +8,7 @@ const RAW = {
  id:'crystal_valley',name:'Crystal Valley',subtitle:'หุบเขาคริสตัล · Lv.118–134 · MVP คริสธาร์',levelRange:[118,131],eliteRange:[131,134],width:W,height:H,fill:'GRASS',spawn:{x:5.5,y:31.5},music:'crystal',
  theme:{fog:'#8a7ab8',fogNear:24,fogFar:70,outer:'#241a3e',light:{hemi:.9,sky:'#e8dcff',ground:'#4a3a6a',sun:1.1,sunColor:'#f0e4ff',exposure:1.05},
   grass:{base:'#6a6a9a',blobs:['#5e5e8e','#7676a8','#6a7aa8','#7a6aa0'],blades:['#9a9ad8','#8ab4e0','#b8a0e8'],litter:['#e0c8ff','#7fe0ff','#ffffff']},
-  dirt:{base:'#8a82a8',blobs:['#9a92b8','#7a7298','#a49cc0'],pebble:'#e8e0ff',cracks:'#5a527a'},water:'ice',trees:'dead',tufts:true,flowers:['#e0c8ff','#9affe0','#ffb0e8'],
+  dirt:{base:'#8a82a8',blobs:['#9a92b8','#7a7298','#a49cc0'],pebble:'#e8e0ff',cracks:'#5a527a'},water:'ice',trees:'dead',treeSprites:'crystal',tufts:true,flowers:['#e0c8ff','#9affe0','#ffb0e8'],
   motes:'#e0d0ff',moteCount:120,moteSize:.07,fx:{gain:.8,glow:.9,flash:.75},mini:{grass:'#6a6a9a',dirt:'#9a92b8',water:'#9ad0f0',flowers:'#e0c8ff',bridge:'#a894b4'}},
  prune:true,
  regions:[
