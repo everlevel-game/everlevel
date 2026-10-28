@@ -3,7 +3,8 @@
 // · ดวงวิญญาณ 3 ดวงโคจรรอบเอว · วงอักขระมรณะบนพื้น · หมอกวิญญาณลอยต่ำ
 // · ทุก ~4.2 วิ: ยมทูตง้างเคียว → ฟาดลงเป็นวงพระจันทร์เสี้ยวรอบตัว คลื่นวิญญาณบนพื้น ดวงวิญญาณถูกดูดขึ้นไปหาเคียว
 // ภาพทั้งหมดวาดขึ้นใหม่ด้วยโค้ด (ไม่ใช้ภาพจากที่อื่น) · ใช้ตัวช่วยชุดเดียวกับออร่าคอสมิก (ส่งมาจาก Costumes.js)
-import { THREE } from './three.js?v=0.93.0-p4.45';
+import { THREE } from './three.js?v=0.93.0-p4.48';
+import { VERSION } from '../config.js?v=0.93.0-p4.48';
 
 const TAU = Math.PI * 2;
 const CY = 1.05;          // กลางลำตัวตัวละครพิกเซล
@@ -12,6 +13,7 @@ const CY = 1.05;          // กลางลำตัวตัวละครพ
 const RY = CY;
 const FIG_H = 2.1, FIG_W = FIG_H * 0.8;
 const FIG_CY = -0.5;      // center.y ของเฟรมยมทูต (ค่าลบ = ยกภาพขึ้นเหนือจุดยึด)
+const PX_N = 16, PX_W = 3.3, PX_CY = -0.22;   // fix40 จำนวนช่อง · ขนาดสไปรต์ (หน่วยโลก) · center.y (ต่ำ = ยกภาพขึ้นเหนือไหล่)
 const SOUL = '#5affc8', SOUL2 = '#9af0ff', BONE = '#ece6d6';
 
 export function reaperAuras(H) {
@@ -93,7 +95,9 @@ export function reaperAuras(H) {
     g.drawImage(fig, OX, OY);
     g.drawImage(fig, 182, 140, 40, 44, OX + 182, OY + 140, 40, 44);   // มือกระดูกทับด้ามอีกครั้ง (กำอยู่ทุกมุม)
   });
-  const FR = FIG_W / 256 * FS;   // ขนาดสไปรต์เฟรม (หน่วยโลก) — กึ่งกลางกรอบ = กึ่งกลางร่าง
+  const FR = FIG_W / 256 * FS;
+  // fix40 แผ่นภาพยมทูตพิกเซล (กรองแบบพิกเซลคม) · โหลดแยกต่อผู้เล่น (เบราว์เซอร์แคชรูปเดียว) เพื่อเลื่อนเฟรมของใครของมัน
+  const pxSheet = () => { const t = new THREE.TextureLoader().load(`assets/fashion/aura/reaper_px.png?v=${VERSION}`); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.encoding = THREE.sRGBEncoding; t.repeat.set(1 / PX_N, 1); return t; };   // ขนาดสไปรต์เฟรม (หน่วยโลก) — กึ่งกลางกรอบ = กึ่งกลางร่าง
 
   return {
     /* ===== ยมทูตเคียวมรณะ ===== */
@@ -178,6 +182,69 @@ export function reaperAuras(H) {
         rune.rotation.z = t * 0.25; rune2.rotation.z = -t * 0.45;
         rune.material.opacity = 0.5 + 0.1 * Math.sin(t * 2) + kick * 0.4; rim.material.opacity = 0.4 + kick * 0.5; rune2.material.opacity = 0.4 + kick * 0.5;
               });
+    },
+
+    /* ===== fix40 ยมทูตวิญญาณมรกต (ภาพพิกเซล PixelLab) =====
+       ร่างยมทูตเป็นแผ่นภาพ assets/fashion/aura/reaper_px.png: 16 ช่องเรียงแถวเดียว (ช่องละ PXC พิกเซล)
+       ช่อง 0–7 = ลอยนิ่ง (วนซ้ำ) · 8–15 = ง้างเคียวแล้วฟาด · ลอยอยู่ด้านหลังเหนือไหล่ผู้เล่น · ทุก ~4.2 วิ ฟาดเคียว */
+    reaperPx(rig, p, rt) {
+      const G = stage(rig, rt);
+      const dark = flat(G, 2.6, unlit('#06100c', { map: TX.softDot(), opacity: 0.5 }), 0.02); dark.material.depthWrite = false;
+      const rune = flat(G, 2.5, unlit(SOUL, { map: TX.runeCircle('star'), opacity: 0.55, add: true }), 0.03);
+      const rim = flat(G, 2.8, unlit(SOUL, { map: TX.softRing(), opacity: 0.45, add: true }), 0.026);
+      const tex = pxSheet(), texE = pxSheet();
+      const glow = deep(sprite(TX.softDot(), '#1affa0', 2.0, 2.0, 0.3), 40); G.add(glow);
+      const fig = deep(sprite(tex, '#ffffff', PX_W, PX_W, 1, false), 44); G.add(fig);
+      fig.material.alphaTest = 0.4; fig.material.transparent = false;
+      const edge = deep(sprite(texE, SOUL, PX_W, PX_W, 0, true), 45); G.add(edge);   // แสงวาบทั้งร่างตอนฟาด
+      const souls = Array.from({ length: 3 }, (_, i) => { const s = deep(sprite(TX.softDot(), i === 1 ? SOUL2 : SOUL, 0.3, 0.3, 0.9), 38); const c = deep(sprite(TX.star4(), '#ffffff', 0.11, 0.11, 0.9), 39); G.add(s, c); return { s, c, ph: (i / 3) * TAU, pull: 0 }; });
+      const slash = deep(sprite(slashTex(), SOUL, 3.4, 3.4, 0), 37); slash.position.y = CY + 0.2; slash.visible = false; G.add(slash);
+      const flash = flashSprite(rig, rt, '#c8fff0', { y: CY + 0.3, size: 2.8 }), wave = shockwaves(rig, rt, SOUL, { n: 3, r1: 2.8 });
+      auraEmitter(rig, rt, 8, (b) => { const sc = rig.root.scale.y; rt.ps('flame').emit({ pos: V(b.x + rand(-0.35, 0.35) * sc, b.y + (CY + 0.9) * sc, b.z + rand(-0.2, 0.2) * sc), count: 1, vel: () => V(rand(-0.1, 0.1), rand(-0.3, -0.1), rand(-0.1, 0.1)), life: [0.8, 1.2], size: [0.08, 0.14], sizeEnd: 0.3, color: [SOUL, SOUL2, '#c8fff0'] }); });
+      auraEmitter(rig, rt, 8, (b) => { const sc = rig.root.scale.y, a = rand(0, TAU), r = rand(0.4, 1.1) * sc; rt.ps('flame').emit({ pos: V(b.x + Math.cos(a) * r, b.y + 0.05, b.z + Math.sin(a) * r), count: 1, vel: () => V(0, rand(0.5, 1.0), 0), life: [0.8, 1.2], size: [0.1, 0.16], sizeEnd: 0.2, color: [SOUL, SOUL2, '#c8fff0'] }); });
+      const sw = { t: -1, hit: false };
+      burstCycle(rt, 4.2, () => { sw.t = 0; sw.hit = false; }, 0.4);
+      let kick = 0, frame = -1;
+      const setFrame = (i) => { if (i === frame) return; frame = i; tex.offset.x = texE.offset.x = i / PX_N; };
+      rt.on(({ t, dt }) => {
+        const sc = rig.root.scale.x || 1;
+        let fi = Math.floor(t * 8) % 8, eo = 0;
+        if (sw.t >= 0) {
+          sw.t += dt; const k = Math.floor(sw.t * 13);
+          if (k < 8) {
+            fi = 8 + k; eo = k >= 2 ? Math.max(0, 0.9 - (k - 2) * 0.16) : k * 0.2;   // ช่อง 10 = คมเคียวฟาดผ่าน
+            if (!sw.hit && k >= 2) {
+              sw.hit = true; kick = 1; flash(); wave(); setTimeout(() => wave({ color: SOUL2, r1: 2.2 }), 120);
+              slash.visible = true; slash.userData.t = 0;
+              const b = rt.worldPos(rig.root);
+              scatter(rt, 'flame', V(b.x, b.y + CY * sc, b.z), 26, { color: [SOUL, SOUL2, '#ffffff'], speed: [2.2, 4], up: [0.2, 1.6], gravity: -1, drag: 1.4, life: [0.6, 1.0], size: [0.12, 0.22] });
+              for (const S of souls) S.pull = 1;
+            }
+          } else sw.t = -1;
+        }
+        setFrame(fi);
+        const bob = Math.sin(t * 1.6) * 0.05;
+        fig.position.set(0, RY, 0); edge.position.copy(fig.position);
+        fig.center.set(0.5, PX_CY - bob); edge.center.copy(fig.center);
+        glow.position.y = RY; glow.center.set(0.5, 0.5 - (0.5 - (PX_CY - bob)) * PX_W / glow.scale.y);
+        glow.material.opacity = 0.26 + 0.06 * Math.sin(t * 2.4) + kick * 0.4;
+        edge.material.opacity = eo * 0.5;
+        if (slash.visible) {
+          slash.userData.t += dt; const k = slash.userData.t / 0.5;
+          if (k >= 1) slash.visible = false;
+          else { slash.material.rotation = 0.9 - k * 2.6; slash.material.opacity = (1 - k) * 0.9; slash.scale.setScalar(3.0 + k * 0.8); }
+        }
+        for (const S of souls) {
+          S.pull = Math.max(0, S.pull - dt * 0.9);
+          const a = S.ph + t * 1.1, r = 0.7 * (1 - S.pull * 0.8), y = CY - 0.15 + Math.sin(t * 2 + S.ph) * 0.12 + S.pull * 1.2;
+          S.s.position.set(Math.cos(a) * r, y, Math.sin(a) * r); S.c.position.copy(S.s.position);
+          S.s.scale.setScalar(0.28 + 0.05 * Math.sin(t * 5 + S.ph)); S.c.material.rotation = t * 3;
+        }
+        kick = Math.max(0, kick - dt * 1.6);
+        rune.rotation.z = t * 0.25;
+        rune.material.opacity = 0.45 + 0.1 * Math.sin(t * 2) + kick * 0.4; rim.material.opacity = 0.35 + kick * 0.5;
+      });
+      rt.onDispose && rt.onDispose(() => { tex.dispose(); texE.dispose(); });
     },
   };
 }

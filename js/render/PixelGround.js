@@ -1,9 +1,10 @@
 // v0.17: พื้นแผนที่แบบภาพพิกเซล — แผ่นลายพิกเซล 48×48 ต่อช่อง (1 พิกเซลลาย = 1 พิกเซลภาพที่ระยะกล้องปกติ)
 // วาดลายทุกชนิดพื้น × 4 แบบลงแผ่นรวม (atlas) แล้วให้เชดเดอร์เลือกลายตามชนิดพื้นของแต่ละช่อง
 // ขอบระหว่างพื้นต่างชนิดเป็นหยักแบบพิกเซล (สุ่มเลื่อนทีละกลุ่ม 3×3) · เงาใต้วัตถุเป็นขั้นแบบพิกเซล
-import { THREE } from './three.js?v=0.93.0-p4.45';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.45';
-import { rng } from '../core/util.js?v=0.93.0-p4.45';
+import { THREE } from './three.js?v=0.93.0-p4.48';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.48';
+import { rng } from '../core/util.js?v=0.93.0-p4.48';
+import { VERSION } from '../config.js?v=0.93.0-p4.48';
 
 export const TP = 48;          // พิกเซลลายต่อ 1 ช่อง
 const NV = 4, NT = 8;          // แบบต่อชนิด · จำนวนชนิดพื้น
@@ -181,6 +182,53 @@ function aoTexture(map) {
   return t;
 }
 
+/* ---------- fix41 ลายพื้น + รอยต่อจาก PixelLab (Wang tileset แบบมุม) ----------
+   แต่ละแมพมีแผ่น assets/ground/<แมพ>.png: แถวละ 1 ชุดรอยต่อ (พื้นหลัก ↔ พื้นอีกชนิด) · 16 ช่อง ช่องละ WP พิกเซล
+   ช่องที่ m = มุม NW·8 + NE·4 + SW·2 + SE·1 (1 = พื้นชนิดบน) · ทุกแถวใช้พื้นหลัก (lower) ชุดเดียวกัน
+   วาดแบบ "ตารางคู่" (dual grid): ช่องภาพเลื่อนครึ่งช่อง มุมทั้ง 4 = กลางช่องแผนที่ 4 ช่องรอบ ๆ → รอยต่อโค้งพอดีขอบพื้น
+   ช่องที่มีพื้นชนิดอื่นปน (น้ำ ดอกไม้ กำแพง ฯลฯ) ใช้ลายวาดด้วยโค้ดแบบเดิม */
+const WP = 32;
+const FIELD_LOW = [T.GRASS, T.FLOWERS, T.WATER, T.BRIDGE, T.WALL];   // น้ำ/สะพาน/กำแพงมีของวาดทับ → ใต้ล่างใช้พื้นหลักให้ขอบตลิ่งต่อกันเนียน
+const G_SETS = {
+  beginner_field: [[T.DIRT]],
+  whisper_forest: [[T.DIRT]],
+  frostveil: [[T.DIRT]],
+  ember_caldera: [[T.DIRT]],
+  ancient_ruins: [[T.DIRT], [T.PLAZA]],
+  haunted_forest: [[T.DIRT]],
+  sunken_coast: [[T.DIRT]],
+  crystal_valley: [[T.DIRT]],
+  sky_citadel: [[T.DIRT], [T.PLAZA]],
+  asteria_town: [[T.DIRT], [T.PATH], [T.PLAZA]],
+  // fix41 ดันเจี้ยน (แผนที่สุ่ม: ใช้คีย์ ground ในนิยามแผนที่) — พื้นหลักคือหินผนังถ้ำ/ความมืดใต้ลาน · พื้นบนคือพื้นเดินได้
+  cave0: { low: [T.WALL, T.WATER, T.BRIDGE, T.GRASS], sets: [[T.DIRT]] },
+  cave1: { low: [T.WALL, T.WATER, T.BRIDGE, T.GRASS], sets: [[T.DIRT]] },
+  cave2: { low: [T.WALL, T.WATER, T.BRIDGE, T.GRASS], sets: [[T.DIRT]] },
+  cave3: { low: [T.WALL, T.WATER, T.BRIDGE, T.GRASS], sets: [[T.DIRT]] },
+  tower0: { low: [T.DIRT, T.WALL, T.GRASS], sets: [[T.PLAZA]] },
+  tower1: { low: [T.DIRT, T.WALL, T.GRASS], sets: [[T.PLAZA]] },
+  tower2: { low: [T.DIRT, T.WALL, T.GRASS], sets: [[T.PLAZA]] },
+  party: { low: [T.DIRT, T.WALL, T.GRASS], sets: [[T.PLAZA]] },
+  arena: { low: [T.DIRT, T.WALL, T.GRASS], sets: [[T.PLAZA]] },
+};
+const GTEX = {};
+function wangKinds(cfg) {   // ชนิดพื้น → 0 = ใช้ลายเดิม · 1 = พื้นหลัก · 2+s = พื้นชนิดบนของชุด s
+  const k = new Array(NT).fill(0);
+  for (const t of cfg.low) k[t] = 1;
+  cfg.sets.forEach((ups, si) => { for (const t of ups) k[t] = 2 + si; });
+  return k;
+}
+function wangTex(id, U) {
+  let e = GTEX[id];
+  if (!e) {
+    e = GTEX[id] = { ready: false, wait: [] };
+    e.tex = new THREE.TextureLoader().load(`assets/ground/${id}.png?v=${VERSION}`, () => { e.ready = true; for (const u of e.wait) u.wangOn.value = 1; e.wait.length = 0; });
+    e.tex.magFilter = e.tex.minFilter = THREE.NearestFilter; e.tex.generateMipmaps = false; e.tex.encoding = THREE.sRGBEncoding;
+  }
+  if (e.ready) U.wangOn.value = 1; else e.wait.push(U);
+  return e.tex;
+}
+
 /* ---------- วัสดุพื้น (Lambert + ลายพิกเซลจากเชดเดอร์) ---------- */
 // v0.93 fix9 เปิด/ปิดการเกลี่ยขอบพิกเซลลาย (เปิดในโหมด HD ที่กล้องเลื่อนนุ่ม · ปิดในโหมดพิกเซลที่กล้องล็อกตาราง)
 export const PXAA = { value: 1 };
@@ -191,11 +239,15 @@ export function pixelGround(map, { aa = true } = {}) {
   const U = {
     tAtlas: { value: atlas }, tTypes: { value: types }, tAO: { value: ao },
     mapSize: { value: new THREE.Vector2(map.w, map.h) }, outerType: { value: fill }, pxAA: PXAA,
+    tWang: { value: null }, wangOn: { value: 0 }, wangRows: { value: 1 }, wangKind: { value: new Array(NT).fill(0) }, wangFlip: { value: [1, 1, 1, 1] },
   };
+  const gid = (map.def && map.def.ground) || map.id || (map.def && map.def.id), raw = G_SETS[gid];
+  const cfg = raw && (Array.isArray(raw) ? { low: FIELD_LOW, sets: raw } : raw), sets = cfg && cfg.sets;
+  if (cfg) { U.wangKind.value = wangKinds(cfg); U.wangRows.value = sets.length; U.wangFlip.value = [0, 1, 2, 3].map((i) => (sets[i] && sets[i].some((t) => t === T.PATH || t === T.PLAZA) ? 0 : 1)); U.tWang.value = wangTex(gid, U); }
   mat.onBeforeCompile = (s) => {
     Object.assign(s.uniforms, U);
     s.vertexShader = 'varying vec2 vGW;\n' + s.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vGW = (modelMatrix * vec4(transformed, 1.0)).xz;');
-    s.fragmentShader = `uniform sampler2D tAtlas; uniform sampler2D tTypes; uniform sampler2D tAO; uniform vec2 mapSize; uniform float outerType; uniform float pxAA;
+    s.fragmentShader = `uniform sampler2D tAtlas; uniform sampler2D tTypes; uniform sampler2D tAO; uniform vec2 mapSize; uniform float outerType; uniform float pxAA; uniform sampler2D tWang; uniform float wangOn; uniform float wangRows; uniform float wangKind[${NT}]; uniform float wangFlip[4];
 varying vec2 vGW;
 float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float tileType(vec2 t) {
@@ -220,12 +272,44 @@ vec4 gTexel(vec2 tp) {
   float seam = (texelType(tp + vec2(0.0, -1.0)) != ty || texelType(tp + vec2(-1.0, 0.0)) != ty) ? 0.8 : 1.0;   // ขอบรอยต่อพื้นต่างชนิด: เส้นเข้ม 1 พิกเซล
   return vec4(tc, seam);
 }
+float wKind(float t) { float k = 0.0; for (int i = 0; i < ${NT}; i++) if (float(i) == t) k = wangKind[i]; return k; }
+// fix41 สีพื้นจากชุดรอยต่อ PixelLab ที่จุดลาย tp (หน่วย = พิกเซลลาย ${WP}/ช่อง) · a < 0 = ช่องนี้ใช้ลายเดิม
+vec4 wTexel(vec2 tp) {
+  vec2 q = (tp + 0.5) / ${WP.toFixed(1)} - 0.5;
+  vec2 c = floor(q);
+  float k0 = wKind(tileType(c)), k1 = wKind(tileType(c + vec2(1.0, 0.0))), k2 = wKind(tileType(c + vec2(0.0, 1.0))), k3 = wKind(tileType(c + vec2(1.0, 1.0)));
+  if (k0 < 0.5 || k1 < 0.5 || k2 < 0.5 || k3 < 0.5) return vec4(-1.0);
+  float up = max(max(k0, k1), max(k2, k3));
+  if ((k0 > 1.5 && k0 != up) || (k1 > 1.5 && k1 != up) || (k2 > 1.5 && k2 != up) || (k3 > 1.5 && k3 != up)) return vec4(-1.0);
+  float row = up > 1.5 ? up - 2.0 : 0.0;
+  float m = (k0 > 1.5 ? 8.0 : 0.0) + (k1 > 1.5 ? 4.0 : 0.0) + (k2 > 1.5 ? 2.0 : 0.0) + (k3 > 1.5 ? 1.0 : 0.0);
+  vec2 inC = floor(fract(q) * ${WP.toFixed(1)});
+  float fl = 0.0; for (int i = 0; i < 4; i++) if (float(i) == row) fl = wangFlip[i];
+  if (m < 0.5 || (m > 14.5 && fl > 0.5)) {   // ช่องพื้นล้วน: พลิกลายตามช่องให้ไม่ซ้ำเป็นตาราง (ยกเว้นพื้นปูหิน/ลานที่ลายต้องต่อกันตรง)
+    float hh = h21(c * 0.73 + 5.3);
+    if (hh > 0.5) inC.x = ${(WP - 1).toFixed(1)} - inC.x;
+    if (fract(hh * 7.13) > 0.5) inC.y = ${(WP - 1).toFixed(1)} - inC.y;
+  }
+  vec2 uv = (vec2(m * ${WP.toFixed(1)} + inC.x, (wangRows - 1.0 - row) * ${WP.toFixed(1)} + ${(WP - 1).toFixed(1)} - inC.y) + 0.5) / vec2(${(16 * WP).toFixed(1)}, wangRows * ${WP.toFixed(1)});
+  return vec4(texture2D(tWang, uv).rgb, 1.0);
+}
 ` + s.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
   {
     // v0.93 fix9 กันลายพื้นยุบยับตอนกล้องเลื่อน: ขอบพิกเซลลายผสมสีเพื่อนบ้านตามสัดส่วนที่ครอบพิกเซลจอ (กว้างไม่เกิน 1 พิกเซลจอ)
     // ภายในพิกเซลลายยังคมเป๊ะเหมือนเดิม · ไกลจนลายเล็กกว่าพิกเซลจอ → เฉลี่ยสี (ไม่กระพริบ)
     vec2 tp = floor(vGW * ${TP.toFixed(1)});
-    vec4 tq;
+    vec4 tq = vec4(-1.0);
+    if (wangOn > 0.5) {   // fix41 ลายพื้น/รอยต่อ PixelLab (เกลี่ยขอบพิกเซลแบบเดียวกับลายเดิม)
+#ifdef PX_AA
+      vec2 wp = vGW * ${WP.toFixed(1)} - 0.5; vec2 wi = floor(wp); vec2 wfw = max(fwidth(wp), vec2(1e-4));
+      vec2 wf = pxAA > 0.5 ? clamp((wp - wi - 0.5) / wfw + 0.5, 0.0, 1.0) : step(0.5, wp - wi);
+      vec4 w00 = wTexel(wi), w10 = wTexel(wi + vec2(1.0, 0.0)), w01 = wTexel(wi + vec2(0.0, 1.0)), w11 = wTexel(wi + vec2(1.0, 1.0));
+      if (w00.a > 0.0 && w10.a > 0.0 && w01.a > 0.0 && w11.a > 0.0) tq = mix(mix(w00, w10, wf.x), mix(w01, w11, wf.x), wf.y);
+#else
+      tq = wTexel(floor(vGW * ${WP.toFixed(1)}));
+#endif
+    }
+    if (tq.a < 0.0) {
 #ifdef PX_AA
     vec2 pp = vGW * ${TP.toFixed(1)} - 0.5; vec2 pi = floor(pp); vec2 fw = max(fwidth(pp), vec2(1e-4));
     vec2 pf = pxAA > 0.5 ? clamp((pp - pi - 0.5) / fw + 0.5, 0.0, 1.0) : step(0.5, pp - pi);
@@ -235,6 +319,7 @@ vec4 gTexel(vec2 tp) {
 #else
     tq = gTexel(tp);
 #endif
+    }
     vec3 tc = sRGBToLinear(vec4(tq.rgb, 1.0)).rgb * tq.a;
     // เงาใต้วัตถุเป็นขั้น
     vec2 aw = vGW / mapSize;
@@ -244,8 +329,8 @@ vec4 gTexel(vec2 tp) {
   }`);
   };
   if (aa) { mat.defines = { PX_AA: 1 }; mat.extensions = { derivatives: true }; }
-  mat.customProgramCacheKey = () => 'pixelGround' + (aa ? 'aa' : '');
-  return { material: mat, dispose() { atlas.dispose(); types.dispose(); ao.dispose(); mat.dispose(); } };
+  mat.customProgramCacheKey = () => 'pixelGround2' + (aa ? 'aa' : '');
+  return { material: mat, U, dispose() { atlas.dispose(); types.dispose(); ao.dispose(); mat.dispose(); } };
 }
 
 /* ---------- ผิวน้ำ/น้ำแข็ง/ลาวาแบบพิกเซล: สีเป็นชั้น + ขีดประกายสั้น ๆ กะพริบเคลื่อนไหว ---------- */

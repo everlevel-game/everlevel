@@ -1,7 +1,7 @@
 // v0.32: ดันเจี้ยนถ้ำ + หอคอยไต่ชั้น — ข้อมูล · สูตรปรับความยากมอนสเตอร์ · สร้างแผนที่แต่ละชั้น (สุ่มตาม seed)
 // ปรับสมดุลได้จากไฟล์นี้ไฟล์เดียว
-import { ZENY_INCOME } from '../config.js?v=0.93.0-p4.45';
-import { MONSTERS } from './monsters.js?v=0.93.0-p4.45';
+import { ZENY_INCOME } from '../config.js?v=0.93.0-p4.48';
+import { MONSTERS } from './monsters.js?v=0.93.0-p4.48';
 
 /* ---------- ค่าหลัก ---------- */
 export const CAVE = {
@@ -118,7 +118,7 @@ const CAVE_THEMES = [
 // ถ้ำ 1 ชั้น: ห้องเริ่ม (ซ้าย) → ห้องกลาง 3–4 ห้อง → ห้องบอส (ขวา) เชื่อมด้วยอุโมงค์ · ผนังหินขรุขระ
 export function caveFloorDef(runId, floor, seed) {
   const r = rngOf(seed * 131 + floor * 977), W = 50, H = 38;
-  const th = CAVE_THEMES[(floor - 1 + Math.floor(seed)) % CAVE_THEMES.length];
+  const ti = (floor - 1 + Math.floor(seed)) % CAVE_THEMES.length, th = CAVE_THEMES[ti];
   const start = { x: 6.5, y: 8 + r() * (H - 16), r: 4.6 };
   const bossC = { x: W - 8.5, y: 8 + r() * (H - 16), r: 6.6 };
   const mids = [];
@@ -167,7 +167,7 @@ export function caveFloorDef(runId, floor, seed) {
   objects.push({ kind: 'campfire', x: Math.floor(start.x) - 2, y: Math.floor(start.y) - 2 });
   if (th.water === 'lava') for (const c of mids) if (r() < 0.6) put('vent', c);
   return {
-    id: `dg_${runId}_${floor}`, instance: 'cave', name: `${CAVE.name} · B${floor}`, subtitle: `${th.name} · ชั้นที่ ${floor}/${CAVE.floors}`,
+    id: `dg_${runId}_${floor}`, instance: 'cave', ground: 'cave' + ti,   // fix41 ground = ชุดลายพื้น PixelLab name: `${CAVE.name} · B${floor}`, subtitle: `${th.name} · ชั้นที่ ${floor}/${CAVE.floors}`,
     width: W, height: H, fill: 'WALL', spawn: { x: start.x, y: start.y }, music: floor === CAVE.floors ? 'haunted' : 'ruins',
     theme: {
       fog: th.fog, fogNear: 14, fogFar: 46, outer: th.outer, rockWall: true, noOuterTrees: true, wallColor: th.wall, water: th.water,
@@ -188,12 +188,12 @@ const TOWER_THEMES = [
   { fog: '#3a2230', outer: '#1a0c14', sky: '#ffb8c8', mote: '#ffc0d0', name: 'ลานแสงสนธยา' },
 ];
 export function towerFloorDef(runId, floor) {
-  const W = 32, H = 32, cx = 16, cy = 16, R = 11.5, th = TOWER_THEMES[Math.floor((floor - 1) / 10) % TOWER_THEMES.length];
+  const W = 32, H = 32, cx = 16, cy = 16, R = 11.5, ti = Math.floor((floor - 1) / 10) % TOWER_THEMES.length, th = TOWER_THEMES[ti];
   const objects = [];
   for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 + Math.PI / 8; objects.push({ kind: 'pillar', x: Math.floor(cx + Math.cos(a) * (R - 1.6)), y: Math.floor(cy + Math.sin(a) * (R - 1.6)), seed: 40 + i }); }
   objects.push({ kind: 'lamp', x: cx - 3, y: cy + 8 }, { kind: 'lamp', x: cx + 3, y: cy + 8 });
   return {
-    id: `tw_${runId}_${floor}`, instance: 'tower', name: `${TOWER.name} · ชั้น ${floor}`, subtitle: `${th.name} · Lv.${towerLevel(floor)}`,
+    id: `tw_${runId}_${floor}`, instance: 'tower', ground: 'tower' + ti, name: `${TOWER.name} · ชั้น ${floor}`, subtitle: `${th.name} · Lv.${towerLevel(floor)}`,
     width: W, height: H, fill: 'DIRT', spawn: { x: cx + 0.5, y: cy + 6.5 }, music: floor % 10 === 0 ? 'haunted' : 'ruins',
     theme: {
       fog: th.fog, fogNear: 20, fogFar: 58, outer: th.outer, noOuterTrees: true, wallColor: '#3a3448', cobble: 'gray',

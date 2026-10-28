@@ -1,5 +1,5 @@
 // v0.78 สนามประลอง (อารีน่า PvP) — ข้อมูล · ผลแพ้ชนะ/แต้ม/ราคาร้าน ตัดสินที่เซิร์ฟเวอร์ (supabase/arena_v0.78.sql)
-import { statPointsForLevel, statCost, START_STAT_POINTS, MAX_STAT, STAT_KEYS } from './progression.js?v=0.93.0-p4.45';
+import { statPointsForLevel, statCost, START_STAT_POINTS, MAX_STAT, STAT_KEYS } from './progression.js?v=0.93.0-p4.48';
 
 export const AR = {
   name: 'สนามประลอง',
@@ -76,7 +76,7 @@ export function arMapDef(matchId, mode, team, idx) {
   objects.push({ kind: 'lamp', x: 4, y: 3 }, { kind: 'lamp', x: 4, y: H - 4 }, { kind: 'lamp', x: W - 5, y: 3 }, { kind: 'lamp', x: W - 5, y: H - 4 });
   const sx = team === 1 ? 5.5 : W - 5.5, sy = cy + 0.5 + (idx - 1) * 2.5;
   return {
-    id: `ar_${matchId}`, instance: 'arena', name: AR.name, subtitle: AR.modes[mode] ? AR.modes[mode].name : '',
+    id: `ar_${matchId}`, instance: 'arena', ground: 'arena', name: AR.name, subtitle: AR.modes[mode] ? AR.modes[mode].name : '',
     width: W, height: H, fill: 'DIRT', spawn: { x: sx, y: sy }, music: 'boss',
     theme: {
       fog: '#2a1a14', fogNear: 24, fogFar: 70, outer: '#140c0a', noOuterTrees: true, wallColor: '#4a3428', cobble: 'warm',

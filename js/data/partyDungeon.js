@@ -1,5 +1,5 @@
 // v0.75 ดันเจี้ยนปาร์ตี้ "วิหารผนึกจันทรา" — ข้อมูล (เลือดบอส/รางวัล/โควตาตัดสินที่เซิร์ฟเวอร์: supabase/party_dungeon_v0.75.sql)
-import { MONSTERS } from './monsters.js?v=0.93.0-p4.45';
+import { MONSTERS } from './monsters.js?v=0.93.0-p4.48';
 
 export const PD = {
   name: 'วิหารผนึกจันทรา',
@@ -40,7 +40,7 @@ export function pdMapDef(runId, bossType) {
   for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; objects.push({ kind: 'pillar', x: Math.floor(cx + Math.cos(a) * (R - 1.4)), y: Math.floor(cy + Math.sin(a) * (R - 1.4)), seed: 60 + i }); }
   objects.push({ kind: 'lamp', x: cx - 4, y: cy + R - 3 }, { kind: 'lamp', x: cx + 4, y: cy + R - 3 });
   return {
-    id: `pd_${runId}`, instance: 'party', name: PD.name, subtitle: `ดันเจี้ยนปาร์ตี้ · ${PD_BOSS_NAME[bossType] || ''}`,
+    id: `pd_${runId}`, instance: 'party', ground: 'party', name: PD.name, subtitle: `ดันเจี้ยนปาร์ตี้ · ${PD_BOSS_NAME[bossType] || ''}`,
     width: W, height: H, fill: 'DIRT', spawn: { x: cx + 0.5, y: cy + R - 3.5 }, music: 'haunted',
     theme: {
       fog: '#241a3a', fogNear: 22, fogFar: 64, outer: '#0c0818', noOuterTrees: true, wallColor: '#34284a', cobble: 'gray',

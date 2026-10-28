@@ -1,12 +1,12 @@
 // ใช้ไอเทมใช้งานชุดใหม่ (v0.13): วาร์ป · บัฟ/ใบคูณ · ฟื้นฟู · ขยายกระเป๋า/คลัง · รีเซ็ต · เปลี่ยนชื่อ · ประกาศ · เรียกมอน · กล่องสุ่ม · ฟักไข่
-import { TILE } from '../config.js?v=0.93.0-p4.45';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.45';
-import { CONSUMABLES, ADVENTURER_BOX, fmtDur } from '../data/consumables.js?v=0.93.0-p4.45';
-import { MAPS, START_MAP } from '../data/maps/index.js?v=0.93.0-p4.45';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.45';
-import { STORAGE_CAPACITY } from '../data/shops.js?v=0.93.0-p4.45';
-import { validName } from '../net/Online.js?v=0.93.0-p4.45';
-import { askText } from '../ui/Prompt.js?v=0.93.0-p4.45';
+import { TILE } from '../config.js?v=0.93.0-p4.48';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.48';
+import { CONSUMABLES, ADVENTURER_BOX, fmtDur } from '../data/consumables.js?v=0.93.0-p4.48';
+import { MAPS, START_MAP } from '../data/maps/index.js?v=0.93.0-p4.48';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.48';
+import { STORAGE_CAPACITY } from '../data/shops.js?v=0.93.0-p4.48';
+import { validName } from '../net/Online.js?v=0.93.0-p4.48';
+import { askText } from '../ui/Prompt.js?v=0.93.0-p4.48';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const STORAGE_UP = 20;
