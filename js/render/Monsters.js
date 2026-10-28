@@ -1,10 +1,10 @@
 // v0.17: มอนสเตอร์ออกแบบใหม่ทั้งหมด (ใช้ถ่ายเป็นสไปรต์พิกเซลแบบเกม RPG — render/PixelSprites.js)
 // แต่ละชนิด = build (สร้างโมเดลจากชิ้นรูปทรง) + anim (ท่าทางต่อเฟรม) · ส่วนกลาง: กระพริบตอนโดนตี ตาย เกิดใหม่ แช่แข็ง มึน ทุบพื้น
-import { THREE } from './three.js?v=0.93.0-p4.24';
-import { lin, mergeGeometries } from './Geo.js?v=0.93.0-p4.24';
-import { toon, toonOwn, addOutline } from './Toon.js?v=0.93.0-p4.24';
-import { blobShadowTexture, shadeHex, glowTexture } from './Textures.js?v=0.93.0-p4.24';
-import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.24';
+import { THREE } from './three.js?v=0.93.0-p4.37';
+import { lin, mergeGeometries } from './Geo.js?v=0.93.0-p4.37';
+import { toon, toonOwn, addOutline } from './Toon.js?v=0.93.0-p4.37';
+import { blobShadowTexture, shadeHex, glowTexture } from './Textures.js?v=0.93.0-p4.37';
+import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.37';
 
 const PI = Math.PI;
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -148,7 +148,7 @@ export class MonsterView {
   hurt() { this.hurtT = 0.22; }
   die() { this.deadT = 0; }
   respawn() { this.deadT = -1; this.spawnT = 0.0001; this.root.visible = true; this.body.scale.set(0.01, 0.01, 0.01); }
-  attack() { this.attackT = 0.45; }
+  attack() { this.attackT = 0.45; this.lastAttackAt = performance.now(); }   // fix36 แผ่นภาพมอนจับจังหวะตี
   slam(dur = 1.3) { this.slamT = dur; this.slamDur = dur; }
 
   update(dt, mob) {

@@ -1,41 +1,44 @@
 // ตัววาดโลก 3 มิติ: แสงเงา, กล้อง, สร้างฉากจากข้อมูลแผนที่, ป้ายชื่อ
-import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.24';
-import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.24';   // fix21 NPC ภาพพิกเซล
+import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.37';
+import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.37';   // fix21 NPC ภาพพิกเซล
 for (const [k, d] of Object.entries(NPC_SHEETS)) registerSheet(k, npcSheetDef(d));
-import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.24';
-import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.24';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
-import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.24';
-import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.24';
-import { THREE } from './three.js?v=0.93.0-p4.24';
-import { TILE } from '../config.js?v=0.93.0-p4.24';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.24';
-import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.24';
-import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.24';   // fix15
-import { PXAA } from './PixelGround.js?v=0.93.0-p4.24';
-import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.24';
-import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.24';
-import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.24';
+import { MOB_SHEETS, mobSheetDef } from '../data/mobSprites.js?v=0.93.0-p4.37';   // fix36 มอนภาพพิกเซล
+for (const [k, d] of Object.entries(MOB_SHEETS)) registerSheet('mob_' + k, mobSheetDef(d));
+import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.37';
+import { StructureSprite, structFor } from './PixelStructures.js?v=0.93.0-p4.37';
+import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.37';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
+import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.37';
+import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.37';
+import { THREE } from './three.js?v=0.93.0-p4.37';
+import { TILE } from '../config.js?v=0.93.0-p4.37';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.37';
+import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.37';
+import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.37';   // fix15
+import { PXAA } from './PixelGround.js?v=0.93.0-p4.37';
+import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.37';
+import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.37';
+import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.37';
 import {
   BUILDERS, cityWalls, bridges, setPixelModels, glowSprite, roundTreeGeometry, pineGeometry, treeMaterial, snowPineGeometry, snowTreeGeometry, deadTreeGeometry,
   grassTuftGeometry, flowerGeometry, rockGeometry,
-} from './Models.js?v=0.93.0-p4.24';
-import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.24';
-import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.24';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.24';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.24';
-import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.24';
-import { SkillFX } from './SkillFX.js?v=0.93.0-p4.24';
-import { BossFX } from './BossFX.js?v=0.93.0-p4.24';
-import { PostFX } from './PostFX.js?v=0.93.0-p4.24';
-import { Weather } from './Weather.js?v=0.93.0-p4.24';   // v0.91 สภาพอากาศ
-import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.24';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.24';
-import { PetView } from './Pets.js?v=0.93.0-p4.24';
-import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.24';
-import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.24';
-import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.24';
-import { gradientMap } from './Toon.js?v=0.93.0-p4.24';
-import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.24';
+} from './Models.js?v=0.93.0-p4.37';
+import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.37';
+import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.37';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.37';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.37';
+import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.37';
+import { SkillFX } from './SkillFX.js?v=0.93.0-p4.37';
+import { BossFX } from './BossFX.js?v=0.93.0-p4.37';
+import { PostFX } from './PostFX.js?v=0.93.0-p4.37';
+import { Weather } from './Weather.js?v=0.93.0-p4.37';   // v0.91 สภาพอากาศ
+import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.37';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.37';
+import { PetView } from './Pets.js?v=0.93.0-p4.37';
+import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.37';
+import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.37';
+import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.37';
+import { gradientMap } from './Toon.js?v=0.93.0-p4.37';
+import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.37';
 // v0.86 กลางวัน · ตอนเย็น · กลางคืน · รุ่งสาง — ตัวคูณแสง (h=ฟ้า s=แดด e=exposure) + สีที่ผสมเข้าไป (mix)
 const DAY_PRESETS = {
   day: { name: 'กลางวัน', icon: '☀', h: 1, s: 1, e: 1, mix: 0, glow: 1, tint: [0, 0, 0, 0] },
@@ -67,7 +70,8 @@ const PX_BASE = (() => { const a = new THREE.Color('#dcefff'), b = new THREE.Col
 const COSTUME_GLOW = 1.6;
 
 const TREE_SCALE = 1.6, PINE_SCALE = 1.5;
-const SPRITE_TREES = true, TREE_PX = 0.021;   // ต้นไม้ภาพ PixelLab · ขนาดต่อพิกเซลภาพ (หน่วยโลก)
+const SPRITE_TREES = true, TREE_PX = 0.021;
+const PXC = 3.55 / 96;   // fix36 ขนาดพิกเซลตัวละคร · โหมดกล้อง 2D ใช้ค่านี้ทั้งฉาก (ต้นไม้ อาคาร ตารางพิกเซลของภาพ) → พิกเซลเท่ากันทั้งเกม   // ต้นไม้ภาพ PixelLab · ขนาดต่อพิกเซลภาพ (หน่วยโลก)
 const TREE_SPRITES = {   // [ไฟล์, กว้าง, สูง] · สุ่มตาม seed ของต้นไม้
   round: [['assets/flora/oak1.png', 128, 160], ['assets/flora/oak2.png', 128, 160], ['assets/flora/oak1.png', 128, 160], ['assets/flora/oak2.png', 128, 160], ['assets/flora/oak3.png', 128, 160]],   // ต้นแอปเปิ้ล 1 ใน 5
   pine: [['assets/flora/pine1.png', 112, 176], ['assets/flora/pine2.png', 112, 176]],
@@ -113,6 +117,9 @@ const D2R = Math.PI / 180;
 const CAM = {
   d3: { pitch: 0.8, pmin: 0.8, pmax: 0.8, fov: 32, fovP: 52, min: 7, max: 31, def: 13 },
   px: { pitch: 60 * D2R, pmin: 45 * D2R, pmax: 75 * D2R, fov: 15, fovP: 24, min: 6.5, max: 40, def: 17 },
+  // fix36 กล้องแบบเกม 2D: มุมเดียวตายตัว ไม่หมุน · เลนส์ซูมไกลมาก (fov แคบ) → ภาพแทบไม่มีมุมมองไกลใกล้ (ใกล้เคียง orthographic)
+  // ใช้กล้องตัวเดิม (ระบบอนุภาค/ป้ายชื่อ/คลิกที่อิง fov ยังทำงานเหมือนเดิม)
+  flat: { pitch: 55 * D2R, pmin: 55 * D2R, pmax: 55 * D2R, fov: 3.2, fovP: 5.2, min: 6.5, max: 40, def: 17 },
 };
 const CAM_FAR = 1.3, CAM_FAR_P = 1.4;   // v0.88 ถอยกล้องออกจากขั้นพิกเซล 1:1 อีก 30%
 const SPRITE_PITCH = 20 * D2R;   // มุมที่ "ช่างวาด" มองสไปรต์ (ดู PixelSprites.js)
@@ -296,7 +303,7 @@ export class Renderer3D {
     statics.add(bridges(map, T.BRIDGE, T.WATER));
 
     this.water = this.px.enabled ? new PixelWater(theme.water || 'water') : new Water(theme.water || 'water');
-    this.glows = []; this.flags = []; this.sprays = []; this.portals = []; this.fires = []; this.crystals = [];
+    this.glows = []; this.flags = []; this.sprays = []; this.portals = []; this.fires = []; this.crystals = []; this.structs = [];
     this.pools = [];   // v0.89 วงแสงบนพื้นตอนกลางคืน (ตะเกียง กองไฟ คริสตัล)
     const trees = { round: [], pine: [] };
 
@@ -305,13 +312,21 @@ export class Renderer3D {
         trees[o.kind === 'tree' ? 'round' : 'pine'].push({ x: o.cx, z: o.cy, seed: o.def.seed || 1, vs: o.def.vs || 1 });
         continue;
       }
-      const build = (this.px.enabled && this.pxBuilders()[o.kind]) || BUILDERS[o.kind]; if (!build) continue;
-      const m = build(o.def), vs = o.def.vs || 1;   // v0.41.1 vs = ขยายโมเดล (เมืองขยาย)
-      m.position.set(o.cx, 0, o.cy); if (vs !== 1) m.scale.setScalar(vs);
-      if (o.def.rot) m.rotation.y = o.def.rot;
-      statics.add(m);
+      const sk = this.px.enabled && !globalThis.__struct3d ? structFor(o.def, map.id, !!this.cam2d) : null;   // fix36 อาคาร/ของประกอบฉากภาพพิกเซล (PixelLab)
+      let m, vs = o.def.vs || 1;   // v0.41.1 vs = ขยายโมเดล (เมืองขยาย)
+      if (sk) {
+        const sp = new StructureSprite(sk, o.def, this.px.tint, this.cam2d ? PXC : 0); sp.group.position.set(o.cx, 0, o.cy); statics.add(sp.group); this.structs.push(sp);
+        m = sp.group; if (this.cam2d) vs = 1;   // โหมด 2D: ขนาดพิกเซลเท่าตัวละครเสมอ (ไม่ขยายตามเมือง)
+      } else {
+        const build = (this.px.enabled && this.pxBuilders()[o.kind]) || BUILDERS[o.kind]; if (!build) continue;
+        m = build(o.def);
+        m.position.set(o.cx, 0, o.cy); if (vs !== 1) m.scale.setScalar(vs);
+        if (o.def.rot) m.rotation.y = o.def.rot;
+        statics.add(m);
+      }
       if (o.kind === 'lamp') {
-        for (const sx of [-1, 1]) { const gl = glowSprite('#ffc970', 0.8 * vs, 0.3); gl.position.set(o.cx + sx * 0.32 * vs, 1.85 * vs, o.cy); world.add(gl); this.glows.push(gl); }
+        if (sk) { const gl = glowSprite('#ffc970', 1.0, 0.3); gl.position.set(o.cx, 2.85 / Math.cos(this.camCfg().pitch), o.cy + 0.6); world.add(gl); this.glows.push(gl); }   // fix36 เสาไฟภาพพิกเซล: โคมเดียวบนยอด
+        else for (const sx of [-1, 1]) { const gl = glowSprite('#ffc970', 0.8 * vs, 0.3); gl.position.set(o.cx + sx * 0.32 * vs, 1.85 * vs, o.cy); world.add(gl); this.glows.push(gl); }
         this.addPool(world, o.cx, o.cy, 3.0 * vs, '#ffc070', 1);
       }
       if (o.kind === 'campfire' || o.kind === 'vent') this.addPool(world, o.cx, o.cy, 3.8 * vs, '#ff9a48', 1.1);
@@ -319,7 +334,7 @@ export class Renderer3D {
       if (o.kind === 'campfire' || o.kind === 'vent') this.fires.push(new Campfire(world, o.cx, o.cy, vs));
       if (o.kind === 'warpstone') this.crystals.push(new WarpCrystal(world, o.cx, o.cy, o.def.color, vs));
       if (m.userData.glow) { const gl = glowSprite(m.userData.glow.color, 1.7 * vs, 0.32); gl.position.set(o.cx, m.userData.glow.y * vs, o.cy); world.add(gl); this.glows.push(gl); }
-      if (o.kind === 'fountain') {
+      if (o.kind === 'fountain' && !sk) {   // fix36 น้ำพุภาพพิกเซลมีน้ำในภาพแล้ว
         this.water.add(world, new THREE.CircleGeometry(1.34 * vs, 48).rotateX(-Math.PI / 2).translate(o.cx, 0, o.cy), 0.55, 3);
         this.water.add(world, new THREE.CircleGeometry(0.5 * vs, 24).rotateX(-Math.PI / 2).translate(o.cx, 0, o.cy), 1.5 * vs, 1);
         this.sprays.push(new FountainSpray(world, o.cx, o.cy));
@@ -542,7 +557,7 @@ export class Renderer3D {
   // ต้นไม้ภาพ 2 มิติ: แผ่นสี่เหลี่ยมหันหน้าเข้ากล้องเสมอ (ทำใน vertex shader) · ฐานภาพแตะพื้นที่จุดต้นไม้ · มีเงาวงรีบนพื้น
   spriteTrees(parent, url, w, h, list, tint, shadeCol = 0x0a1a08) {
     if (!list.length) return;
-    const px = TREE_PX, gw = w * px, gh = h * px;
+    const px = this.cam2d ? PXC : TREE_PX, gw = w * px, gh = h * px;
     const geo = new THREE.PlaneGeometry(gw, gh).translate(0, gh / 2 - 6 * px, 0);
     const TC = (Renderer3D.treeTex = Renderer3D.treeTex || {});
     let tex = TC[url];
@@ -774,7 +789,8 @@ export class Renderer3D {
       const t = Math.tan((this.camera.fov * Math.PI) / 360), ds = this.distScale || 1, small = Math.min(this.cw || 0, this.ch || 0) < 600;
       const ref = ((this.ch || 0) * (small ? 2 : 1) * PX) / (2 * t) / ds;
       this.tagRef = Math.max(steps[0], ref);   // v0.88 ระยะอ้างอิงของขนาดป้ายชื่อ/ฉายา (ถอยกล้องออก → ป้ายเล็กลงตามตัวละคร)
-      this.rig.targetDist = Math.min(95, this.tagRef * (this.cw < this.ch ? CAM_FAR_P : CAM_FAR));
+      const cap = 95 * (this.cam2d ? Math.tan((CAM.px.fov * D2R) / 2) / Math.tan((this.camera.fov * D2R) / 2) : 1);   // fix36 เลนส์แคบ = ถอยไกลขึ้นตามส่วน
+      this.rig.targetDist = Math.min(cap, this.tagRef * (this.cw < this.ch ? CAM_FAR_P : CAM_FAR));
       return;
     }
     this.rig.targetDist = steps.reduce((a, b) => (Math.abs(Math.log(b / want)) < Math.abs(Math.log(a / want)) ? b : a));
@@ -788,7 +804,8 @@ export class Renderer3D {
     // (บางแถวลายถูกข้าม/ซ้ำ แล้วสลับไปมาเมื่อกล้องเลื่อน) → ใช้ k แบบเศษส่วน ให้ 1 พิกเซลภาพ = PX หน่วยโลกพอดีเสมอ
     // แล้วค่อยขยายขึ้นจอแบบ "คมแต่นุ่มขอบ" (sharp bilinear ใน PostFX) · คิด k จากระยะเป้าหมายของกล้อง (ไม่เปลี่ยนทุกเฟรมตอนกล้องกระตุก)
     const Dk = (this.rig.targetDist || this.rig.dist) * (this.distScale || 1);
-    const k = Math.max(1, Math.round(((H * PX) / (2 * Dk * t)) * 32) / 32);
+    const PU = this.cam2d ? PXC : PX;   // fix36 โหมด 2D: 1 พิกเซลภาพ = 1 พิกเซลตัวละคร
+    const k = Math.max(1, Math.round(((H * PU) / (2 * Dk * t)) * 32) / 32);
     const wpp = (2 * D * t) / (H / k);
     if (k !== this.pxK) { this.pxK = k; this.syncFxSize(); }
     cam.updateMatrixWorld();
@@ -894,7 +911,8 @@ export class Renderer3D {
     if (bossK > 1) view.root.scale.setScalar(bossK);
     this.scene.add(view.root);
     if (this.halloween && !mob.data.fest && !mob.data.worldBoss && !mob.worldRun && !mob.data.dummy) view.root.add(pumpkinHat(mob.data.height || 1));   // fix15 ฮาโลวีน: มอนสวมหมวกฟักทอง
-    if (this.px.enabled) this.px.attach(mob, view, 'mob');
+    const mobSheet = !mob.data.viewScale && MOB_SHEETS[mob.type] && this.spriteChars !== false ? 'mob_' + mob.type : null;   // fix36
+    if (this.px.enabled && !mobSheet) this.px.attach(mob, view, 'mob');
     const h = mob.data.height;
     const rad = mob.data.radius || 0.55;
     const hb = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad, h + 0.4, 8), new THREE.MeshBasicMaterial({ visible: false }));
@@ -903,7 +921,7 @@ export class Renderer3D {
     const hpbar = document.createElement('div'); hpbar.className = 'hpbar' + (mob.data.mvp || mob.data.dgBoss ? ' hpbar-mvp' : ''); hpbar.innerHTML = '<i></i>'; hpbar.hidden = true;
     const hpnum = document.createElement('div'); hpnum.className = 'hpnum'; hpnum.hidden = true;   // v0.94 ตัวเลขเลือดที่เหลือใต้หลอดเล็ก
     this.labelLayer.append(label, hpbar, hpnum);
-    this.characters.set(mob, { view, label, hpbar, hpnum, kind: 'mob', head: h * bossK, lastHp: -1, aura: bossK > 1 ? this.bossAura(mob, bossK) : null });
+    this.characters.set(mob, { view, label, hpbar, hpnum, kind: 'mob', npcSheet: mobSheet, head: h * bossK, lastHp: -1, aura: bossK > 1 ? this.bossAura(mob, bossK) : null });
     if (mob.champ || mob.golden) this.eliteFx(mob);   // fix17
     this.actorQuality(this.characters.get(mob));
     view.update(0, mob);
@@ -972,7 +990,7 @@ export class Renderer3D {
     if (X && X.p.vfx && c.pxwLoaded !== X.p.vfx) { c.pxwLoaded = X.p.vfx; this.pixelVfx().load(X.p.vfx); }   // โหลดภาพเอฟเฟกต์อาวุธล่วงหน้า
     if (!c.pwing && !c.paura) return;
     const vis = !entity.hidden && c.view.root.visible;
-    if (c.pwing) { c.pwing.liftK = c.sheet && c.sheet.S && c.sheet.S.wingK || 1; c.pwing.ax = c.sheet ? c.sheet.wdx || 0 : 0; c.pwing.ay = c.sheet ? c.sheet.wdy || 0 : 0; c.pwing.update(dt, entity, c.sheet ? c.sheet.dir : screenDir(entity.angle, this.camera), this.camera, vis); }   // v0.40.3 ตัวขาสั้น → ปีกต่ำลงตาม
+    if (c.pwing) { c.pwing.liftK = c.sheet && c.sheet.S && c.sheet.S.wingK || 1; c.pwing.ax = c.sheet ? c.sheet.wdx || 0 : 0; c.pwing.ay = c.sheet ? c.sheet.wdy || 0 : 0; c.pwing.anim = c.sheet ? c.sheet.anim : 'idle'; c.pwing.anc = c.sheet ? c.sheet.wanc : null; c.pwing.update(dt, entity, c.sheet ? c.sheet.dir : screenDir(entity.angle, this.camera), this.camera, vis); }   // v0.40.3 ตัวขาสั้น → ปีกต่ำลงตาม
     if (c.paura && c.paura.e) c.paura.e.hidden = !vis;
   }
 
@@ -1428,10 +1446,20 @@ export class Renderer3D {
     this.updateCamera(0);
   }
 
-  rotateCamera(delta) { this.rig.targetYaw += delta; }
+  rotateCamera(delta) { if (this.cam2d) return; this.rig.targetYaw += delta; }   // fix36 โหมด 2D ไม่หมุน
   // v0.17.1: ปรับมุมก้ม (โหมดพิกเซลเท่านั้น)
   tiltCamera(delta) { const C = this.camCfg(); this.rig.targetPitch = clamp(this.rig.targetPitch + delta, C.pmin, C.pmax); }
-  camCfg() { return this.px && this.px.enabled ? CAM.px : CAM.d3; }
+  camCfg() { return this.px && this.px.enabled ? (this.cam2d ? CAM.flat : CAM.px) : CAM.d3; }
+  // fix36 เปิด/ปิดกล้องแบบเกม 2D (เฉพาะโหมดพิกเซล)
+  setCam2d(on) {
+    this.cam2d = !!on;
+    if (this.cam2d) { this.rig.targetYaw = 0; this.rig.yaw = 0; }
+    if (this.post) this.post.tilt = this.hd && !this.cam2d ? (this.mobile ? 0.7 : 1) : 0;
+    if (typeof document !== 'undefined') document.body.classList.toggle('cam2d', this.cam2d);   // ซ่อนปุ่มหมุนกล้อง
+    this.camMode(true);
+    if (this.px && this.px.enabled) this.pxSnapZoom();
+    if (this.post && this.post.size) this.syncFxSize && this.syncFxSize();
+  }
   // ตั้งกล้องตามโหมด · reset = กลับมุม/ระยะเริ่มต้นของโหมดนั้น
   camMode(reset = true) {
     const C = this.camCfg(), g = this.rig;
@@ -1455,6 +1483,7 @@ export class Renderer3D {
   updateCamera(dt, focus) {
     const g = this.rig;
     if (focus) g.target.lerp(this.tmp.set(focus.x * S, 0.55, focus.y * S), damp(7, dt));
+    if (this.cam2d) g.targetYaw = 0;   // fix36 โหมด 2D ล็อกมุม (รวมมุมกล้องที่เซฟไว้)
     g.yaw = dt ? lerpAngle(g.yaw, g.targetYaw, damp(9, dt)) : g.yaw;
     g.dist = dt ? lerp(g.dist, g.targetDist, damp(9, dt)) : g.dist;
     if (Math.abs(g.dist - g.targetDist) < 0.01) g.dist = g.targetDist;   // v0.17: ให้ถึงระยะพิกเซลพอดี
@@ -1626,7 +1655,7 @@ export class Renderer3D {
     this.hd = on; this.hdInit = true;
     this.post.hd = on;
     PXAA.value = on && !this.mobile && !this.safe ? 1 : 0;   // v0.93 fix12 มือถือปิด · v0.93 fix9 HD = กล้องนุ่ม → เกลี่ยขอบพิกเซลลาย · พิกเซล = กล้องล็อกตาราง → คมแบบเดิม
-    this.post.tilt = on ? (this.mobile ? 0.7 : 1) : 0;
+    this.post.tilt = on && !this.cam2d ? (this.mobile ? 0.7 : 1) : 0;   // fix36 โหมด 2D ไม่เบลอบน/ล่าง
     this.pxK = 0;
     document.body.classList.toggle('gfx-hd', on);   // 
     if (this.quality != null) this.setQuality(this.quality); else this.syncFxSize();
@@ -1722,6 +1751,7 @@ export class Renderer3D {
 
     this.water.update(t);
     for (const s of this.sprays) s.update(dt, t);
+    for (const s of this.structs || []) s.update(this.camera, this.rig.yaw);
     for (const p of this.portals) p.update(t, this.lowFx);
     if (this.hwDecor) this.hwDecor.update(t);
     this.updateElites(t, simDt); this.updateChests(t);   // fix17
@@ -1792,7 +1822,7 @@ export class Renderer3D {
       c.view.update(simDt, entity);
       if (c.aura) this.updateBossAura(c, entity, simDt);
       if (c.kind === 'player' || c.kind === 'remote') { this.sheetChar(c, entity, simDt); this.pixelWear(c, entity, simDt); }
-      else if (c.npcSheet) this.sheetChar(c, entity, simDt);   // fix21
+      else if (c.npcSheet) { this.sheetChar(c, entity, simDt); if (c.kind === 'mob' && c.sheetScale) c.view.root.scale.setScalar(c.sheetScale); }   // fix21 · fix36 มอน: ไม่ขยายตัวโมเดล (ฮิตบ็อกซ์เดิม)
       if (c.costume) { c.costume.update(simDt, c.view); if (c.glow && c.kind === 'player' && !c.sheet) glowC = c; }
       this.placeLabel(entity, c);
     }

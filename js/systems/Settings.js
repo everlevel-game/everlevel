@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS = {
   othersSkills: true,   // v0.94 เอฟเฟกต์สกิลของผู้เล่นคนอื่น
   weather: true,        // v0.91 ฝน หิมะ ใบไม้ หิ่งห้อย
   hd: true,             // v0.89 ภาพ HD-2D (ปิด = ภาพพิกเซลแบบเดิม)
+  cam2d: false,         // fix36 กล้องแบบเกม 2D (มุมเดียวตายตัว ไม่หมุน ไม่มีมุมมองไกลใกล้) · ทดลอง
   bloom: true,          // แสงเรือง
   shake: true,          // กล้องสั่น
   master: 0.8, music: 0.5, sfx: 0.8, muted: false,

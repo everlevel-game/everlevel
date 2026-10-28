@@ -2505,3 +2505,6 @@ body.touch #chatWrap.open[data-size="s"] .chat { max-height: 90px; }
 /* v0.94 ตัวเลขเลือดมอนใต้หลอดเล็ก */
 .hpnum { position: absolute; left: 0; top: 0; font: 600 10.5px/1 Kanit, system-ui, sans-serif; color: #fff; white-space: nowrap; pointer-events: none; will-change: transform;
   text-shadow: 0 0 2px #000, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000; font-variant-numeric: tabular-nums; }
+
+/* fix36 กล้องแบบเกม 2D: ไม่มีปุ่มหมุนกล้อง */
+body.cam2d #rotL, body.cam2d #rotR { display: none !important; }

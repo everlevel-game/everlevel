@@ -2,9 +2,9 @@
 // แผ่นละอาชีพ = 8 คอลัมน์ × 8 แถว (ช่องละ 128px)
 //   แถว: N · NE · E · SE · S · SW · W · NW  (ทิศตัวละครหันเทียบจอ)
 //   คอลัมน์ 0–3 = เดิน 4 เฟรม · 4–7 = โจมตี 4 เฟรม (นักบวช = ท่าร่าย/ฮีล)
-import { THREE } from './three.js?v=0.93.0-p4.24';
-import { VERSION } from '../config.js?v=0.93.0-p4.24';
-import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.24';   // v0.91 สีชุด
+import { THREE } from './three.js?v=0.93.0-p4.37';
+import { VERSION } from '../config.js?v=0.93.0-p4.37';
+import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.37';   // v0.91 สีชุด
 
 // แผ่นวาดมือ 8×8 (ช่อง 128px): คอลัมน์ 0–3 เดิน · 4–7 โจมตี
 const HAND = { cols: 8, size: 2.75, pixel: false, anim: { idle: [7], walk: [0, 1, 2, 3], attack: [4, 5, 6, 7] } };
@@ -30,6 +30,7 @@ export const SHEETS = {
   archer_dragon: { ...PX2, base: 'archer', src: 'assets/sprites/archer_dragon.png' },
   mage_dragon: { ...PX2, base: 'mage', src: 'assets/sprites/mage_dragon.png' },
   acolyte_dragon: { ...PXC(208, 112), base: 'acolyte', src: 'assets/sprites/acolyte_dragon.png' },   // v0.41 Novice ตัวพิกเซล (ดาบไม้ฝึก · เป้ผ้าใบ)
+  swordsman_seraph: { ...PX2, base: 'swordsman', src: 'assets/sprites/swordsman_seraph.png' },   // fix36 ชุดอัศวินเซราฟ (ทดลอง · ยังไม่ขาย)
 };
 // v0.39 สกินอาวุธ (แผ่นทั้งตัวที่ถืออาวุธลายอื่น) — key = ชื่อแผ่น · เลือกได้จากชิ้นแฟชั่นอาวุธ { sheet: key, job }
 export const SKIN_SHEETS = {};
@@ -159,7 +160,7 @@ export class SheetSprite {
     const A = fpsOf(S, this.anim), cols = framesOf(S, this.anim), n = cols.length;
     let f = Math.floor(this.t * A.fps);
     // v0.40.2 ยืนนิ่ง: ค้างเฟรมแรก แล้วขยับท่ายืนรอบเดียวทุก ~5 วิ (ไม่ไหวตลอดเวลา)
-    if (this.anim === 'idle' && n > 1) { const cyc = n / A.fps, per = cyc + 4; const ph = (this.t + cyc) % per; f = ph < cyc ? Math.floor(ph * A.fps) : 0; }
+    if (this.anim === 'idle' && n > 1 && !S.mob) { const cyc = n / A.fps, per = cyc + 4; const ph = (this.t + cyc) % per; f = ph < cyc ? Math.floor(ph * A.fps) : 0; }
     if (this.anim === 'skill' && (ent.cast || ent.castPose) && f >= 1 && n > 2) { const h = n >= 8 ? [n - 4, n - 3] : [1, 2]; if (f >= h[0]) f = h[Math.floor(this.t * 5) % 2]; }   // ร่ายค้าง (สลับ 2 เฟรมช่วงท้าย)
     f = A.loop ? f % n : Math.min(n - 1, f);
     const col = cols[f], row = ROW[d] * (S.rowsPerDir || 1) + ((S.row && S.row[this.anim]) || 0), NR = S.rows || 8;
@@ -167,6 +168,7 @@ export class SheetSprite {
     // ปีกเกาะหลัง: ระยะที่จุดหลังเฟรมนี้ต่างจากท่ายืนเฟรมแรกของทิศเดียวกัน (หน่วยโลก)
     const AN = S.anch, cur = AN && AN[row] && AN[row][col], base = AN && AN[ROW[d] * (S.rowsPerDir || 1)] && AN[ROW[d] * (S.rowsPerDir || 1)][0];
     if (cur && base) { this.wdx = (cur[0] - base[0]) * PX_UNIT; this.wdy = (cur[1] - base[1]) * PX_UNIT; } else { this.wdx = 0; this.wdy = 0; }
+    this.wanc = cur || null;   // fix36 จุดหลังเฟรมนี้ (พิกเซล: x ขวาของเท้า · y เหนือเท้า) → ปีกพิกเซลเกาะตรงจุดนี้พอดี
     // วางตำแหน่ง · หันหากล้อง
     const bob = this.anim === 'idle' && !ent.dead && S.anim.idle.length < 2 ? 1 + Math.sin(this.life * 2.6) * 0.012 : 1;   // แผ่นที่มีท่าหายใจแล้วไม่ต้องยืดหด
     // แผ่นป้าย: ตามตำแหน่งเท้า หันหากล้อง ดันเข้าหากล้องเล็กน้อยกันจมพื้น/สะพาน/รั้ว (ย่อชดเชยให้ขนาดบนจอเท่าเดิม)

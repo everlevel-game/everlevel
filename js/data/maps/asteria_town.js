@@ -1,5 +1,5 @@
 // ข้อมูลแผนที่ Asteria Town (เมืองเริ่มต้น) — v0.27 รีมาสเตอร์: ลานวงกลมกลางเมือง · คลองตะวันตก · 4 ย่าน
-import { borderTrees as _borderTrees, scaleMap } from './helpers.js?v=0.93.0-p4.24';
+import { borderTrees as _borderTrees, scaleMap } from './helpers.js?v=0.93.0-p4.37';
 // พิกัดทั้งหมดเป็นหน่วย "ช่อง" (tile) — วัตถุใช้มุมซ้ายบนของ footprint
 
 const LOOK = {
@@ -81,8 +81,8 @@ const RAW = {
   objects: [
     { kind: 'fountain', x: 34, y: 26 },
     // ย่านช่าง (ตะวันตกเฉียงเหนือ)
-    { kind: 'house', x: 15, y: 7, w: 6, roof: '#7a3a2a', wall: '#e4d2b0', seed: 11 },   // โรงตีเหล็ก
-    { kind: 'house', x: 24, y: 7, w: 6, roof: '#5a8a3c', seed: 12 },                    // ร้านของใช้
+    { kind: 'house', x: 15, y: 7, w: 6, roof: '#7a3a2a', wall: '#e4d2b0', seed: 11, sprite: 'blacksmith' },   // โรงตีเหล็ก
+    { kind: 'house', x: 24, y: 7, w: 6, roof: '#5a8a3c', seed: 12, sprite: 'store' },                    // ร้านของใช้
     { kind: 'stall', x: 16, y: 16, color: '#d84a4a', seed: 1 },
     { kind: 'stall', x: 22, y: 19, color: '#3f7fd8', seed: 2 },
     { kind: 'stall', x: 28, y: 16, color: '#e0b030', seed: 3 },
@@ -90,7 +90,7 @@ const RAW = {
     { kind: 'barrel', x: 21, y: 11 }, { kind: 'crate', x: 22, y: 11 },
     { kind: 'sign', x: 20, y: 12, text: 'Forge' }, { kind: 'sign', x: 29, y: 11, text: 'Tools' },
     // หอสมาคมนักผจญภัย (ตะวันออกเฉียงเหนือ)
-    { kind: 'house', x: 47, y: 7, w: 9, roof: '#3a4f9e', wall: '#efe6d0', seed: 13 },
+    { kind: 'house', x: 47, y: 7, w: 9, roof: '#3a4f9e', wall: '#efe6d0', seed: 13, sprite: 'guildhall' },
     { kind: 'tower', x: 44, y: 7, roof: '#d8b45c' }, { kind: 'tower', x: 57, y: 7, roof: '#d8b45c' },
     { kind: 'house', x: 60, y: 7, w: 5, roof: '#6a5a94', seed: 14 },
     { kind: 'sign', x: 55, y: 11, text: 'Quest Board' }, { kind: 'sign', x: 48, y: 11, text: 'Adventurer Guild' },
