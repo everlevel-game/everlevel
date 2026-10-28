@@ -1,7 +1,7 @@
 // fix36 สิ่งปลูกสร้างภาพพิกเซล 8 มุม (PixelLab) — แผ่นป้ายหันหากล้อง · เปลี่ยนภาพตามมุมกล้องที่หมุนได้ทีละ 45°
 // แผ่นภาพ: 8 แถว (N·NE·E·SE·S·SW·W·NW = ทิศที่ "ตัวอาคารหัน") × 1 คอลัมน์ · ทุกภาพจัดฐานกลางล่างไว้ที่ (cell/2, foot)
-import { THREE } from './three.js?v=0.93.0-p4.44';
-import { VERSION } from '../config.js?v=0.93.0-p4.44';
+import { THREE } from './three.js?v=0.93.0-p4.45';
+import { VERSION } from '../config.js?v=0.93.0-p4.45';
 
 const PXW = 3.55 / 96;   // หน่วยโลกต่อพิกเซล (เท่าตัวละครพิกเซล)
 const ROW = { n: 0, ne: 1, e: 2, se: 3, s: 4, sw: 5, w: 6, nw: 7 };
@@ -118,7 +118,8 @@ export class StructureSprite {
     this.mat = atlasMat(S.src, tint);
     // ขนาด: กว้างเท่าฐานอาคารในแผนที่ (w ช่อง × 0.92) · ไม่มี w ใช้ขนาดพิกเซลเท่าตัวละคร
     const ww = S.ww || (def.w ? def.w * 0.92 : 0);
-    const px = this.px = unit || (ww && S.cw ? ww / S.cw : PXW);   // fix36 unit = โหมด 2D ใช้ขนาดพิกเซลเดียวกับตัวละคร
+    // fix39 คูณ vs (ตัวคูณขยายแผนที่ เช่น เมือง ×1.5) ให้อาคารใหญ่ตามพื้นที่ชนที่ขยายแล้ว — เดิมภาพพิกเซลไม่ขยายตาม เมืองจึงดูเล็กกว่าปกติ
+    const px = this.px = (unit || (ww && S.cw ? ww / S.cw : PXW)) * (def.vs || 1);   // fix36 unit = โหมด 2D ใช้ขนาดพิกเซลเดียวกับตัวละคร
     this.k = px / PXW;
     const gw = this.fw * px, gh = this.fh * px;
     const geo = new THREE.PlaneGeometry(gw, gh).translate(0, gh / 2 - (this.fh - S.foot) * px, 0);
@@ -136,7 +137,7 @@ export class StructureSprite {
     const step = ((Math.round(yaw / (Math.PI / 4)) - this.turn) % 8 + 8) % 8;
     const row = this.S.rows === 1 ? 0 : ROW[BY_YAW[step]];
     if (row !== this.row) { this.row = row; this.setRow(row); }
-    const d = this.S.deep;
+    const d = this.S.deep * (this.def.vs || 1);
     this.mesh.position.set(Math.sin(yaw) * d, 0, Math.cos(yaw) * d);
     this.mesh.quaternion.copy(camera.quaternion);
   }

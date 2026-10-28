@@ -1,6 +1,6 @@
 // หน้าต่างเควส (v0.10, กด J) + แถบติดตามเควสบนจอ
-import { QUESTS, QUEST_KIND } from '../data/quests.js?v=0.93.0-p4.44';
-import { npcWhere, rewardText } from '../systems/Quests.js?v=0.93.0-p4.44';
+import { QUESTS, QUEST_KIND } from '../data/quests.js?v=0.93.0-p4.45';
+import { npcWhere, rewardText } from '../systems/Quests.js?v=0.93.0-p4.45';
 
 const TABS = [['active', 'กำลังทำ'], ['available', 'รับได้'], ['daily', 'รายวัน'], ['weekly', 'รายสัปดาห์'], ['done', 'สำเร็จแล้ว']];
 
