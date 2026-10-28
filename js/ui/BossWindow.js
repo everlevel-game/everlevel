@@ -1,12 +1,12 @@
 // v0.47 หน้าต่างเช็กบอส: บอสโลก (เวลาเกิด · สถานะ · HP · รางวัล) + บอส MVP ทุกแผนที่ (สถานะเกิด · เวลาเกิดใหม่ · ของดรอป)
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.37';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.37';
-import { MAPS } from '../data/maps/index.js?v=0.93.0-p4.37';
-import { WORLD_BOSSES, WORLD_TOP_BONUS } from '../data/events.js?v=0.93.0-p4.37';
-import { cardDrops } from '../data/cards.js?v=0.93.0-p4.37';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.37';
-import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.37';
-import { TILE } from '../config.js?v=0.93.0-p4.37';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.43';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.43';
+import { MAPS } from '../data/maps/index.js?v=0.93.0-p4.43';
+import { WORLD_BOSSES, WORLD_TOP_BONUS } from '../data/events.js?v=0.93.0-p4.43';
+import { cardDrops } from '../data/cards.js?v=0.93.0-p4.43';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.43';
+import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.43';
+import { TILE } from '../config.js?v=0.93.0-p4.43';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');

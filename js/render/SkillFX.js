@@ -3,9 +3,9 @@
 // ctx = { caster:{pos,facing,height}, targets:[{pos,height}], main, center?, count?,
 //         hit(i, info) → { stun, freeze } | undefined, heal(n), buff(text), anim(kind, dur), shake(a), sky(dark, dur),
 //         hitstop?(t), shock?(pos, s), flash?(color, a), aberrate?(a), punch?(a), lines?(a, dur) }
-import { THREE } from './three.js?v=0.93.0-p4.37';
-import * as TX from './FxTextures.js?v=0.93.0-p4.37';
-import { beamTexture } from './Textures.js?v=0.93.0-p4.37';
+import { THREE } from './three.js?v=0.93.0-p4.43';
+import * as TX from './FxTextures.js?v=0.93.0-p4.43';
+import { beamTexture } from './Textures.js?v=0.93.0-p4.43';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -1462,31 +1462,31 @@ export class SkillFX {
 }
 
 // v0.31: เอฟเฟกต์สกิลอาชีพขั้นที่ 2
-import { installJob2FX } from './Job2FX.js?v=0.93.0-p4.37';
+import { installJob2FX } from './Job2FX.js?v=0.93.0-p4.43';
 installJob2FX(SkillFX.prototype, { Particles });
 
 // v0.60: สกิลชุดใหม่ (Night Forge) — ตัวจัดจังหวะดาเมจกลาง fx_nf
-import { installNFSkills } from './NFSkills.js?v=0.93.0-p4.37';
+import { installNFSkills } from './NFSkills.js?v=0.93.0-p4.43';
 installNFSkills(SkillFX.prototype);
 
 // v0.67: สายดาบชุดใหม่วาดเป็นเอฟเฟกต์ 3 มิติในฉาก (fx_sw_* / fx_kn_*)
-import { installSwordFX } from './SwordFX.js?v=0.93.0-p4.37';
+import { installSwordFX } from './SwordFX.js?v=0.93.0-p4.43';
 installSwordFX(SkillFX.prototype);
 
 // v0.68: สายฮีลชุดใหม่ (fx_ac_* / fx_pr_*) — ใช้ตัวช่วยจาก SwordFX
-import { installHealFX } from './HealFX.js?v=0.93.0-p4.37';
+import { installHealFX } from './HealFX.js?v=0.93.0-p4.43';
 installHealFX(SkillFX.prototype);
-import { installMageFX } from './MageFX.js?v=0.93.0-p4.37';
+import { installMageFX } from './MageFX.js?v=0.93.0-p4.43';
 installMageFX(SkillFX.prototype);
-import { installArcherFX } from './ArcherFX.js?v=0.93.0-p4.37';
+import { installArcherFX } from './ArcherFX.js?v=0.93.0-p4.43';
 installArcherFX(SkillFX.prototype);
 
 // v0.85: สกิลอาชีพคลาส 3 (fx_m3_* · fx_s3_* · fx_e3_* · fx_h3_*) — MageC3FX ต้องติดตั้งก่อน (SwordC3FX ใช้ลำแสง m3Beam)
-import { installMageC3FX } from './MageC3FX.js?v=0.93.0-p4.37';
+import { installMageC3FX } from './MageC3FX.js?v=0.93.0-p4.43';
 installMageC3FX(SkillFX.prototype);
-import { installSwordC3FX } from './SwordC3FX.js?v=0.93.0-p4.37';
+import { installSwordC3FX } from './SwordC3FX.js?v=0.93.0-p4.43';
 installSwordC3FX(SkillFX.prototype);
-import { installArcherC3FX } from './ArcherC3FX.js?v=0.93.0-p4.37';
+import { installArcherC3FX } from './ArcherC3FX.js?v=0.93.0-p4.43';
 installArcherC3FX(SkillFX.prototype);
-import { installHealC3FX } from './HealC3FX.js?v=0.93.0-p4.37';
+import { installHealC3FX } from './HealC3FX.js?v=0.93.0-p4.43';
 installHealC3FX(SkillFX.prototype);

@@ -2,9 +2,9 @@
 // แผ่นละอาชีพ = 8 คอลัมน์ × 8 แถว (ช่องละ 128px)
 //   แถว: N · NE · E · SE · S · SW · W · NW  (ทิศตัวละครหันเทียบจอ)
 //   คอลัมน์ 0–3 = เดิน 4 เฟรม · 4–7 = โจมตี 4 เฟรม (นักบวช = ท่าร่าย/ฮีล)
-import { THREE } from './three.js?v=0.93.0-p4.37';
-import { VERSION } from '../config.js?v=0.93.0-p4.37';
-import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.37';   // v0.91 สีชุด
+import { THREE } from './three.js?v=0.93.0-p4.43';
+import { VERSION } from '../config.js?v=0.93.0-p4.43';
+import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.43';   // v0.91 สีชุด
 
 // แผ่นวาดมือ 8×8 (ช่อง 128px): คอลัมน์ 0–3 เดิน · 4–7 โจมตี
 const HAND = { cols: 8, size: 2.75, pixel: false, anim: { idle: [7], walk: [0, 1, 2, 3], attack: [4, 5, 6, 7] } };
@@ -79,6 +79,13 @@ const FPS = { idle: { fps: 1, loop: true }, walk: { fps: 8, loop: true }, attack
 const framesOf = (S, name) => S.anim[name] || S.anim.attack;
 const fpsOf = (S, name) => (S.fps && S.fps[name]) || FPS[name];
 
+// fix37 มอน: ใช้ภาพร่วมกันทุกตัว (อัปโหลดเข้าการ์ดจอครั้งเดียว) · เลือกเฟรมด้วยพิกัด UV ของแผ่นแต่ละตัวแทน offset ของภาพ
+const SHARED = new Map();
+function sharedTexture(S) {
+  let t = SHARED.get(S.src);
+  if (!t) { t = sheetTexture(S); t.repeat.set(1, 1); t.__shared = true; SHARED.set(S.src, t); }
+  return t;
+}
 function sheetTexture(S) {
   const t = new THREE.TextureLoader().load(`${S.src}?v=${VERSION}`);   // v0.40.2 กันภาพเก่าค้างแคช
   const f = S.pixel ? THREE.NearestFilter : THREE.LinearFilter;
@@ -112,9 +119,9 @@ export class SheetSprite {
     const k = skin && SHEETS[skin] && SHEETS[skin].base === base ? skin : base;
     if (k === this.job) return true;
     this.job = k;
-    if (this.tex) this.tex.dispose();
+    if (this.tex && !this.tex.__shared) this.tex.dispose();
     this.S = SHEETS[k];
-    this.tex = sheetTexture(this.S);
+    this.tex = this.S.mob ? sharedTexture(this.S) : sheetTexture(this.S); this.uvKey = -1;
     this.mat.map = this.tex; this.mat.needsUpdate = true; this.xmat.map = this.tex; this.xmat.needsUpdate = true;
     this.headH = this.S.size * (this.S.foot - (this.S.head || 12 / 96)) + 0.6;   // ความสูงถึงปลายผม (วางป้ายฉายา)
     // v0.40.5 จุดหลังของตัวละครทุกเฟรม (ไฟล์ .json คู่กับแผ่น) → ปีกขยับตามตัว
@@ -164,7 +171,8 @@ export class SheetSprite {
     if (this.anim === 'skill' && (ent.cast || ent.castPose) && f >= 1 && n > 2) { const h = n >= 8 ? [n - 4, n - 3] : [1, 2]; if (f >= h[0]) f = h[Math.floor(this.t * 5) % 2]; }   // ร่ายค้าง (สลับ 2 เฟรมช่วงท้าย)
     f = A.loop ? f % n : Math.min(n - 1, f);
     const col = cols[f], row = ROW[d] * (S.rowsPerDir || 1) + ((S.row && S.row[this.anim]) || 0), NR = S.rows || 8;
-    this.tex.offset.set(col / S.cols, 1 - (row + 1) / NR);
+    if (S.mob) this.mobUV(S, col, row);
+    else this.tex.offset.set(col / S.cols, 1 - (row + 1) / NR);
     // ปีกเกาะหลัง: ระยะที่จุดหลังเฟรมนี้ต่างจากท่ายืนเฟรมแรกของทิศเดียวกัน (หน่วยโลก)
     const AN = S.anch, cur = AN && AN[row] && AN[row][col], base = AN && AN[ROW[d] * (S.rowsPerDir || 1)] && AN[ROW[d] * (S.rowsPerDir || 1)][0];
     if (cur && base) { this.wdx = (cur[0] - base[0]) * PX_UNIT; this.wdy = (cur[1] - base[1]) * PX_UNIT; } else { this.wdx = 0; this.wdy = 0; }
@@ -195,5 +203,15 @@ export class SheetSprite {
     this.info = { dir: d, anim: this.anim, col };
   }
 
-  dispose() { this.scene.remove(this.pivot); this.mesh.geometry.dispose(); this.mat.dispose(); this.xmat.dispose(); if (this.tex) this.tex.dispose(); }
+  // fix37 พิกัดเฟรมในแผ่นมอน (รองรับแผ่นรวมหลายตัว: x0/y0/W/H เป็นพิกเซล)
+  mobUV(S, col, row) {
+    const key = row * 64 + col; if (key === this.uvKey) return; this.uvKey = key;
+    const c = S.cell, W = S.W, H = S.H;
+    const u0 = (S.x0 + col * c) / W, u1 = (S.x0 + (col + 1) * c) / W;
+    const v1 = 1 - (S.y0 + row * c) / H, v0 = 1 - (S.y0 + (row + 1) * c) / H;
+    const uv = this.mesh.geometry.attributes.uv;
+    uv.setXY(0, u0, v1); uv.setXY(1, u1, v1); uv.setXY(2, u0, v0); uv.setXY(3, u1, v0); uv.needsUpdate = true;
+  }
+
+  dispose() { this.scene.remove(this.pivot); this.mesh.geometry.dispose(); this.mat.dispose(); this.xmat.dispose(); if (this.tex && !this.tex.__shared) this.tex.dispose(); }
 }

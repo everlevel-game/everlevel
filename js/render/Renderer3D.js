@@ -1,44 +1,44 @@
 // ตัววาดโลก 3 มิติ: แสงเงา, กล้อง, สร้างฉากจากข้อมูลแผนที่, ป้ายชื่อ
-import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.37';
-import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.37';   // fix21 NPC ภาพพิกเซล
+import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.43';
+import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.43';   // fix21 NPC ภาพพิกเซล
 for (const [k, d] of Object.entries(NPC_SHEETS)) registerSheet(k, npcSheetDef(d));
-import { MOB_SHEETS, mobSheetDef } from '../data/mobSprites.js?v=0.93.0-p4.37';   // fix36 มอนภาพพิกเซล
-for (const [k, d] of Object.entries(MOB_SHEETS)) registerSheet('mob_' + k, mobSheetDef(d));
-import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.37';
-import { StructureSprite, structFor } from './PixelStructures.js?v=0.93.0-p4.37';
-import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.37';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
-import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.37';
-import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.37';
-import { THREE } from './three.js?v=0.93.0-p4.37';
-import { TILE } from '../config.js?v=0.93.0-p4.37';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.37';
-import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.37';
-import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.37';   // fix15
-import { PXAA } from './PixelGround.js?v=0.93.0-p4.37';
-import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.37';
-import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.37';
-import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.37';
+import { MOB_SHEETS, mobSheetDef } from '../data/mobSprites.js?v=0.93.0-p4.43';   // fix36 มอนภาพพิกเซล
+for (const [k, d] of Object.entries(MOB_SHEETS)) { registerSheet('mob_' + k, mobSheetDef(d)); registerSheet('mob_world_' + k, mobSheetDef({ ...d, k: (d.k || 1) * 1.6 })); }   // บอสโลก = แผ่นบอสต้นแบบ ขยาย
+import { PixelWingSprite } from './PixelWings.js?v=0.93.0-p4.43';
+import { StructureSprite, structFor } from './PixelStructures.js?v=0.93.0-p4.43';
+import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.43';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
+import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.43';
+import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.43';
+import { THREE } from './three.js?v=0.93.0-p4.43';
+import { TILE } from '../config.js?v=0.93.0-p4.43';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.43';
+import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.43';
+import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.43';   // fix15
+import { PXAA } from './PixelGround.js?v=0.93.0-p4.43';
+import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.43';
+import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.43';
+import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.43';
 import {
   BUILDERS, cityWalls, bridges, setPixelModels, glowSprite, roundTreeGeometry, pineGeometry, treeMaterial, snowPineGeometry, snowTreeGeometry, deadTreeGeometry,
   grassTuftGeometry, flowerGeometry, rockGeometry,
-} from './Models.js?v=0.93.0-p4.37';
-import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.37';
-import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.37';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.37';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.37';
-import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.37';
-import { SkillFX } from './SkillFX.js?v=0.93.0-p4.37';
-import { BossFX } from './BossFX.js?v=0.93.0-p4.37';
-import { PostFX } from './PostFX.js?v=0.93.0-p4.37';
-import { Weather } from './Weather.js?v=0.93.0-p4.37';   // v0.91 สภาพอากาศ
-import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.37';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.37';
-import { PetView } from './Pets.js?v=0.93.0-p4.37';
-import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.37';
-import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.37';
-import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.37';
-import { gradientMap } from './Toon.js?v=0.93.0-p4.37';
-import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.37';
+} from './Models.js?v=0.93.0-p4.43';
+import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.43';
+import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.43';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.43';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.43';
+import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.43';
+import { SkillFX } from './SkillFX.js?v=0.93.0-p4.43';
+import { BossFX } from './BossFX.js?v=0.93.0-p4.43';
+import { PostFX } from './PostFX.js?v=0.93.0-p4.43';
+import { Weather } from './Weather.js?v=0.93.0-p4.43';   // v0.91 สภาพอากาศ
+import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.43';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.43';
+import { PetView } from './Pets.js?v=0.93.0-p4.43';
+import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.43';
+import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.43';
+import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.43';
+import { gradientMap } from './Toon.js?v=0.93.0-p4.43';
+import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.43';
 // v0.86 กลางวัน · ตอนเย็น · กลางคืน · รุ่งสาง — ตัวคูณแสง (h=ฟ้า s=แดด e=exposure) + สีที่ผสมเข้าไป (mix)
 const DAY_PRESETS = {
   day: { name: 'กลางวัน', icon: '☀', h: 1, s: 1, e: 1, mix: 0, glow: 1, tint: [0, 0, 0, 0] },
@@ -911,7 +911,7 @@ export class Renderer3D {
     if (bossK > 1) view.root.scale.setScalar(bossK);
     this.scene.add(view.root);
     if (this.halloween && !mob.data.fest && !mob.data.worldBoss && !mob.worldRun && !mob.data.dummy) view.root.add(pumpkinHat(mob.data.height || 1));   // fix15 ฮาโลวีน: มอนสวมหมวกฟักทอง
-    const mobSheet = !mob.data.viewScale && MOB_SHEETS[mob.type] && this.spriteChars !== false ? 'mob_' + mob.type : null;   // fix36
+    const mobSheet = !mob.data.viewScale && this.spriteChars !== false && (MOB_SHEETS[mob.type] || (mob.data.worldBoss && MOB_SHEETS[mob.type.replace(/^world_/, '')])) ? 'mob_' + mob.type : null;   // fix36
     if (this.px.enabled && !mobSheet) this.px.attach(mob, view, 'mob');
     const h = mob.data.height;
     const rad = mob.data.radius || 0.55;
