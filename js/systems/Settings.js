@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS = {
   othersSkills: true,   // v0.94 เอฟเฟกต์สกิลของผู้เล่นคนอื่น
   weather: true,        // v0.91 ฝน หิมะ ใบไม้ หิ่งห้อย
   hd: true,             // v0.89 ภาพ HD-2D (ปิด = ภาพพิกเซลแบบเดิม)
-  cam2d: false,         // fix36 กล้องแบบเกม 2D (มุมเดียวตายตัว ไม่หมุน ไม่มีมุมมองไกลใกล้) · ทดลอง
+  cam2d: true,          // fix42 เกมเป็นมุมกล้อง 2D ถาวร (เดิม fix36 เป็นตัวเลือกทดลอง) (มุมเดียวตายตัว ไม่หมุน ไม่มีมุมมองไกลใกล้) · ทดลอง
   bloom: true,          // แสงเรือง
   shake: true,          // กล้องสั่น
   master: 0.8, music: 0.5, sfx: 0.8, muted: false,
@@ -30,6 +30,7 @@ export function loadSettings() {
   try { s = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { s = {}; }
   const out = { ...DEFAULT_SETTINGS };
   for (const k of Object.keys(DEFAULT_SETTINGS)) if (k in s && typeof s[k] === typeof DEFAULT_SETTINGS[k]) out[k] = s[k];
+  out.cam2d = true;   // fix42 มุมกล้อง 2D ถาวร (ค่าเก่าที่เคยปิดไว้ไม่มีผล)
   out.uiScale = Math.min(1.3, Math.max(0.8, out.uiScale));
   for (const k of ['master', 'music', 'sfx']) out[k] = Math.min(1, Math.max(0, out[k]));
   if (!['auto', '0', '1', '2', '3'].includes(String(out.quality))) out.quality = 'auto';

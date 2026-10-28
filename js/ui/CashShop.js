@@ -1,13 +1,13 @@
 // v0.43 ร้านเพชร + เติมเพชร (โอนพร้อมเพย์ → ส่งสลิป → v0.80 ตรวจสลิปอัตโนมัติ / แอดมินอนุมัติเมื่อไม่ชัวร์)
 // ราคา/สินค้า/แพ็กมาจากเซิร์ฟเวอร์ (supabase/cashshop.sql) · ซื้อแล้วของเข้าเซฟบนเซิร์ฟเวอร์ → ดึง ledger มาปรับในเครื่อง
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.48';
-import { COSTUME_BY_ID, RARITY as FASHION_RARITY } from '../data/costumes.js?v=0.93.0-p4.48';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.48';
-import { requestThumb } from '../render/CostumeThumbs.js?v=0.93.0-p4.48';
-import { ready } from './TradeMarket.js?v=0.93.0-p4.48';
-import { WARP_ROUTES } from '../data/shops.js?v=0.93.0-p4.48';
-import { PETS, PET_RARITY } from '../data/pets.js?v=0.93.0-p4.48';
-import { petThumb } from '../render/PetThumbs.js?v=0.93.0-p4.48';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.49';
+import { COSTUME_BY_ID, RARITY as FASHION_RARITY } from '../data/costumes.js?v=0.93.0-p4.49';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.49';
+import { requestThumb } from '../render/CostumeThumbs.js?v=0.93.0-p4.49';
+import { ready } from './TradeMarket.js?v=0.93.0-p4.49';
+import { WARP_ROUTES } from '../data/shops.js?v=0.93.0-p4.49';
+import { PETS, PET_RARITY } from '../data/pets.js?v=0.93.0-p4.49';
+import { petThumb } from '../render/PetThumbs.js?v=0.93.0-p4.49';
 
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');
 const QR_SRC = 'assets/ui/topup_qr.png';
@@ -50,7 +50,7 @@ export class CashShopWindow {
     // v0.51 แถบลองใส่แฟชั่น (ซ่อนร้านไว้ให้เห็นตัวละคร)
     const bar = this.tryBar = document.createElement('div');
     bar.className = 'panel cs-try'; bar.hidden = true;
-    bar.innerHTML = `<div class="cs-try-info"><b></b><small>กำลังลองใส่ · กด Q / E หมุนกล้องดูรอบตัว · ผู้เล่นอื่นไม่เห็น</small></div><button type="button" class="primary cs-try-buy"></button><button type="button" class="cs-try-back">กลับร้าน</button><button type="button" class="st-close cs-try-x" aria-label="ถอดและปิด">✕</button>`;
+    bar.innerHTML = `<div class="cs-try-info"><b></b><small>กำลังลองใส่ · เดินไปรอบ ๆ เพื่อดูรอบตัว · ผู้เล่นอื่นไม่เห็น</small></div><button type="button" class="primary cs-try-buy"></button><button type="button" class="cs-try-back">กลับร้าน</button><button type="button" class="st-close cs-try-x" aria-label="ถอดและปิด">✕</button>`;
     for (const ev of ['pointerdown', 'wheel', 'contextmenu', 'touchstart']) bar.addEventListener(ev, (e) => e.stopPropagation(), { passive: true });
     (root.querySelector('.hud') || root).append(bar);
     bar.querySelector('.cs-try-back').addEventListener('click', () => { this.endTry(); this.el.hidden = false; this.render(); });
