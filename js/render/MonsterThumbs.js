@@ -1,12 +1,16 @@
 // รูปย่อมอนสเตอร์ (v0.14) — เรนเดอร์โมเดล 3 มิติจริงเป็นภาพเล็ก ใช้ในหน้าต่างตีออโต้ (ติ๊กเลือกมอน)
-import { THREE } from './three.js?v=0.93.0-p4.43';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.43';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.43';
-import { snapThumb } from './PetThumbs.js?v=0.93.0-p4.43';
+import { THREE } from './three.js?v=0.93.0-p4.44';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.44';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.44';
+import { snapThumb } from './PetThumbs.js?v=0.93.0-p4.44';
+import { MOB_SHEETS } from '../data/mobSprites.js?v=0.93.0-p4.44';
 
 export function monsterThumb(type, size = 112) {
   const data = MONSTERS[type];
   if (!data) return '';
+  // มอนที่มีสไปรต์พิกเซลแล้ว ใช้ภาพพอร์ตเทรตจากสไปรต์ใหม่ (assets/monsters) แทนการเรนเดอร์โมเดล 3D เก่า
+  const pk = MOB_SHEETS[type] ? type : (data.worldBoss && MOB_SHEETS[type.replace(/^world_/, '')] ? type.replace(/^world_/, '') : null);
+  if (pk && !data.viewScale) return new URL('../../assets/monsters/' + pk + '.png', import.meta.url).href;
   return snapThumb('mob:' + type + '@' + size, size, (scene) => {
     const mob = { type, data, x: 0, y: 0, angle: 0, moving: false };
     const v = new MonsterView(mob);

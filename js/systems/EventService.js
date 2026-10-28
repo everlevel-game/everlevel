@@ -1,6 +1,6 @@
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.43';
-import { eventRate, localBossRuns, WORLD_BOSSES, weekKey } from '../data/events.js?v=0.93.0-p4.43';
-import { TILE } from '../config.js?v=0.93.0-p4.43';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.44';
+import { eventRate, localBossRuns, WORLD_BOSSES, weekKey } from '../data/events.js?v=0.93.0-p4.44';
+import { TILE } from '../config.js?v=0.93.0-p4.44';
 export class EventService {
  constructor(game) {
   this.storagePrefix=window.__contentPreview?'everlevel-preview':'everlevel-local';
