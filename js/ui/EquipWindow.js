@@ -1,12 +1,12 @@
 // v0.89 หน้าดูตัวละคร — ช่องอุปกรณ์ซ้าย/ขวา ตัวละครยืนอยู่ตรงกลาง (หมุนดูได้ 8 ทิศ) · ความทนทาน · ค่าสถานะรวม
-import { ITEMS, RARITY, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.49';
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.49';
-import { SHEETS, liveSheet } from '../render/SheetChars.js?v=0.93.0-p4.49';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.49';
-import { duraOf, DURA_MAX, DURA_LOW } from '../data/durability.js?v=0.93.0-p4.49';
-import { duraBar } from './SmithWindow.js?v=0.93.0-p4.49';
-import { VERSION } from '../config.js?v=0.93.0-p4.49';
-import { recolorPixels } from '../data/outfits.js?v=0.93.0-p4.49';   // v0.91 สีชุด
+import { ITEMS, RARITY, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.61';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.61';
+import { SHEETS, liveSheet } from '../render/SheetChars.js?v=0.93.0-p4.61';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.61';
+import { duraOf, DURA_MAX, DURA_LOW } from '../data/durability.js?v=0.93.0-p4.61';
+import { duraBar } from './SmithWindow.js?v=0.93.0-p4.61';
+import { VERSION } from '../config.js?v=0.93.0-p4.61';
+import { recolorPixels } from '../data/outfits.js?v=0.93.0-p4.61';   // v0.91 สีชุด
 
 const LEFT = [['head', 'หัว', '⛑'], ['weapon', 'อาวุธ', '⚔'], ['garment', 'ผ้าคลุม', '🧣'], ['accessory', 'เครื่องประดับ', '💍']];
 const RIGHT = [['body', 'ชุด', '🛡'], ['shield', 'มือรอง', '◈'], ['shoes', 'รองเท้า', '👢']];
@@ -76,7 +76,7 @@ export class EquipWindow {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(im, col * cw, row * ch, cw, ch, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
     const oc = this.g.player.look && this.g.player.look.oc;   // v0.91 ย้อมสีชุดเหมือนในฉาก
-    if (oc && oc !== 'def' && !String(S.src).includes('_dragon')) { try { const d = ctx.getImageData(0, 0, W, H); recolorPixels(d.data, oc, S.base || liveSheet(this.g.player.jobId)); ctx.putImageData(d, 0, 0); } catch (e) { /* แคนวาสติดข้อจำกัด */ } }
+    if (oc && oc !== 'def' && !S.noOc && !String(S.src).includes('_dragon')) { try { const d = ctx.getImageData(0, 0, W, H); recolorPixels(d.data, oc, S.base || liveSheet(this.g.player.jobId)); ctx.putImageData(d, 0, 0); } catch (e) { /* แคนวาสติดข้อจำกัด */ } }
   }
 
   slotCard(id, name, glyph) {

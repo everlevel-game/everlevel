@@ -2,9 +2,9 @@
 // แผ่นละอาชีพ = 8 คอลัมน์ × 8 แถว (ช่องละ 128px)
 //   แถว: N · NE · E · SE · S · SW · W · NW  (ทิศตัวละครหันเทียบจอ)
 //   คอลัมน์ 0–3 = เดิน 4 เฟรม · 4–7 = โจมตี 4 เฟรม (นักบวช = ท่าร่าย/ฮีล)
-import { THREE } from './three.js?v=0.93.0-p4.49';
-import { VERSION } from '../config.js?v=0.93.0-p4.49';
-import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.49';   // v0.91 สีชุด
+import { THREE } from './three.js?v=0.93.0-p4.61';
+import { VERSION } from '../config.js?v=0.93.0-p4.61';
+import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.61';   // v0.91 สีชุด
 
 // แผ่นวาดมือ 8×8 (ช่อง 128px): คอลัมน์ 0–3 เดิน · 4–7 โจมตี
 const HAND = { cols: 8, size: 2.75, pixel: false, anim: { idle: [7], walk: [0, 1, 2, 3], attack: [4, 5, 6, 7] } };
@@ -14,23 +14,21 @@ const PXLAB = { cols: 13, size: 3.55, pixel: true, anim: { idle: [0], walk: [1, 
 // แผ่น 16×16 ช่อง 144px: ทิศละ 2 แถว — แถวบน คอลัมน์ 0–7 ยืน · 8–15 เดิน / แถวล่าง 0–7 โจมตี · 8–15 สกิล (ขนาดบนจอเทียบความละเอียดเดิม 96px = 3.55 หน่วย)
 const PX_UNIT = 3.55 / 96;   // หน่วยโลกต่อพิกเซลของแผ่นพิกเซล
 const R = (a, n) => Array.from({ length: n }, (_, i) => a + i);
-const PX2 = { cols: 16, rows: 16, rowsPerDir: 2, size: 3.55 * 144 / 96, pixel: true, foot: 96 / 144, head: 24 / 144,
+const PX2 = { cols: 16, rows: 16, rowsPerDir: 2, cell: 144, size: 3.55 * 144 / 96, pixel: true, foot: 96 / 144, head: 24 / 144,
   anim: { idle: R(0, 8), walk: R(8, 8), attack: R(0, 8), skill: R(8, 8) }, row: { idle: 0, walk: 0, attack: 1, skill: 1 },
   fps: { idle: { fps: 6, loop: true }, walk: { fps: 11, loop: true }, attack: { fps: 14, loop: false }, skill: { fps: 12, loop: false } } };   // v0.40.2 ฟันชัดขึ้น
 // แผ่นช่องใหญ่กว่า 144 (เอฟเฟกต์/ปีกกว้าง) — ขนาดพิกเซลต่อหน่วยเท่าเดิม · foot = แถวพิกเซลเท้าจากขอบบน
-const PXC = (cell, foot) => ({ ...PX2, size: 3.55 * cell / 96, foot: foot / cell, head: (foot - 72) / cell });
+const PXC = (cell, foot) => ({ ...PX2, cell, size: 3.55 * cell / 96, foot: foot / cell, head: (foot - 72) / cell });
+// fix42 แผ่นแบบใหม่ (ช่อง 96 · เท้าที่พิกเซล 84) — k = ขยายให้สูงเท่า Novice · top = แถวบนสุดของหัว
+const V4 = (k, top) => ({ cols: 16, rows: 16, rowsPerDir: 2, cell: 96, size: 3.55, pixel: true, smin: true, noOc: true, k, foot: 85 / 96, head: top / 96,
+  anim: { idle: [0], walk: R(8, 8), attack: R(0, 9), skill: R(0, 9) }, row: { idle: 0, walk: 0, attack: 1, skill: 1 } });
 export const SHEETS = {
-  swordsman: { ...PX2, src: 'assets/sprites/swordsman_v2.png' },   // v0.39 ดาบใหญ่ · ท่าละ 8 เฟรม
-  archer: { ...PX2, src: 'assets/sprites/archer_v2.png' },   // v0.40 อาวุธใหญ่ · ท่าละ 8 เฟรม
-  mage: { ...PX2, src: 'assets/sprites/mage_v2.png' },   // v0.40 อาวุธใหญ่ · ท่าละ 8 เฟรม
-  acolyte: { ...PXC(208, 112), src: 'assets/sprites/acolyte_v2.png' },   // v0.40 อาวุธใหญ่ (ช่องกว้าง: คทาเหวี่ยงไกล)
-  novice: { ...PX2, src: 'assets/sprites/novice_v2.png' },
-  // v0.43 ชุดเกราะมังกร (ร้านเพชร) — สวมช่อง "ชุด" แล้วเปลี่ยนแผ่นทั้งตัวตามสายอาชีพ
-  swordsman_dragon: { ...PX2, base: 'swordsman', src: 'assets/sprites/swordsman_dragon.png' },
-  archer_dragon: { ...PX2, base: 'archer', src: 'assets/sprites/archer_dragon.png' },
-  mage_dragon: { ...PX2, base: 'mage', src: 'assets/sprites/mage_dragon.png' },
-  acolyte_dragon: { ...PXC(208, 112), base: 'acolyte', src: 'assets/sprites/acolyte_dragon.png' },   // v0.41 Novice ตัวพิกเซล (ดาบไม้ฝึก · เป้ผ้าใบ)
-  swordsman_seraph: { ...PX2, base: 'swordsman', src: 'assets/sprites/swordsman_seraph.png' },   // fix36 ชุดอัศวินเซราฟ (ทดลอง · ยังไม่ขาย)
+  // fix42 ตัวละครชุดใหม่จาก PixelLab (ผู้เล่นส่งมา) — 8 ทิศจริง · ช่อง 96px · ยืน 1 · เดิน 8 · โจมตี/ร่าย 9 เฟรม · จัดเท้า/กลางตัวในภาพแล้ว
+  swordsman: { ...V4(1.2, 24), fps: { idle: { fps: 1, loop: true }, walk: { fps: 10, loop: true }, attack: { fps: 14, loop: false }, skill: { fps: 13, loop: false } }, src: 'assets/sprites/swordsman_v4.png' },
+  archer: { ...V4(1.17, 24), fps: { idle: { fps: 1, loop: true }, walk: { fps: 10, loop: true }, attack: { fps: 12, loop: false }, skill: { fps: 12, loop: false } }, src: 'assets/sprites/archer_v4.png' },
+  mage: { ...PX2, k: 1.2, dx: [[-1,1,0,1],[-3,0,-1,1],[2,2,-2,0],[0,0,-1,-1],[-2,-1,-6,-1],[1,1,-4,-1],[2,2,1,2],[4,2,4,3]], src: 'assets/sprites/mage_v2.png' },   // v0.40 อาวุธใหญ่ · ท่าละ 8 เฟรม
+  acolyte: { ...V4(1.17, 24), fps: { idle: { fps: 1, loop: true }, walk: { fps: 10, loop: true }, attack: { fps: 11, loop: false }, skill: { fps: 11, loop: false } }, src: 'assets/sprites/acolyte_v4.png' },
+  novice: { ...PX2, dx: [[0,0,0,0],[-3,-3,0,0],[0,-1,0,0],[0,0,0,0],[0,0,0,0],[1,0,0,0],[2,1,0,0],[2,3,2,2]], src: 'assets/sprites/novice_v2.png' },
 };
 // v0.39 สกินอาวุธ (แผ่นทั้งตัวที่ถืออาวุธลายอื่น) — key = ชื่อแผ่น · เลือกได้จากชิ้นแฟชั่นอาวุธ { sheet: key, job }
 export const SKIN_SHEETS = {};
@@ -66,13 +64,17 @@ vec3 ocApply(vec3 lin){
   vec3 n = uOc.x<1.5 ? ocRgb(vec3(fract((uOc.y+hd-uOcBand.x)/360.+1.),h.y,h.z)) : uOc.x<2.5 ? ocRgb(vec3(h.x,h.y*.3,h.z*.42)) : ocRgb(vec3(h.x,h.y*.1,.62+h.z*.38));
   return pow(mix(c,n,w),vec3(2.2));
 }`;
-function addOutfitShader(mat, U) {
+function addOutfitShader(mat, U, cut = null) {
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.uOc = U.uOc; sh.uniforms.uOcBand = U.uOcBand;
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + OC_GLSL)
-      .replace('#include <map_fragment>', 'vec4 texelColor = texture2D( map, vUv ); texelColor = mapTexelToLinear( texelColor ); if ( uOc.x > 0.5 ) texelColor.rgb = ocApply( texelColor.rgb ); diffuseColor *= texelColor;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + OC_GLSL + (cut ? '\nuniform float uCut; varying float vLy;' : ''))
+      .replace('#include <map_fragment>', (cut ? 'if ( vLy < uCut ) discard; ' : '') + 'vec4 texelColor = texture2D( map, vUv ); texelColor = mapTexelToLinear( texelColor ); if ( uOc.x > 0.5 ) texelColor.rgb = ocApply( texelColor.rgb ); diffuseColor *= texelColor;');
+    if (cut) {   // fix42 ส่วนหัว: ตัดทิ้งใต้ระดับคอ (พิกัดแผ่น -0.5..0.5)
+      sh.uniforms.uCut = cut;
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying float vLy;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvLy = position.y;');
+    }
   };
-  mat.customProgramCacheKey = () => 'outfit1';
+  mat.customProgramCacheKey = () => (cut ? 'outfitCut1' : 'outfit1');
 }
 
 const FPS = { idle: { fps: 1, loop: true }, walk: { fps: 8, loop: true }, attack: { fps: 11, loop: false }, skill: { fps: 9, loop: false } };
@@ -89,7 +91,7 @@ function sharedTexture(S) {
 function sheetTexture(S) {
   const t = new THREE.TextureLoader().load(`${S.src}?v=${VERSION}`);   // v0.40.2 กันภาพเก่าค้างแคช
   const f = S.pixel ? THREE.NearestFilter : THREE.LinearFilter;
-  t.encoding = THREE.sRGBEncoding; t.magFilter = f; t.minFilter = f; t.generateMipmaps = false;
+  t.encoding = THREE.sRGBEncoding; t.magFilter = f; t.minFilter = S.smin ? THREE.LinearFilter : f; t.generateMipmaps = false;   // fix42 smin: ย่อภาพแบบเฉลี่ย กันเส้นบาง (คันธนู/ดาบ) ขาดเป็นช่วง ๆ
   t.repeat.set(1 / S.cols, 1 / (S.rows || 8));
   return t;
 }
@@ -106,7 +108,12 @@ export class SheetSprite {
     // ส่วนที่ถูกต้นไม้/บ้านบัง → เงาโปร่งทะลุ (แบบเดียวกับสไปรต์ตัวละครเดิม)
     this.xmat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5, alphaTest: 0.5, depthWrite: false, depthFunc: THREE.GreaterDepth, toneMapped: false, color: new THREE.Color(0.75, 0.82, 1.0), side: THREE.DoubleSide });
     this.xray = new THREE.Mesh(geo, this.xmat); this.xray.renderOrder = 30; this.xray.frustumCulled = false;
-    this.pivot = new THREE.Group(); this.pivot.add(this.mesh, this.xray); scene.add(this.pivot);
+    // fix42 หัวตัวละครวาดทับปีกตอนหันหลัง (ปีกทับหลัง แต่หัวต้องโผล่) — แผ่นเดียวกัน ตัดใต้คอทิ้ง · ดันเข้าหากล้องให้อยู่หน้าปีก
+    this.cut = { value: 0 }; this.headOver = false;
+    this.hmat = new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.5, depthWrite: true, toneMapped: false, side: THREE.DoubleSide });
+    addOutfitShader(this.hmat, this.oc, this.cut);
+    this.head = new THREE.Mesh(geo, this.hmat); this.head.renderOrder = 44; this.head.frustumCulled = false; this.head.visible = false;
+    this.pivot = new THREE.Group(); this.pivot.add(this.mesh, this.xray, this.head); scene.add(this.pivot);
     this._c = new THREE.Vector3();
     this.anim = 'idle'; this.t = 0; this.life = 0; this.lastAtk = 0; this.dir = 0;
     this._r = new THREE.Vector3(); this._b = new THREE.Vector3();
@@ -122,8 +129,8 @@ export class SheetSprite {
     if (this.tex && !this.tex.__shared) this.tex.dispose();
     this.S = SHEETS[k];
     this.tex = this.S.mob ? sharedTexture(this.S) : sheetTexture(this.S); this.uvKey = -1;
-    this.mat.map = this.tex; this.mat.needsUpdate = true; this.xmat.map = this.tex; this.xmat.needsUpdate = true;
-    this.headH = this.S.size * (this.S.foot - (this.S.head || 12 / 96)) + 0.6;   // ความสูงถึงปลายผม (วางป้ายฉายา)
+    this.mat.map = this.tex; this.mat.needsUpdate = true; this.hmat.map = this.tex; this.hmat.needsUpdate = true; this.xmat.map = this.tex; this.xmat.needsUpdate = true;
+    this.headH = this.S.size * (this.S.k || 1) * (this.S.foot - (this.S.head || 12 / 96)) + 0.6;   // fix42 k = ขยายให้สูงเท่า Novice   // ความสูงถึงปลายผม (วางป้ายฉายา)
     // v0.40.5 จุดหลังของตัวละครทุกเฟรม (ไฟล์ .json คู่กับแผ่น) → ปีกขยับตามตัว
     const S = this.S;
     if (S.pixel && S.anch === undefined && S.rowsPerDir) {
@@ -186,17 +193,27 @@ export class SheetSprite {
     this.pivot.position.copy(foot).addScaledVector(toCam, push);
     this.pivot.quaternion.copy(camera.quaternion);
     this.pivot.scale.setScalar(k);
-    this.mesh.scale.set(S.size, S.size * bob, 1);
-    this.mesh.position.y = S.size * (S.foot - 0.5) * bob;
+    // fix42 แผ่นอาชีพ: ขยาย (k) ให้ตัวสูงเท่า Novice · เลื่อนตัวให้อยู่กลางจุดยืนทุกทิศ (dx = พิกเซลที่ลำตัวเยื้องจากกลางช่อง ตามแถว N..NW)
+    const SZ = S.size * (S.k || 1), DG = S.dx && S.dx[ROW[d]], DX = DG ? DG[{ walk: 1, attack: 2, skill: 3 }[this.anim] || 0] || 0 : 0;   // dx[ทิศ][ยืน·เดิน·ตี·สกิล]
+    this.kS = S.k || 1;
+    this.mesh.scale.set(SZ, SZ * bob, 1);
+    this.mesh.position.y = SZ * (S.foot - 0.5) * bob;
+    this.mesh.position.x = -DX * SZ / (S.cell || 144);
     this.mesh.rotation.z = ent.dead ? (sx < 0 ? -1 : 1) * Math.PI / 2 : 0;
     this.xray.scale.copy(this.mesh.scale); this.xray.position.copy(this.mesh.position); this.xray.rotation.z = this.mesh.rotation.z;
+    this.head.visible = !!this.headOver && !ent.dead;
+    if (this.head.visible) {
+      this.head.scale.copy(this.mesh.scale); this.head.position.copy(this.mesh.position); this.head.position.z = 0.35;
+      const H = ((this.wanc ? this.wanc[1] : 36) + 9) / (S.cell || 144);   // ระดับคอ (เหนือเท้า) เป็นสัดส่วนช่อง
+      this.cut.value = 0.5 - S.foot + H;
+    }
     this.xray.visible = !!ent.isPlayer || ent === (globalThis.asteria && globalThis.asteria.player);
-    this.mat.color.copy(tint || new THREE.Color(1, 1, 1));
+    this.mat.color.copy(tint || new THREE.Color(1, 1, 1)); this.hmat.color.copy(this.mat.color);
     // v0.91 สีชุด (ตามหน้าตาของผู้เล่น/ผู้เล่นคนอื่น) · แผ่นชุดมังกรไม่ย้อม
     const oid = (ent.look && ent.look.oc) || 'def', ok = oid + '|' + this.job;
     if (ok !== this.ocKey) {
       this.ocKey = ok;
-      const P = this.job.endsWith('_dragon') || S.npc ? null : outfitParams(oid, S.base || this.job);
+      const P = this.job.endsWith('_dragon') || S.npc || S.noOc ? null : outfitParams(oid, S.base || this.job);
       if (P) { this.oc.uOc.value.set(P.mode, P.hue, 0, 0); this.oc.uOcBand.value.set(P.band[0], P.band[1], P.band[2]); } else this.oc.uOc.value.set(0, 0, 0, 0);
     }
     if (view && view.hurtT > 0) this.mat.color.setRGB(1, 0.45, 0.45);
@@ -213,5 +230,5 @@ export class SheetSprite {
     uv.setXY(0, u0, v1); uv.setXY(1, u1, v1); uv.setXY(2, u0, v0); uv.setXY(3, u1, v0); uv.needsUpdate = true;
   }
 
-  dispose() { this.scene.remove(this.pivot); this.mesh.geometry.dispose(); this.mat.dispose(); this.xmat.dispose(); if (this.tex && !this.tex.__shared) this.tex.dispose(); }
+  dispose() { this.scene.remove(this.pivot); this.mesh.geometry.dispose(); this.mat.dispose(); this.xmat.dispose(); this.hmat.dispose(); if (this.tex && !this.tex.__shared) this.tex.dispose(); }
 }

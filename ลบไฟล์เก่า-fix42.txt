@@ -1,0 +1,26 @@
+fix42 — ลบไฟล์เหล่านี้ออกจาก repo (ตัวละครเก่า 3 อาชีพ + ชุดมังกร + ชุดเซราฟ):
+assets/sprites/acolyte.png
+assets/sprites/acolyte8.png
+assets/sprites/acolyte_dragon.json
+assets/sprites/acolyte_dragon.png
+assets/sprites/acolyte_px.png
+assets/sprites/acolyte_v2.json
+assets/sprites/acolyte_v2.png
+assets/sprites/archer.png
+assets/sprites/archer8.png
+assets/sprites/archer_dragon.json
+assets/sprites/archer_dragon.png
+assets/sprites/archer_px.png
+assets/sprites/archer_v2.json
+assets/sprites/archer_v2.png
+assets/sprites/mage_dragon.json
+assets/sprites/mage_dragon.png
+assets/sprites/swordsman.png
+assets/sprites/swordsman8.png
+assets/sprites/swordsman_dragon.json
+assets/sprites/swordsman_dragon.png
+assets/sprites/swordsman_px.png
+assets/sprites/swordsman_seraph.json
+assets/sprites/swordsman_seraph.png
+assets/sprites/swordsman_v2.json
+assets/sprites/swordsman_v2.png
