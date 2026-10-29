@@ -6,9 +6,9 @@
 //       ดาเมจจริงต่อฮิต = (ตัวคูณของฮิตนั้นในเอฟเฟกต์ / ref) × mult(lv)
 //       lock = วินาทีที่ยืนนิ่งระหว่างท่า · delay = หน่วงก่อนใช้สกิลถัดไป (after-cast delay)
 // fx (แบบเก่า v0.6) ยังใช้กับสกิลที่ไม่มี vfx: strike | nova | bolt | storm | arrows | rain | heal | buff
-import { JOBS } from './progression.js?v=0.93.0-p4.69';
-import { JOB2_SKILLS, LEGACY_JOB2 } from './job2Skills.js?v=0.93.0-p4.69';
-import { job3Skills, JOB3_PARTY } from './job3Skills.js?v=0.93.0-p4.69';   // v0.85 อาชีพคลาส 3
+import { JOBS } from './progression.js?v=0.93.0-p4.71';
+import { JOB2_SKILLS, LEGACY_JOB2 } from './job2Skills.js?v=0.93.0-p4.71';
+import { job3Skills, JOB3_PARTY } from './job3Skills.js?v=0.93.0-p4.71';   // v0.85 อาชีพคลาส 3
 export { LEGACY_JOB2 };
 
 export function healAmount(lv, pl) {
@@ -275,9 +275,15 @@ for (const [id, r] of Object.entries(PARTY_SUPPORT)) {
 export const sval = (v, lv, pl) => (typeof v === 'function' ? v(lv, pl) : v);
 export const skillSp = (sk, lv) => sval(sk.sp, lv) || 0;
 // v0.94 ใช้สกิลรัวขึ้นทุกอาชีพ: ตัวคูณคูลดาวน์ / เวลาร่าย / หน่วงหลังใช้ / ล็อกท่า (ปรับความเร็วรวมได้ที่นี่ที่เดียว)
-export const SKILL_SPEED = { cd: 0.3, cast: 0.6, delay: 0.4, lock: 0.7 };   // v0.94 รอบ 2: คูลดาวน์เหลือ 30%
-export const skillCast = (sk, lv) => (sval(sk.cast, lv) || 0) * SKILL_SPEED.cast;
-export const skillCd = (sk) => (sk.cd || 0) * SKILL_SPEED.cd;
+export const SKILL_SPEED = { cd: 0.3, cast: 0.3, delay: 0.25, lock: 0.4 };   // fix49 ออกสกิลไวขึ้นมาก (ร่าย/ล็อกท่า/หน่วงสั้นลง)   // v0.94 รอบ 2: คูลดาวน์เหลือ 30%
+// fix50 สกิลอันติ (สกิลใหญ่ของแต่ละอาชีพ: SP ≥ 55 และไม่ใช่บัฟ) — ออกไวกว่าสกิลปกติอีก + คูลดาวน์สั้นลงนิดหน่อย
+export const ULT_SPEED = { cd: 0.8, cast: 0.5, delay: 0.6, lock: 0.6, fx: 0.4, pose: 2.2 };   // fx = ตัวคูณเวลาเอฟเฟกต์ (สกิลปกติ 0.55) · pose = ความเร็วท่า (ปกติ 1.7)
+export const isUlt = (sk) => !!sk && (sk.ult ?? (sk.ult = sk.kind === 'active' && !sk.bonus && !sk.passive && (sval(sk.sp, 1) || 0) >= 55));
+const ultK = (sk, key) => (isUlt(sk) ? ULT_SPEED[key] : 1);
+export const skillCast = (sk, lv) => (sval(sk.cast, lv) || 0) * SKILL_SPEED.cast * ultK(sk, 'cast');
+export const skillCd = (sk) => (sk.cd || 0) * SKILL_SPEED.cd * ultK(sk, 'cd');
+export const skillLock = (sk) => (sk.lock || 0) * SKILL_SPEED.lock * ultK(sk, 'lock');
+export const skillDelayK = (sk) => SKILL_SPEED.delay * ultK(sk, 'delay');
 
 // สกิลของสายอาชีพนั้น (เรียงตามที่ประกาศ)
 export const jobSkills = (job) => Object.keys(SKILLS).filter((id) => SKILLS[id].job === job);

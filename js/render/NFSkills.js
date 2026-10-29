@@ -17,7 +17,8 @@ export function installNFSkills(proto) {
   proto.fx_nf = function (c) {
     const S = c.spec || {};
     const k = 1 / (S.speed || 1), after = (t, fn) => this.after((t || 0) * k, fn);   // v0.65.1 speed = เร่งทั้งสกิล (ภาพเร่งด้วย SKILL_VFX.speed ค่าเดียวกัน)
-    if (S.anim) c.anim(S.anim, S.animDur || 0.45);
+    const TS = () => (this.FXT && this.FXT.s) || 1;   // fix49 ตัวคูณเวลาสกิลผู้เล่น (ใช้กับเวลาฝั่งเกม: ท่า/ลอย/ฟ้ามืด/พุ่ง)
+    if (S.anim) c.anim(S.anim, (S.animDur || 0.45) * TS());
     const mainPos = () => { const t = c.targets[c.main]; return t ? t.pos.clone() : (c.center ? c.center.clone() : c.caster.pos.clone().setY(0)); };
     const center = (at) => ((at || S.at) === 'self' ? c.caster.pos.clone().setY(0) : mainPos().setY(0));
     const hits = S.hits || [];
@@ -56,13 +57,13 @@ export function installNFSkills(proto) {
       const dir = t ? from.clone().sub(t.pos.clone().setY(0)) : c.caster.facing.clone().negate();
       if (dir.lengthSq() < 1e-4) dir.copy(c.caster.facing).negate();
       dir.setY(0).normalize(); if (!S.dash.back) dir.negate();
-      c.move(from.addScaledVector(dir, S.dash.dist || 3), S.dash.dur || 0.25);
+      c.move(from.addScaledVector(dir, S.dash.dist || 3), (S.dash.dur || 0.25) * TS());
     });
     if (S.flashes && c.flash) for (const F of S.flashes) after(F.t || 0, () => c.flash(F.color || '#cfe9ff', F.a ?? 0.3));
     if (S.texts && c.buff) for (const X of S.texts) after(X.t || 0, () => c.buff(X.text));
-    if (S.sky && c.sky) after(S.sky.t || 0, () => c.sky(S.sky.dark ?? 0.6, (S.sky.dur || 2) * k));
-    if (S.lift && c.lift) after(S.lift.t || 0, () => c.lift(S.lift.h || 1, (S.lift.dur || 0.5) * k, (S.lift.hold || 0) * k));
+    if (S.sky && c.sky) after(S.sky.t || 0, () => c.sky(S.sky.dark ?? 0.6, (S.sky.dur || 2) * k * TS()));
+    if (S.lift && c.lift) after(S.lift.t || 0, () => c.lift(S.lift.h || 1, (S.lift.dur || 0.5) * k * TS(), (S.lift.hold || 0) * k * TS()));
     const end = Math.max(0.6, ...hits.map((h) => h.t || 0), ...(S.heals || [0]), S.pull ? S.pull.to || 0 : 0);
-    return end * k + 0.4;
+    return end * k * TS() + 0.4;
   };
 }

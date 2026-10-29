@@ -2,9 +2,9 @@
 // แผ่นละอาชีพ = 8 คอลัมน์ × 8 แถว (ช่องละ 128px)
 //   แถว: N · NE · E · SE · S · SW · W · NW  (ทิศตัวละครหันเทียบจอ)
 //   คอลัมน์ 0–3 = เดิน 4 เฟรม · 4–7 = โจมตี 4 เฟรม (นักบวช = ท่าร่าย/ฮีล)
-import { THREE } from './three.js?v=0.93.0-p4.69';
-import { VERSION } from '../config.js?v=0.93.0-p4.69';
-import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.69';   // v0.91 สีชุด
+import { THREE } from './three.js?v=0.93.0-p4.71';
+import { VERSION } from '../config.js?v=0.93.0-p4.71';
+import { outfitParams } from '../data/outfits.js?v=0.93.0-p4.71';   // v0.91 สีชุด
 
 // แผ่นวาดมือ 8×8 (ช่อง 128px): คอลัมน์ 0–3 เดิน · 4–7 โจมตี
 const HAND = { cols: 8, size: 2.75, pixel: false, anim: { idle: [7], walk: [0, 1, 2, 3], attack: [4, 5, 6, 7] } };
@@ -152,9 +152,10 @@ export class SheetSprite {
       this.lastAtk = view.lastAttackAt;
       const name = view.attackKind === 'cast' ? 'skill' : 'attack';
       const playing = (this.anim === 'attack' || this.anim === 'skill') && this.t < this.dur;
-      if (!playing) { this.dur = framesOf(S, name).length / fpsOf(S, name).fps; this.play(name); this.t = 0; }
+      if (!playing || (view.attackFast || 1) > 1) { this.spd = view.attackFast || 1; this.dur = framesOf(S, name).length / fpsOf(S, name).fps / this.spd; this.play(name); this.t = 0; }   // fix49 สกิลเล่นท่าเร็วขึ้น (spd) · ตัดท่าเดิมทิ้งได้
     }
     const busy = (this.anim === 'attack' || this.anim === 'skill') && this.t < (this.dur || framesOf(S, this.anim).length / fpsOf(S, this.anim).fps) + 0.04;
+    if (!busy) this.spd = 1;
     if (!busy) this.play(ent.cast || ent.castPose ? 'skill' : (ent.moving ?? ent.mv) ? 'walk' : 'idle');
     this.t += dt; this.life += dt;
     // ทิศเทียบกล้อง: ฉายทิศหันของตัวละครลงแกนจอ (ขวา / ลึกเข้าจอ)
@@ -172,7 +173,7 @@ export class SheetSprite {
     const d = DIR8[this.dir];
     // เฟรม
     const A = fpsOf(S, this.anim), cols = framesOf(S, this.anim), n = cols.length;
-    let f = Math.floor(this.t * A.fps);
+    let f = Math.floor(this.t * A.fps * ((this.anim === 'attack' || this.anim === 'skill') ? this.spd || 1 : 1));
     // v0.40.2 ยืนนิ่ง: ค้างเฟรมแรก แล้วขยับท่ายืนรอบเดียวทุก ~5 วิ (ไม่ไหวตลอดเวลา)
     if (this.anim === 'idle' && n > 1 && !S.mob) { const cyc = n / A.fps, per = cyc + 4; const ph = (this.t + cyc) % per; f = ph < cyc ? Math.floor(ph * A.fps) : 0; }
     if (this.anim === 'skill' && (ent.cast || ent.castPose) && f >= 1 && n > 2) { const h = n >= 8 ? [n - 4, n - 3] : [1, 2]; if (f >= h[0]) f = h[Math.floor(this.t * 5) % 2]; }   // ร่ายค้าง (สลับ 2 เฟรมช่วงท้าย)
