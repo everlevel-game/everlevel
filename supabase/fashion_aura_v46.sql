@@ -1,0 +1,28 @@
+-- fix46 ออร่าภาพพิกเซล 12 แบบ — ร้านเพชร 100 เพชร
+insert into public.cash_products (id, kind, ref, qty, price, cat, tag, sort) values
+  ('f_la_inferno',   'fashion', 'a_la_inferno',   1, 100, 'fashion', 'ใหม่', -22),
+  ('f_la_divine',    'fashion', 'a_la_divine',    1, 100, 'fashion', 'ใหม่', -21),
+  ('f_la_sakura',    'fashion', 'a_la_sakura',    1, 100, 'fashion', 'ใหม่', -20),
+  ('f_la_abyss',     'fashion', 'a_la_abyss',     1, 100, 'fashion', 'ใหม่', -19),
+  ('f_la_frost',     'fashion', 'a_la_frost',     1, 100, 'fashion', 'ใหม่', -18),
+  ('f_la_thunder',   'fashion', 'a_la_thunder',   1, 100, 'fashion', 'ใหม่', -17),
+  ('f_la_celestial', 'fashion', 'a_la_celestial', 1, 100, 'fashion', 'ใหม่', -16),
+  ('f_la_lotus',     'fashion', 'a_la_lotus',     1, 100, 'fashion', 'ใหม่', -15),
+  ('f_la_bloodmoon', 'fashion', 'a_la_bloodmoon', 1, 100, 'fashion', 'ใหม่', -14),
+  ('f_la_bloom',     'fashion', 'a_la_bloom',     1, 100, 'fashion', 'ใหม่', -13),
+  ('f_la_tide',      'fashion', 'a_la_tide',      1, 100, 'fashion', 'ใหม่', -12),
+  ('f_la_chrono',    'fashion', 'a_la_chrono',    1, 100, 'fashion', 'ใหม่', -11)
+on conflict (id) do update set kind = excluded.kind, ref = excluded.ref, qty = excluded.qty, price = excluded.price,
+  cat = excluded.cat, tag = excluded.tag, sort = excluded.sort, active = true;
+
+-- แฟชั่นที่ได้จากร้านเพชรเท่านั้น (ระบบกันโกง) — รวมปีกตำนาน (fix44) ด้วย
+create or replace function public._cash_only_fashion()
+returns text[] language sql immutable as $$
+  select array['a_wx_iron', 'a_wx_jade', 'a_wx_qi', 'a_wx_soulscythe', 'a_wx_sunfire', 'a_wx_bloodscythe', 'a_wx_heaven', 'a_wx_ascend', 'o_px_dragon',
+               'a_cs_galaxy', 'a_cs_nebula', 'a_cs_blackhole', 'a_cs_solar', 'a_cs_guardian',
+               'a_rp_reaper', 'w_lw_seraph', 'w_lw_abyss',
+               'w_dx_phoenix', 'w_dx_infernal', 'w_dx_sakura', 'w_dx_void', 'w_dx_prism', 'w_dx_storm',
+               'a_la_inferno', 'a_la_divine', 'a_la_sakura', 'a_la_abyss', 'a_la_frost', 'a_la_thunder',
+               'a_la_celestial', 'a_la_lotus', 'a_la_bloodmoon', 'a_la_bloom', 'a_la_tide', 'a_la_chrono']
+$$;
+revoke all on function public._cash_only_fashion() from public, anon, authenticated;

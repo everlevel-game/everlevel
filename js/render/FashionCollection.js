@@ -1,5 +1,5 @@
-import { THREE } from './three.js?v=0.93.0-p4.66';
-import { toon } from './Toon.js?v=0.93.0-p4.66';
+import { THREE } from './three.js?v=0.93.0-p4.67';
+import { toon } from './Toon.js?v=0.93.0-p4.67';
 
 // Low-poly shapes attached to the live rig, never cropped concept-board images.
 function group(parent,x=0,y=0,z=0) { const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);return g; }

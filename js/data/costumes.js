@@ -1,4 +1,4 @@
-import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.66';
+import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.67';
 // แคตตาล็อกชุดแฟชั่น (v0.9) — ได้จากการเปิดกล่องแฟชั่นสุ่ม (data/fashionBoxes.js) — ชิ้นแฟชั่นเป็น "ชุดทับ" ไม่เพิ่มค่าสถานะ ใส่ทับอุปกรณ์จริงได้
 // slot: wings | outfit | head | face | back | weapon | aura | pet · kind = ชื่อตัวสร้างใน render/Costumes.js · p = ค่าปรับแต่ง
 // rarity: common ธรรมดา | rare หายาก | epic ล้ำค่า | legend ตำนาน | mythic | celestial
@@ -365,6 +365,31 @@ COSTUMES[COSTUMES.length - 1].cash = true;
 COSTUMES.push(PX('wings', 'w_dx_prism', 'ปีกปริซึม', 'Prism Aurora Wings', 'mythic', 'ขนรุ้งไล่สีชมพูถึงฟ้า ปลายขนขาว อัญมณีหลากสี วงแหวนรุ้งหมุนใต้เท้า', { mesh: 'dx_prism', size: [116, 119], pivot: [28, 55], above: 40, spark: '#ffffff', ground: true }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 COSTUMES.push(PX('wings', 'w_dx_storm', 'ปีกพายุฟ้า', 'Azure Storm Wings', 'mythic', 'ขนเมฆสีฟ้าขาว สายฟ้าสีเหลืองแลบรอบปีก', { mesh: 'dx_storm', size: [116, 119], pivot: [28, 55], cols: 8, flick: true, fps: 10, above: 40, spark: '#fff27a' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+// fix46 ออร่าภาพพิกเซล 2 ชั้น 12 แบบ (ร้านเพชร) — ตัวสร้าง LayeredAura ใน render/PixelWings.js · ราคาใน supabase/fashion_aura_v46.sql
+COSTUMES.push(PX('aura', 'a_la_inferno', 'ออร่าเปลวเพลิง', 'Inferno Blaze', 'mythic', 'เปลวไฟลุกห่อตัว ไล่สีแดงส้มทอง ประกายไฟลอยขึ้น วงความร้อนใต้เท้า', { laura: 'la_inferno', fps: 10, rim: '#ff7a2a' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_divine', 'ออร่าแสงศักดิ์สิทธิ์', 'Divine Radiance', 'mythic', 'รัศมีแสง 12 แฉกหมุนหลังตัว เสาแสงทอง วงเวทอักษรรูนใต้เท้า ขนนกขาวปลิว', { laura: 'la_divine', fps: 10, rim: '#ffe8a0' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_sakura', 'ออร่าพายุซากุระ', 'Sakura Whirl', 'mythic', 'กลีบซากุระ 3 สายหมุนเกลียวรอบตัว หมอกชมพูใต้เท้า', { laura: 'la_sakura', fps: 10, rim: '#ff9ab8' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_abyss', 'ออร่าหมอกอเวจี', 'Abyss Mist', 'mythic', 'ควันม่วงดำบิดเกลียว ลูกแก้วดำโคจรรอบตัว แอ่งเงาใต้เท้า', { laura: 'la_abyss', fps: 10, rim: '#b04aff' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_frost', 'ออร่าผลึกน้ำแข็ง', 'Frost Crystal', 'mythic', 'หมอกเย็นเรี่ยพื้น เกล็ดหิมะโคจร ผลึกน้ำแข็งล้อมเท้า', { laura: 'la_frost', fps: 10, rim: '#9fe8ff' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_thunder', 'ออร่าสายฟ้า', 'Thunder Surge', 'mythic', 'สายฟ้าโค้งพันรอบตัว เปลี่ยนรูปทุกจังหวะ วงไฟฟ้าใต้เท้า', { laura: 'la_thunder', fps: 10, rim: '#7fd0ff' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_celestial', 'ออร่าดาราจักร', 'Celestial Galaxy', 'mythic', 'เนบิวลาไหลช้า ๆ ฝุ่นดาวกะพริบ กาแล็กซีหมุนใต้เท้า ดาวตกพาดฟ้า', { laura: 'la_celestial', fps: 10, rim: '#b89aff' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_lotus', 'ออร่าบัวสวรรค์', 'Celestial Lotus', 'mythic', 'ดอกบัวยักษ์บานใต้เท้า วงแหวนแสงลอยขึ้น โคมแสงและกลีบบัวปลิว', { laura: 'la_lotus', fps: 10, rim: '#ffb8d8' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_bloodmoon', 'ออร่าจันทร์เลือด', 'Blood Moon', 'mythic', 'พระจันทร์แดงหลังตัว ค้างคาวตาแดงบินวน ดอกพลับพลึงแดงรอบเท้า', { laura: 'la_bloodmoon', fps: 10, rim: '#ff2a3a' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_bloom', 'ออร่าพฤกษา', 'Nature Bloom', 'mythic', 'เถาวัลย์เลื้อยพันขึ้น ดอกไม้บาน หิ่งห้อยบินวน ใบไม้ร่วง', { laura: 'la_bloom', fps: 10, rim: '#a8ff7a' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_tide', 'ออร่าคลื่นทะเล', 'Ocean Tide', 'mythic', 'สายน้ำหมุนเกลียว ฟองอากาศลอย ปลาคาร์ปว่ายวน แอ่งน้ำใต้เท้า', { laura: 'la_tide', fps: 10, rim: '#5ad8ff' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('aura', 'a_la_chrono', 'ออร่ากาลเวลา', 'Chrono Clockwork', 'mythic', 'หน้าปัดนาฬิกาทองหลังตัว วงแหวนไจโร เฟืองหมุน ทรายทองโปรย', { laura: 'la_chrono', fps: 10, rim: '#ffd27a' }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 // fix42 ชุดเกราะมังกร o_px_dragon ถอดออกแล้ว (ตัวละครชุดใหม่ไม่มีแผ่นชุดมังกร)
 

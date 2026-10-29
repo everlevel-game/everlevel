@@ -1,9 +1,9 @@
 // v0.35: ปีกแฟชั่นภาพพิกเซล 8 ทิศ (จาก PixelLab) — แผ่นป้ายหันหากล้อง วางซ้อนหลัง/หน้าตัวละครพิกเซลตามทิศที่หัน
 // แผ่นภาพ assets/fashion/wings/<key>.png : 8 แถว (N·NE·E·SE·S·SW·W·NW) × F คอลัมน์ (เฟรมกระพือ) · ช่องละ cell px
 // ค่าในชิ้นแฟชั่น p = { px: key, cell, frames, fps, lift, scale }
-import { THREE } from './three.js?v=0.93.0-p4.66';
-import { VERSION } from '../config.js?v=0.93.0-p4.66';
-import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.66';
+import { THREE } from './three.js?v=0.93.0-p4.67';
+import { VERSION } from '../config.js?v=0.93.0-p4.67';
+import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.67';
 
 const PXW = 3.55 / 96;   // หน่วยโลกต่อพิกเซล (เท่าตัวละครพิกเซล)
 const ROW = { n: 0, ne: 1, e: 2, se: 3, s: 4, sw: 5, w: 6, nw: 7 };
@@ -300,4 +300,44 @@ export class MeshWings {
     if (this.halo) { this.halo.material.map.dispose(); this.halo.material.dispose(); }
     this.pts.geometry.dispose(); this.pts.material.dispose();
   }
+}
+
+// fix46 ออร่าแฟชั่นภาพพิกเซล 2 ชั้น (ชุด 12 แบบ) — assets/fashion/aura/<key>_back.png / _front.png
+// แผ่นละ 1 แถว × 8 เฟรมวนลูป · ช่อง 192 · จุดเท้าที่ (96, 150) · ไม่ขึ้นกับทิศ · back หลังตัวละคร · front ทับตัวละคร
+export class LayeredAura {
+  constructor(scene, p) {
+    this.p = p; this.scene = scene; this.t = Math.random() * 10; this.name = p.laura;
+    this.L = ['back', 'front'].map((layer, i) => {
+      const tex = new THREE.TextureLoader().load(`assets/fashion/aura/${p.laura}_${layer}.png?v=${VERSION}`);
+      tex.encoding = THREE.sRGBEncoding; tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+      tex.repeat.set(1 / 8, 1);
+      const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.01, depthWrite: false, toneMapped: false, side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat); mesh.frustumCulled = false; mesh.renderOrder = i ? 43 : 35;
+      scene.add(mesh);
+      return { tex, mat, mesh, push: i ? 0.75 : 0.2 };
+    });
+    this._c = new THREE.Vector3(); this._d = new THREE.Vector3();
+  }
+
+  update(dt, ent, camera, visible) {
+    const vis = !!visible && !ent.dead;
+    for (const l of this.L) l.mesh.visible = vis;
+    if (!vis) return;
+    this.t += dt;
+    const f = Math.floor(this.t * (this.p.fps || 10)) % 8;
+    const k = this.kS || 1, W = 192 * PXW * k, cy = (150 - 96) * PXW * k;   // กลางช่องอยู่เหนือเท้า 54 พิกเซล
+    const foot = this._c.set(ent.x / 16, ent.lift || 0, ent.y / 16);
+    const toCam = this._d.copy(camera.position).sub(foot); const dist = toCam.length(); toCam.multiplyScalar(1 / dist);
+    for (const l of this.L) {
+      l.tex.offset.set(f / 8, 0);
+      const kk = (dist - l.push) / dist;
+      l.mesh.position.copy(foot).addScaledVector(toCam, l.push);
+      l.mesh.quaternion.copy(camera.quaternion);
+      l.mesh.translateY(cy * kk);
+      l.mesh.scale.set(W * kk, W * kk, 1);
+    }
+  }
+
+  stop() { this.dispose(); }
+  dispose() { for (const l of this.L) { this.scene.remove(l.mesh); l.mesh.geometry.dispose(); l.mat.dispose(); l.tex.dispose(); } }
 }
