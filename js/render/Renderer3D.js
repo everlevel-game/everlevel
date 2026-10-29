@@ -1,44 +1,44 @@
 // ตัววาดโลก 3 มิติ: แสงเงา, กล้อง, สร้างฉากจากข้อมูลแผนที่, ป้ายชื่อ
-import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.63';
-import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.63';   // fix21 NPC ภาพพิกเซล
+import { SheetSprite, liveSheet, screenDir, sheetOf, registerSheet } from './SheetChars.js?v=0.93.0-p4.66';
+import { NPC_SHEETS, NPC_SPRITES, npcSheetDef } from '../data/npcSprites.js?v=0.93.0-p4.66';   // fix21 NPC ภาพพิกเซล
 for (const [k, d] of Object.entries(NPC_SHEETS)) registerSheet(k, npcSheetDef(d));
-import { MOB_SHEETS, mobSheetDef } from '../data/mobSprites.js?v=0.93.0-p4.63';   // fix36 มอนภาพพิกเซล
+import { MOB_SHEETS, mobSheetDef } from '../data/mobSprites.js?v=0.93.0-p4.66';   // fix36 มอนภาพพิกเซล
 for (const [k, d] of Object.entries(MOB_SHEETS)) { registerSheet('mob_' + k, mobSheetDef(d)); registerSheet('mob_world_' + k, mobSheetDef({ ...d, k: (d.k || 1) * 1.6 })); }   // บอสโลก = แผ่นบอสต้นแบบ ขยาย
-import { PixelWingSprite, LayeredWings } from './PixelWings.js?v=0.93.0-p4.63';
-import { StructureSprite, structFor } from './PixelStructures.js?v=0.93.0-p4.63';
-import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.63';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
-import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.63';
-import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.63';
-import { THREE } from './three.js?v=0.93.0-p4.63';
-import { TILE } from '../config.js?v=0.93.0-p4.63';
-import { T } from '../data/tileTypes.js?v=0.93.0-p4.63';
-import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.63';
-import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.63';   // fix15
-import { PXAA } from './PixelGround.js?v=0.93.0-p4.63';
-import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.63';
-import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.63';
-import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.63';
+import { PixelWingSprite, LayeredWings, MeshWings } from './PixelWings.js?v=0.93.0-p4.66';
+import { StructureSprite, structFor } from './PixelStructures.js?v=0.93.0-p4.66';
+import { SeraphWings } from './SeraphWings.js?v=0.93.0-p4.66';   // v0.95 ปีกเทวทูต 6 ปีก (โมเดล 3 มิติ หมุนตามตัวแบบลื่น)
+import { paintPlate } from '../ui/Nameplates.js?v=0.93.0-p4.66';
+import { PixelVfx } from './PixelVfx.js?v=0.93.0-p4.66';
+import { THREE } from './three.js?v=0.93.0-p4.66';
+import { TILE } from '../config.js?v=0.93.0-p4.66';
+import { T } from '../data/tileTypes.js?v=0.93.0-p4.66';
+import { rng, lerp, lerpAngle, damp, clamp } from '../core/util.js?v=0.93.0-p4.66';
+import { pumpkinHat, townDecor } from './Halloween.js?v=0.93.0-p4.66';   // fix15
+import { PXAA } from './PixelGround.js?v=0.93.0-p4.66';
+import { GrandPortal, GrandFx, setGrandViewport, screenFlash } from './GrandFx.js?v=0.93.0-p4.66';
+import { groundTexture, skyTexture, glowTexture, blobShadowTexture, magicCircleTexture, beamTexture } from './Textures.js?v=0.93.0-p4.66';
+import { batchStatic, mergeGeometries, std, lin } from './Geo.js?v=0.93.0-p4.66';
 import {
   BUILDERS, cityWalls, bridges, setPixelModels, glowSprite, roundTreeGeometry, pineGeometry, treeMaterial, snowPineGeometry, snowTreeGeometry, deadTreeGeometry,
   grassTuftGeometry, flowerGeometry, rockGeometry,
-} from './Models.js?v=0.93.0-p4.63';
-import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.63';
-import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.63';
-import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.63';
-import { MonsterView } from './Monsters.js?v=0.93.0-p4.63';
-import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.63';
-import { SkillFX } from './SkillFX.js?v=0.93.0-p4.63';
-import { BossFX } from './BossFX.js?v=0.93.0-p4.63';
-import { PostFX } from './PostFX.js?v=0.93.0-p4.63';
-import { Weather } from './Weather.js?v=0.93.0-p4.63';   // v0.91 สภาพอากาศ
-import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.63';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.63';
-import { PetView } from './Pets.js?v=0.93.0-p4.63';
-import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.63';
-import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.63';
-import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.63';
-import { gradientMap } from './Toon.js?v=0.93.0-p4.63';
-import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.63';
+} from './Models.js?v=0.93.0-p4.66';
+import { CharacterView, CHAR_HEAD } from './Characters.js?v=0.93.0-p4.66';
+import { iconCanvas } from './ItemIcons.js?v=0.93.0-p4.66';
+import { ITEMS, RARITY } from '../data/items.js?v=0.93.0-p4.66';
+import { MonsterView } from './Monsters.js?v=0.93.0-p4.66';
+import { Water, FountainSpray, Portal, Motes, ClickMarker, Bursts, TargetRing, Campfire, MagicCircles, WarpCrystal, Projectiles, Strikes, Telegraphs, AutoZone } from './Effects.js?v=0.93.0-p4.66';
+import { SkillFX } from './SkillFX.js?v=0.93.0-p4.66';
+import { BossFX } from './BossFX.js?v=0.93.0-p4.66';
+import { PostFX } from './PostFX.js?v=0.93.0-p4.66';
+import { Weather } from './Weather.js?v=0.93.0-p4.66';   // v0.91 สภาพอากาศ
+import { costumeLook, wearCostume } from './Costumes.js?v=0.93.0-p4.66';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.66';
+import { PetView } from './Pets.js?v=0.93.0-p4.66';
+import { PixelSprites, PX_LAYER, PIXEL, PX } from './PixelSprites.js?v=0.93.0-p4.66';
+import { pixelGround, PixelWater } from './PixelGround.js?v=0.93.0-p4.66';
+import { roundTreePx, pinePx, snowTreePx, snowPinePx, deadTreePx, bushPx, grassTuftPx, flowerPx, rockPx, floraMaterial, vcToon } from './PixelFlora.js?v=0.93.0-p4.66';
+import { gradientMap } from './Toon.js?v=0.93.0-p4.66';
+import { paintHonor, injectTitleCss } from '../ui/TitleFx.js?v=0.93.0-p4.66';
 // v0.86 กลางวัน · ตอนเย็น · กลางคืน · รุ่งสาง — ตัวคูณแสง (h=ฟ้า s=แดด e=exposure) + สีที่ผสมเข้าไป (mix)
 const DAY_PRESETS = {
   day: { name: 'กลางวัน', icon: '☀', h: 1, s: 1, e: 1, mix: 0, glow: 1, tint: [0, 0, 0, 0] },
@@ -407,7 +407,10 @@ export class Renderer3D {
     if (PXW && (!TK || TREE_SPRITES[TK]) && SPRITE_TREES && !globalThis.__tree3d) {
       const TS = TK ? TREE_SPRITES[TK] : TREE_SPRITES;
       // ใกล้ประตูวาร์ป/NPC: ย่อเล็กลง (ภาพแผ่นสูงบังง่ายกว่าโมเดล) · ชิดมากซ่อนไปเลย
-      const sn = (t) => { let d = 99; for (const [kx, kz] of keep) d = Math.min(d, Math.hypot(t.x - kx, t.z - kz)); return d < 2.2 ? 0 : 0.55 + 0.45 * Math.min(1, Math.max(0, (d - 2.2) / 4.5)); };
+      // fix44 ต้นไม้ที่อยู่หน้าประตูวาร์ป (ฝั่งกล้อง) ภาพสูงบังวงวาร์ปมิด → ซ่อนทั้งแนว · รอบ ๆ ย่อลง
+      const gates = (map.portals || []).map((p) => [p.cx / TILE, p.cy / TILE]);
+      const blocks = (t) => gates.some(([gx, gz]) => { const dx = Math.abs(t.x - gx), dz = t.z - gz; return dz > -3 && dz < 10 && dx < 4.2 + Math.max(0, dz) * 0.3; });
+      const sn = (t) => { if (blocks(t)) return 0; let d = 99; for (const [kx, kz] of keep) d = Math.min(d, Math.hypot(t.x - kx, t.z - kz)); return d < 2.2 ? 0 : 0.55 + 0.45 * Math.min(1, Math.max(0, (d - 2.2) / 4.5)); };
       const stint = TK ? (c, v) => c.setRGB(0.9 + v * 0.1, 0.9 + v * 0.1, 0.92 + v * 0.08) : (c, v) => c.setRGB(0.8 + v * 0.14, 0.84 + v * 0.12, 0.8 + v * 0.12);
       const put = (src, sets, k) => sets.forEach((d, i) => {
         const list = src.filter((t) => (Math.abs(Math.floor(t.x * 7.3 + t.z * 13.7) + t.seed) % sets.length) === i).map((t) => ({ ...t, s: (0.9 + ((t.seed * k) % 10) / 25) * (t.vs || 1) * sn(t) })).filter((t) => t.s > 0);
@@ -983,7 +986,7 @@ export class Renderer3D {
   pixelWear(c, entity, dt, off = false) {
     const W = !off && c.pxw ? c.pxw.wings : null, A = !off && c.pxw ? c.pxw.aura : null;
     if (c.pwing && (!W || c.pwing.p !== W.p)) { c.pwing.dispose(); c.pwing = null; if (c.sheet) c.sheet.headOver = false; }
-    if (W && !c.pwing) c.pwing = W.p.model === 'seraph6' ? new SeraphWings(this.scene, W.p) : W.p.layered ? new LayeredWings(this.scene, W.p) : new PixelWingSprite(this.scene, W.p);
+    if (W && !c.pwing) c.pwing = W.p.model === 'seraph6' ? new SeraphWings(this.scene, W.p) : W.p.mesh ? new MeshWings(this.scene, W.p) : W.p.layered ? new LayeredWings(this.scene, W.p) : new PixelWingSprite(this.scene, W.p);
     if (c.paura && (!A || c.paura.name !== A.p.vfx)) { c.paura.stop(); c.paura = null; }
     if (A && !c.paura) c.paura = this.pixelVfx().play(A.p.vfx, null, { scale: A.p.scale || 1, follow: entity });
     const X = !off && c.pxw ? c.pxw.weapon : null;

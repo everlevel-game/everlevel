@@ -1,10 +1,10 @@
 // v0.42 แลกของตัวต่อตัว + ตลาดฝากขาย
 // ทุกอย่างผ่านฟังก์ชันบนเซิร์ฟเวอร์ (supabase/trade.sql) — เครื่องผู้เล่นแค่ส่งคำขอ แล้วดึงผล (ledger) มาปรับกระเป๋า
-import { ITEMS, RARITY, describeBonus } from '../data/items.js?v=0.93.0-p4.63';
-import { attachItemTip, hideItemTip } from './ItemTip.js?v=0.93.0-p4.63';   // v0.94 ชี้ดูค่าสถานะ
-import { rollScore, rollGrade } from '../data/affixes.js?v=0.93.0-p4.63';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.63';
-import { buyPrice, sellPrice } from '../data/shops.js?v=0.93.0-p4.63';
+import { ITEMS, RARITY, describeBonus } from '../data/items.js?v=0.93.0-p4.66';
+import { attachItemTip, hideItemTip } from './ItemTip.js?v=0.93.0-p4.66';   // v0.94 ชี้ดูค่าสถานะ
+import { rollScore, rollGrade } from '../data/affixes.js?v=0.93.0-p4.66';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.66';
+import { buyPrice, sellPrice } from '../data/shops.js?v=0.93.0-p4.66';
 
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

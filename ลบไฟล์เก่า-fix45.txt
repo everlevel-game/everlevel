@@ -1,0 +1,13 @@
+fix45 — ลบไฟล์เหล่านี้ออกจาก repo:
+assets/fashion/wings/dx_infernal_back.png
+assets/fashion/wings/dx_infernal_front.png
+assets/fashion/wings/dx_phoenix_back.png
+assets/fashion/wings/dx_phoenix_front.png
+assets/fashion/wings/dx_prism_back.png
+assets/fashion/wings/dx_prism_front.png
+assets/fashion/wings/dx_sakura_back.png
+assets/fashion/wings/dx_sakura_front.png
+assets/fashion/wings/dx_storm_back.png
+assets/fashion/wings/dx_storm_front.png
+assets/fashion/wings/dx_void_back.png
+assets/fashion/wings/dx_void_front.png

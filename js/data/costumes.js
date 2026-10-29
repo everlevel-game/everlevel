@@ -1,4 +1,4 @@
-import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.63';
+import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.66';
 // แคตตาล็อกชุดแฟชั่น (v0.9) — ได้จากการเปิดกล่องแฟชั่นสุ่ม (data/fashionBoxes.js) — ชิ้นแฟชั่นเป็น "ชุดทับ" ไม่เพิ่มค่าสถานะ ใส่ทับอุปกรณ์จริงได้
 // slot: wings | outfit | head | face | back | weapon | aura | pet · kind = ชื่อตัวสร้างใน render/Costumes.js · p = ค่าปรับแต่ง
 // rarity: common ธรรมดา | rare หายาก | epic ล้ำค่า | legend ตำนาน | mythic | celestial
@@ -352,6 +352,19 @@ if (WX_ON) COSTUMES.push(
 COSTUMES.push(PX('wings', 'w_lw_seraph', 'ปีกเซราฟ', 'Seraph Wings', 'legend', 'ปีกขนนกสีขาวบริสุทธิ์ ปลายขนสีทอง แขนปีกขลิบทอง กางสง่างามทุกทิศทาง', { layered: 'lw_seraph', still: 3 }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 COSTUMES.push(PX('wings', 'w_lw_abyss', 'ปีกอเวจี', 'Abyss Wings', 'legend', 'ปีกค้างคาวสีม่วงเข้ม ขอบพังผืดม่วงแดง กระดูกดำ มีเขี้ยวที่ข้อปีก', { layered: 'lw_abyss', still: 4 }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+// fix44 ปีกระดับตำนาน 6 แบบ (ร้านเพชร) — ภาพนิ่งไม่กระพือ · มีออร่าโปร่งแสง · ราคาใน supabase/fashion_wings_v44.sql
+COSTUMES.push(PX('wings', 'w_dx_phoenix', 'ปีกฟีนิกซ์สุริยะ', 'Solar Phoenix Wings', 'mythic', 'ขนเปลวไฟไล่สีแดง ส้ม ทอง อัญมณีฟ้าที่ข้อปีก สายฟ้าสีฟ้าแลบรอบปีก', { mesh: 'dx_phoenix', size: [116, 119], pivot: [28, 55], cols: 8, flick: true, fps: 10, above: 40, spark: '#ffd24a' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('wings', 'w_dx_infernal', 'ปีกมังกรนรก', 'Infernal Dragon Wings', 'mythic', 'ปีกพังผืดแดงดำ เส้นลาวาเรืองแสง ขอบส้มกับออร่าม่วง วงเวทอักษรรูนสีแดงหมุนใต้เท้า', { mesh: 'dx_infernal', size: [111, 115], pivot: [27, 53], above: 40, spark: '#ff6a3a', ground: true }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('wings', 'w_dx_sakura', 'ปีกโคมซากุระ', 'Sakura Lantern Wings', 'mythic', 'ขนสีชมพูขาว สร้อยทองห้อยโคมแดงสามดวง มงกุฎวงแหวนสีแดงเหนือหัว', { mesh: 'dx_sakura', size: [114, 117], pivot: [27, 54], above: 40, spark: '#ffc2d2', halo: '#ff3048' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('wings', 'w_dx_void', 'ปีกความว่างเปล่า', 'Void Nebula Wings', 'mythic', 'ขนผลึกแหลมสีม่วงดำ มีดวงดาวระยิบในเนื้อปีก ออร่าม่วงเข้ม', { mesh: 'dx_void', size: [118, 122], pivot: [28, 56], above: 40, spark: '#c88aff' }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('wings', 'w_dx_prism', 'ปีกปริซึม', 'Prism Aurora Wings', 'mythic', 'ขนรุ้งไล่สีชมพูถึงฟ้า ปลายขนขาว อัญมณีหลากสี วงแหวนรุ้งหมุนใต้เท้า', { mesh: 'dx_prism', size: [116, 119], pivot: [28, 55], above: 40, spark: '#ffffff', ground: true }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('wings', 'w_dx_storm', 'ปีกพายุฟ้า', 'Azure Storm Wings', 'mythic', 'ขนเมฆสีฟ้าขาว สายฟ้าสีเหลืองแลบรอบปีก', { mesh: 'dx_storm', size: [116, 119], pivot: [28, 55], cols: 8, flick: true, fps: 10, above: 40, spark: '#fff27a' }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 // fix42 ชุดเกราะมังกร o_px_dragon ถอดออกแล้ว (ตัวละครชุดใหม่ไม่มีแผ่นชุดมังกร)
 
