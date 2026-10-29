@@ -1,7 +1,7 @@
 // v0.32: ดันเจี้ยนถ้ำ + หอคอยไต่ชั้น — ข้อมูล · สูตรปรับความยากมอนสเตอร์ · สร้างแผนที่แต่ละชั้น (สุ่มตาม seed)
 // ปรับสมดุลได้จากไฟล์นี้ไฟล์เดียว
-import { ZENY_INCOME } from '../config.js?v=0.93.0-p4.61';
-import { MONSTERS } from './monsters.js?v=0.93.0-p4.61';
+import { ZENY_INCOME } from '../config.js?v=0.93.0-p4.63';
+import { MONSTERS } from './monsters.js?v=0.93.0-p4.63';
 
 /* ---------- ค่าหลัก ---------- */
 export const CAVE = {

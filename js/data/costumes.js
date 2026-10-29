@@ -1,4 +1,4 @@
-import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.61';
+import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.63';
 // แคตตาล็อกชุดแฟชั่น (v0.9) — ได้จากการเปิดกล่องแฟชั่นสุ่ม (data/fashionBoxes.js) — ชิ้นแฟชั่นเป็น "ชุดทับ" ไม่เพิ่มค่าสถานะ ใส่ทับอุปกรณ์จริงได้
 // slot: wings | outfit | head | face | back | weapon | aura | pet · kind = ชื่อตัวสร้างใน render/Costumes.js · p = ค่าปรับแต่ง
 // rarity: common ธรรมดา | rare หายาก | epic ล้ำค่า | legend ตำนาน | mythic | celestial
@@ -348,6 +348,11 @@ if (WX_ON) COSTUMES.push(
   WX('aura', 'a_wx_ascend', 'wuxia', 'ลำแสงทะลวงสวรรค์', 'Heaven-Piercing Radiance', 'celestial', 'ลำแสงทองขาวนับสิบแผ่ซ่านรอบกาย เสาแสงพุ่งขึ้นฟ้า กระบี่แสงสี่เล่มโคจร คลื่นพลังสั่นสะเทือนพื้นเป็นระลอก', { pal: 'gold', color: '#fff0a3', rays: { n: 16, len: 2.4, width: 0.45, color: ['#fff6c8', '#ffffff', '#ffd86a', '#bfe8ff'], pulse: 2.6, spin: 0.3, opacity: 0.95 }, pillar: '#fff0a3', rings: [{ n: 4, r: 0.9, y: 1.3, sp: 2, size: 0.78, mode: 'chase', tilt: 0.3 }], burst: { period: 3, color: '#fff0a3', sparks: 26, r1: 3 }, rune: { kind: 'star', color: '#ffe08a', size: 2.4, inner: '#bfe8ff' }, motes: ['#ffffff', '#ffe08a'], moteRate: 16 }),
 );
 
+// fix43 ปีกแฟชั่นสองชั้น 8 ทิศ (ร้านเพชร) — ตัวสร้าง LayeredWings ใน render/PixelWings.js · ราคาใน supabase/fashion_wings_v43.sql
+COSTUMES.push(PX('wings', 'w_lw_seraph', 'ปีกเซราฟ', 'Seraph Wings', 'legend', 'ปีกขนนกสีขาวบริสุทธิ์ ปลายขนสีทอง แขนปีกขลิบทอง กางสง่างามทุกทิศทาง', { layered: 'lw_seraph', still: 3 }));
+COSTUMES[COSTUMES.length - 1].cash = true;
+COSTUMES.push(PX('wings', 'w_lw_abyss', 'ปีกอเวจี', 'Abyss Wings', 'legend', 'ปีกค้างคาวสีม่วงเข้ม ขอบพังผืดม่วงแดง กระดูกดำ มีเขี้ยวที่ข้อปีก', { layered: 'lw_abyss', still: 4 }));
+COSTUMES[COSTUMES.length - 1].cash = true;
 // fix42 ชุดเกราะมังกร o_px_dragon ถอดออกแล้ว (ตัวละครชุดใหม่ไม่มีแผ่นชุดมังกร)
 
 // v0.35: ตัวละครเป็นภาพพิกเซล 8 ทิศแล้ว → ชิ้นแฟชั่นโมเดล 3 มิติ (ปีก/ชุด/หมวก/หน้า/หลัง/อาวุธ/ผู้ติดตาม) ถอดออกจากเกมทั้งหมด

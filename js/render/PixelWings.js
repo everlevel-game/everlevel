@@ -1,8 +1,8 @@
 // v0.35: ปีกแฟชั่นภาพพิกเซล 8 ทิศ (จาก PixelLab) — แผ่นป้ายหันหากล้อง วางซ้อนหลัง/หน้าตัวละครพิกเซลตามทิศที่หัน
 // แผ่นภาพ assets/fashion/wings/<key>.png : 8 แถว (N·NE·E·SE·S·SW·W·NW) × F คอลัมน์ (เฟรมกระพือ) · ช่องละ cell px
 // ค่าในชิ้นแฟชั่น p = { px: key, cell, frames, fps, lift, scale }
-import { THREE } from './three.js?v=0.93.0-p4.61';
-import { VERSION } from '../config.js?v=0.93.0-p4.61';
+import { THREE } from './three.js?v=0.93.0-p4.63';
+import { VERSION } from '../config.js?v=0.93.0-p4.63';
 
 const PXW = 3.55 / 96;   // หน่วยโลกต่อพิกเซล (เท่าตัวละครพิกเซล)
 const ROW = { n: 0, ne: 1, e: 2, se: 3, s: 4, sw: 5, w: 6, nw: 7 };
@@ -53,7 +53,7 @@ export class PixelWingSprite {
     const back = d === 'n';   // fix42 หันหลังตรงเท่านั้นที่ปีกทับตัว · เฉียงขึ้น (NE/NW) วาดหลังตัวเหมือนหันข้าง (ทับแล้วรก)
     const row = back ? ROW.n : ROW.s;
     this.t += dt * (this.anim === 'walk' ? 1.5 : this.anim === 'attack' || this.anim === 'skill' ? 1.8 : 1);
-    const F = p.frames || 1, f = Math.floor(this.t * (p.fps || 8)) % F;
+    const F = p.frames || 1, f = (p.still ?? 0) % F;   // fix43 ปีกนิ่ง ไม่กระพือ
     this.tex.offset.set(f / F, 1 - (row + 1) / 8);
     const foot = this._c.set(ent.x / 16, ent.lift || 0, ent.y / 16);
     const toCam = this._d.copy(camera.position).sub(foot); const dist = toCam.length(); toCam.multiplyScalar(1 / dist);
@@ -77,4 +77,52 @@ export class PixelWingSprite {
   }
 
   dispose() { this.scene.remove(this.mesh); this.mesh.geometry.dispose(); this.mat.dispose(); this.tex.dispose(); }
+}
+
+// fix43 ปีกแฟชั่นแบบสองชั้น 8 ทิศจริง (ส่งมาพร้อมตัวละครชุดใหม่) — assets/fashion/wings/<key>_back.png / _front.png
+// ชีต 8 คอลัมน์ (เฟรมกระพือ) × 8 แถว (ทิศ ใต้·ตอ.ต้·ตอ.·ตอ.น.·เหนือ·ตต.น.·ตต.·ตต.ต้ = ลำดับเดียวกับ DIR8) · ช่อง 128 · โคนปีกที่ (64, 60)
+// วาด back หลังตัวละคร · front หน้าตัวละคร (ผู้ออกแบบแยกชั้นไว้แล้วตามทิศ) · ขนาดพิกเซลเท่าตัวละคร (คูณ k ของแผ่นตัวละคร)
+function layerTex(key, layer) {
+  const t = new THREE.TextureLoader().load(`assets/fashion/wings/${key}_${layer}.png?v=${VERSION}`);
+  t.encoding = THREE.sRGBEncoding; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  t.repeat.set(1 / 8, 1 / 8);
+  return t;
+}
+export class LayeredWings {
+  constructor(scene, p) {
+    this.p = p; this.scene = scene; this.t = Math.random() * 10;
+    this.L = ['back', 'front'].map((layer, i) => {
+      const tex = layerTex(p.layered, layer);
+      const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.5, depthWrite: true, toneMapped: false, side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat); mesh.frustumCulled = false; mesh.renderOrder = i ? 42 : 38;
+      scene.add(mesh);
+      return { tex, mat, mesh, push: i ? 0.7 : 0.3 };
+    });
+    this._c = new THREE.Vector3(); this._d = new THREE.Vector3();
+    this.frontNow = false;
+  }
+
+  update(dt, ent, dirIdx, camera, visible) {
+    const vis = !!visible && !ent.dead;
+    for (const l of this.L) l.mesh.visible = vis;
+    if (!vis) return;
+    const di = ((dirIdx | 0) % 8 + 8) % 8;
+    this.t += dt * (this.anim === 'walk' ? 1.4 : this.anim === 'attack' || this.anim === 'skill' ? 1.7 : 1);
+    const f = this.p.still ?? 0;   // fix43 ปีกนิ่ง (ไม่กระพือ) · still = เฟรมที่กางสวยที่สุด
+    const k = this.kS || 1, W = 128 * PXW * k;
+    const A = this.anc, above = (A ? A[1] - 2 : 31) * PXW * k;   // โคนปีกเหนือเท้า (หน่วยโลก)
+    const cy = above - 4 * PXW * k;                               // จุดกลางช่อง = ต่ำกว่าโคน 4 พิกเซล
+    const foot = this._c.set(ent.x / 16, ent.lift || 0, ent.y / 16);
+    const toCam = this._d.copy(camera.position).sub(foot); const dist = toCam.length(); toCam.multiplyScalar(1 / dist);
+    for (const l of this.L) {
+      l.tex.offset.set(f / 8, 1 - (di + 1) / 8);
+      const kk = (dist - l.push) / dist;
+      l.mesh.position.copy(foot).addScaledVector(toCam, l.push);
+      l.mesh.quaternion.copy(camera.quaternion);
+      l.mesh.translateY(cy * kk);
+      l.mesh.scale.set(W * kk, W * kk, 1);
+    }
+  }
+
+  dispose() { for (const l of this.L) { this.scene.remove(l.mesh); l.mesh.geometry.dispose(); l.mat.dispose(); l.tex.dispose(); } }
 }

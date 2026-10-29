@@ -1,7 +1,7 @@
 // v0.74 หน้าต่างกระดานภารกิจรายวัน
-import { DAILY_TASKS, DAILY_STREAK_BIG } from '../data/daily.js?v=0.93.0-p4.61';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.61';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.61';
+import { DAILY_TASKS, DAILY_STREAK_BIG } from '../data/daily.js?v=0.93.0-p4.63';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.63';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.63';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');
