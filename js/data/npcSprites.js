@@ -29,6 +29,14 @@ export const NPC_SHEETS = {
   npc_kael: { src: 'assets/npcs/kael.png', cell: 180, foot: 165, head: 14 },
   npc_roza: { src: 'assets/npcs/roza.png', cell: 180, foot: 159, head: 18 },
   npc_lyra_ruins: { src: 'assets/npcs/lyra_ruins.png', cell: 180, foot: 165, head: 13 },
+  npc_ruin_supply: { src: 'assets/npcs/ruin_supply.png', cell: 180, foot: 154, head: 19 },
+  npc_selene: { src: 'assets/npcs/selene.png', cell: 180, foot: 158, head: 21 },
+  npc_forest_supply: { src: 'assets/npcs/forest_supply.png', cell: 180, foot: 155, head: 22 },
+  npc_marin: { src: 'assets/npcs/marin.png', cell: 180, foot: 157, head: 13 },
+  npc_coast_supply: { src: 'assets/npcs/coast_supply.png', cell: 180, foot: 155, head: 18 },
+  npc_valley_supply: { src: 'assets/npcs/valley_supply.png', cell: 180, foot: 157, head: 21 },
+  npc_caelum: { src: 'assets/npcs/caelum.png', cell: 180, foot: 154, head: 15 },
+  npc_sky_supply: { src: 'assets/npcs/sky_supply.png', cell: 180, foot: 155, head: 24 },
 };
 
 // ไอดี NPC → แผ่นภาพ ('แผนที่:ไอดี' ใช้เมื่อไอดีซ้ำกันข้ามแผนที่)
@@ -57,6 +65,15 @@ export const NPC_SPRITES = {
   'kael': 'npc_kael',
   'roza': 'npc_roza',
   'ancient_ruins:lyra': 'npc_lyra_ruins',
+  'crystal_valley:lyra': 'npc_lyra_ruins',
+  'ruin_supply': 'npc_ruin_supply',
+  'selene': 'npc_selene',
+  'forest_supply': 'npc_forest_supply',
+  'marin': 'npc_marin',
+  'coast_supply': 'npc_coast_supply',
+  'valley_supply': 'npc_valley_supply',
+  'caelum': 'npc_caelum',
+  'sky_supply': 'npc_sky_supply',
 };
 
 // แปลงเป็นรูปแบบแผ่นของ SheetChars
