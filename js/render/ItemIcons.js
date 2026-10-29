@@ -1,9 +1,9 @@
-import { drawEquipmentIcon } from './EquipmentIcons.js?v=0.93.0-p4.71';   // v0.24.2: ไอคอนอุปกรณ์ชุดใหม่ตามอาชีพ/ขั้น/เกรด
-import { drawMonsterCard, onPortraitReady } from './CardPortraits.js?v=0.93.0-p4.71';
+import { drawEquipmentIcon } from './EquipmentIcons.js?v=0.93.0-p4.74';   // v0.24.2: ไอคอนอุปกรณ์ชุดใหม่ตามอาชีพ/ขั้น/เกรด
+import { drawMonsterCard, onPortraitReady } from './CardPortraits.js?v=0.93.0-p4.74';
 // ไอคอนไอเทม วาดด้วย Canvas (ใช้ทั้งในหน้าต่าง UI และของที่ตกบนพื้น)
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.71';
-import { shadeHex } from './Textures.js?v=0.93.0-p4.71';
-import { UTIL_DRAW } from './UtilityIcons.js?v=0.93.0-p4.71';   // v0.13: ไอคอนไอเทมใช้งานชุดใหม่
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.74';
+import { shadeHex } from './Textures.js?v=0.93.0-p4.74';
+import { UTIL_DRAW } from './UtilityIcons.js?v=0.93.0-p4.74';   // v0.13: ไอคอนไอเทมใช้งานชุดใหม่
 
 const S = 64;
 const LINE = '#2a1d2c';

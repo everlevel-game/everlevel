@@ -1,7 +1,7 @@
 // fix36 สิ่งปลูกสร้างภาพพิกเซล 8 มุม (PixelLab) — แผ่นป้ายหันหากล้อง · เปลี่ยนภาพตามมุมกล้องที่หมุนได้ทีละ 45°
 // แผ่นภาพ: 8 แถว (N·NE·E·SE·S·SW·W·NW = ทิศที่ "ตัวอาคารหัน") × 1 คอลัมน์ · ทุกภาพจัดฐานกลางล่างไว้ที่ (cell/2, foot)
-import { THREE } from './three.js?v=0.93.0-p4.71';
-import { VERSION } from '../config.js?v=0.93.0-p4.71';
+import { THREE } from './three.js?v=0.93.0-p4.74';
+import { VERSION } from '../config.js?v=0.93.0-p4.74';
 
 const PXW = 3.55 / 96;   // หน่วยโลกต่อพิกเซล (เท่าตัวละครพิกเซล)
 const ROW = { n: 0, ne: 1, e: 2, se: 3, s: 4, sw: 5, w: 6, nw: 7 };

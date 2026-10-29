@@ -1,11 +1,11 @@
-import { jobTier } from '../data/progression.js?v=0.93.0-p4.71';
+import { jobTier } from '../data/progression.js?v=0.93.0-p4.74';
 // ระบบสะสมและเป้าหมายระยะยาว (v0.18) — สมุดมอนสเตอร์ · ความสำเร็จ/ฉายา · อัลบั้มการ์ด · เช็กอินรายวัน
 // ข้อมูลอยู่ในเซฟตัวละคร (player.col) → ไม่ต้องตั้งค่าเซิร์ฟเวอร์เพิ่ม · โบนัสรวมอยู่ที่ player.colBonus (คิดรวมในค่าสถานะ)
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.71';
-import { CARDS } from '../data/cards.js?v=0.93.0-p4.71';
-import { ITEMS, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.71';
-import { titlesOf, holderTitles, MAX_TITLES, SEASON_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.71';   // v0.76
-import { BOOK, BOOK_ORDER, bookTier, bookTiers, CARD_SETS, ACHIEVEMENTS, ACH_BY_ID, ACH_COUNTED, MVP_CARDS, loginReward, LOGIN_DAYS } from '../data/collection.js?v=0.93.0-p4.71';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.74';
+import { CARDS } from '../data/cards.js?v=0.93.0-p4.74';
+import { ITEMS, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.74';
+import { titlesOf, holderTitles, MAX_TITLES, SEASON_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.74';   // v0.76
+import { BOOK, BOOK_ORDER, bookTier, bookTiers, CARD_SETS, ACHIEVEMENTS, ACH_BY_ID, ACH_COUNTED, MVP_CARDS, loginReward, LOGIN_DAYS } from '../data/collection.js?v=0.93.0-p4.74';
 
 const SET_OF = (o) => Object.keys(o);
 const addTo = (out, o) => { for (const [k, v] of Object.entries(o || {})) out[k] = +(((out[k] || 0) + v).toFixed(4)); return out; };
@@ -28,7 +28,11 @@ export function normCol(c) {
   o.quests = int(c.quests);
   if (Array.isArray(c.cards)) o.cards = [...new Set(c.cards.filter((id) => CARDS[id]))];
   if (c.ach && typeof c.ach === 'object') for (const [id, v] of Object.entries(c.ach)) if (ACH_BY_ID[id]) o.ach[id] = int(v) || 1;
-  if (typeof c.title === 'string' && o.ach[c.title]) o.title = c.title;
+  // fix50 เก็บฉายาครบ 3 อัน (เดิมเก็บแค่ title อันแรก → ตาย/เข้าเกมใหม่แล้วเหลืออันเดียว) · ฉายาฤดูกาลตรวจสิทธิ์ตอนแสดงผล
+  const okT = (id) => typeof id === 'string' && (!!o.ach[id] || !!SEASON_TITLES[id]);
+  const tl = (Array.isArray(c.titles) ? c.titles : c.title ? [c.title] : []).filter(okT);
+  o.titles = [...new Set(tl)].slice(0, MAX_TITLES);
+  o.title = o.titles[0] || null;
   const ci = c.ci && typeof c.ci === 'object' ? c.ci : {};
   o.ci = { last: typeof ci.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(ci.last) ? ci.last : '', count: int(ci.count, 99999), day: int(ci.day, LOGIN_DAYS), streak: int(ci.streak, 99999), best: int(ci.best, 99999), vip: typeof ci.vip === 'string' && /^\d{4}-\d\d-\d\d$/.test(ci.vip) ? ci.vip : '' };
   return o;

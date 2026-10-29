@@ -1,4 +1,4 @@
-import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.71';
+import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.74';
 // แคตตาล็อกชุดแฟชั่น (v0.9) — ได้จากการเปิดกล่องแฟชั่นสุ่ม (data/fashionBoxes.js) — ชิ้นแฟชั่นเป็น "ชุดทับ" ไม่เพิ่มค่าสถานะ ใส่ทับอุปกรณ์จริงได้
 // slot: wings | outfit | head | face | back | weapon | aura | pet · kind = ชื่อตัวสร้างใน render/Costumes.js · p = ค่าปรับแต่ง
 // rarity: common ธรรมดา | rare หายาก | epic ล้ำค่า | legend ตำนาน | mythic | celestial
@@ -365,6 +365,8 @@ COSTUMES[COSTUMES.length - 1].cash = true;
 COSTUMES.push(PX('wings', 'w_dx_prism', 'ปีกปริซึม', 'Prism Aurora Wings', 'mythic', 'ขนรุ้งไล่สีชมพูถึงฟ้า ปลายขนขาว อัญมณีหลากสี วงแหวนรุ้งหมุนใต้เท้า', { mesh: 'dx_prism', size: [116, 119], pivot: [28, 55], above: 40, spark: '#ffffff', ground: true }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 COSTUMES.push(PX('wings', 'w_dx_storm', 'ปีกพายุฟ้า', 'Azure Storm Wings', 'mythic', 'ขนเมฆสีฟ้าขาว สายฟ้าสีเหลืองแลบรอบปีก', { mesh: 'dx_storm', size: [116, 119], pivot: [28, 55], cols: 8, flick: true, fps: 10, above: 40, spark: '#fff27a' }));
+// fix50 ปีกเพลิงทมิฬ — วาดพิกเซลด้วยโค้ด (ไฟล์แก้ได้ใน Pixelorama) · เปลวไฟสีดำขอบม่วงพลิ้ว 8 เฟรม
+COSTUMES.push(PX('wings', 'w_dx_blackflame', 'ปีกเพลิงทมิฬ', 'Black Flame Wings', 'mythic', 'ขนปีกสีดำสนิท เปลวไฟดำขอบม่วงลุกพลิ้วตลอดแนวปีก ประกายถ่านสีชมพูกระพริบในเนื้อปีก', { mesh: 'dx_blackflame', size: [104, 108], pivot: [20, 62], cols: 8, flick: true, fps: 10, above: 40, spark: '#b45cff' }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 // fix46 ออร่าภาพพิกเซล 2 ชั้น 12 แบบ (ร้านเพชร) — ตัวสร้าง LayeredAura ใน render/PixelWings.js · ราคาใน supabase/fashion_aura_v46.sql
 COSTUMES.push(PX('aura', 'a_la_inferno', 'ออร่าเปลวเพลิง', 'Inferno Blaze', 'mythic', 'เปลวไฟลุกห่อตัว ไล่สีแดงส้มทอง ประกายไฟลอยขึ้น วงความร้อนใต้เท้า', { laura: 'la_inferno', fps: 10, rim: '#ff7a2a' }));

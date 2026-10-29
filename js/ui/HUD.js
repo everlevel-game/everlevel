@@ -1,8 +1,8 @@
 // หน้าจอข้อมูล (DOM): สถานะตัวละคร, แชท, ชื่อแผนที่, FPS, บัฟ
-import { SKILLS } from '../data/skills.js?v=0.93.0-p4.71';
-import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.71';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.71';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.71';
+import { SKILLS } from '../data/skills.js?v=0.93.0-p4.74';
+import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.74';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.74';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.74';
 // v0.94 หลอดเลือดใหญ่เฉพาะบอส/ผู้เล่นในสนามประลอง · มอนทั่วไปดูหลอดเล็กใต้ตัว (มีตัวเลข)
 const bigMob = (mob) => !!(mob && mob.data && (mob.data.mvp || mob.data.boss || mob.data.worldBoss || mob.data.dgBoss || mob.data.festBoss || mob.arenaProxy || mob.worldRun || mob.pdRun));
 

@@ -1,12 +1,12 @@
 // v0.89 ความทนทานของอุปกรณ์ — ใช้แล้วสึก · ถึง 0 = พัง (ไม่ให้ค่าสถานะ เหมือนไม่ได้สวม) · ซ่อมที่ช่างตีเหล็กในเมือง (VIP ซ่อมได้ทุกที่)
 // เก็บเป็น player.dura = { [คีย์ไอเทม]: 0–100 } (ไม่มีในรายการ = 100 เต็ม)
-import { ITEMS, BASE_ITEMS, itemMods, itemKey } from './items.js?v=0.93.0-p4.71';
-import { CARDS } from './cards.js?v=0.93.0-p4.71';
+import { ITEMS, BASE_ITEMS, itemMods, itemKey } from './items.js?v=0.93.0-p4.74';
+import { CARDS } from './cards.js?v=0.93.0-p4.74';
 
 export const DURA_MAX = 100;
 export const DURA_LOW = 20;   // ต่ำกว่านี้เตือน
 // สึกต่อครั้ง: อาวุธเมื่อโจมตี/ใช้สกิล · ชิ้นอื่นทุกชิ้นเมื่อถูกตี · ตาย = ทุกชิ้นลดเพิ่ม 10%
-export const DURA_LOSS = { attack: 0.012, hit: 0.015, death: 10 };
+export const DURA_LOSS = { attack: 0.005, hit: 0.006, death: 5 };   // fix50 สึกช้าลงอีก ~2.4 เท่า (เดิม 0.012 · 0.015 · 10)
 
 export const duraOf = (pl, key) => (key && pl.dura && Number.isFinite(pl.dura[key]) ? pl.dura[key] : DURA_MAX);
 export const isBroken = (pl, key) => !!key && duraOf(pl, key) <= 0;
