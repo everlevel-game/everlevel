@@ -1,0 +1,19 @@
+{
+  "name": "Everlevel — MMORPG พิกเซล",
+  "short_name": "Everlevel",
+  "description": "MMORPG แฟนตาซีพิกเซล ผจญภัยไปกับเพื่อน เล่นฟรี",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "background_color": "#0b1632",
+  "theme_color": "#13234a",
+  "lang": "th",
+  "categories": ["games"],
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
