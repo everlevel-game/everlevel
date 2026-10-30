@@ -110,10 +110,17 @@ export const PETS = {
     skill: { name: 'โชคลาภสวรรค์', desc: 'โอกาสดรอปการ์ด ×1.5 · ตีบวก +5 ขึ้นไปโอกาสสำเร็จ +5% (ต้องเรียกออกมา)' },
     mods: { card: 1.5, boxUp: 5, refineUp: 5 },
   },
+  // fix47: ขายในร้านเพชรเท่านั้น (shop: true = ไม่อยู่ในไข่สุ่ม)
+  drake: {
+    name: 'อัคนิส', en: 'Obsidian Inferno Drake', tier: 'celestial', kind: 'drake', shop: true,
+    flavor: 'มังกรนิลอัคคีจากปล่องภูเขาไฟโบราณ เกล็ดดำสนิท แต่ใต้ท้องยังมีหินหลอมเดือดอยู่ คำรามทีไรควันไฟพวยพุ่งออกจากจมูก',
+    skill: { name: 'ลมหายใจอัคคีดูดทรัพย์', desc: 'บินข้ามน้ำ กำแพง และหน้าผาได้ · ทุก 3 วินาที พ่นไฟดูดของทุกชิ้นในรัศมีมาหาเจ้าของพร้อมกัน · ของหายาก การ์ด และหินตีบวก มีลำแสงชี้ · ดรอป +3%' },
+    mods: { magnet: 3, drop: 3, rareBeam: true },
+  },
 };
 
 export const PET_ORDER = Object.keys(PETS);
-export const petsOfTier = (tier) => PET_ORDER.filter((id) => PETS[id].tier === tier);
+export const petsOfTier = (tier) => PET_ORDER.filter((id) => PETS[id].tier === tier && !PETS[id].shop);
 
 /* ---------- ไข่สัตว์เลี้ยง (ไอเทมในกระเป๋า) ---------- */
 // odds เป็นเปอร์เซ็นต์ (รวม = 100) · from = แหล่งดรอป

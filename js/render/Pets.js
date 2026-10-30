@@ -2,13 +2,13 @@
 // ใช้:  const pet = new PetView('hamster', { world: scene });  scene.add(pet.root);
 //       ทุกเฟรม pet.update(dt, { moving, speed })  ·  pet.pick() = ท่าเก็บของ  ·  pet.cheer() = ท่าดีใจ
 //       pet.load = 0..1 (ของเต็มตัวแค่ไหน) · pet.mouth = จุดที่ของลอยเข้าไป · pet.range = รัศมี (หน่วยโลก ใช้กับเอฟเฟกต์)
-import { THREE } from './three.js?v=0.93.0-p4.80';
-import { toon, bake, addOutline, gradientMap } from './Toon.js?v=0.93.0-p4.80';
-import { shadeHex, blobShadowTexture } from './Textures.js?v=0.93.0-p4.80';
-import { mergeGeometries } from './Geo.js?v=0.93.0-p4.80';
-import * as TX from './FxTextures.js?v=0.93.0-p4.80';
-import { Particles } from './SkillFX.js?v=0.93.0-p4.80';
-import { PETS, PET_EGGS } from '../data/pets.js?v=0.93.0-p4.80';
+import { THREE } from './three.js?v=0.93.0-p4.81';
+import { toon, bake, addOutline, gradientMap } from './Toon.js?v=0.93.0-p4.81';
+import { shadeHex, blobShadowTexture } from './Textures.js?v=0.93.0-p4.81';
+import { mergeGeometries } from './Geo.js?v=0.93.0-p4.81';
+import * as TX from './FxTextures.js?v=0.93.0-p4.81';
+import { Particles } from './SkillFX.js?v=0.93.0-p4.81';
+import { PETS, PET_EGGS } from '../data/pets.js?v=0.93.0-p4.81';
 
 /* ================= ตัวช่วยพื้นฐาน ================= */
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -177,6 +177,47 @@ const glowSprite = (parent, color, size, opacity = 0.7, x = 0, y = 0, z = 0) => 
 const legs4 = (parent, xs, y, zs, build) => [[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([sx, sz], i) => {
   const l = group(parent, sx * xs, y, sz * zs); build(l, sx, sz); bake(l); return l;
 });
+
+/* ---------- fix47: ผิวต่อเนื่องแบบปั้น — กวาดหน้าตัด superellipse ไปตามเส้นโค้ง (แทนการต่อทรงกลม/กรวย) ---------- */
+// ตารางค่าตามแนวยาว [[u, ค่า], ...] → ฟังก์ชันไล่ค่าแบบนุ่ม
+const prof = (tb) => (u) => {
+  if (u <= tb[0][0]) return tb[0][1];
+  for (let i = 1; i < tb.length; i++) if (u <= tb[i][0]) { const [u0, a] = tb[i - 1], [u1, b] = tb[i], k = (u - u0) / (u1 - u0); return a + (b - a) * k * k * (3 - 2 * k); }
+  return tb[tb.length - 1][1];
+};
+const gauss = (x, c, w) => Math.exp(-(((x - c) / w) ** 2));
+function frameAt(cv, u) {
+  const p = cv.getPointAt(u), tg = cv.getTangentAt(u);
+  const ref = Math.abs(tg.y) > 0.95 ? V(0, 0, 1) : V(0, 1, 0);
+  const up = ref.sub(tg.clone().multiplyScalar(ref.dot(tg))).normalize();
+  return { p, tg, up, sd: new THREE.Vector3().crossVectors(up, tg).normalize() };
+}
+// sec(u, th) → { w, h, hb, d } = ครึ่งกว้าง ครึ่งสูงด้านบน/ล่าง ระยะนูน · th: 0 บน, PI/2 ข้าง (+x), PI ล่าง
+// ex/exb = ความแบนของหน้าตัดครึ่งบน/ล่าง (2 = วงรี · มากขึ้น = แบนเหลี่ยมมน)
+function loftPt(cv, u, th, sec, ex = 2.4, exb = ex, lift = 0, F = frameAt(cv, u)) {
+  th = ((th % (2 * PI)) + 2 * PI) % (2 * PI);
+  const s = Math.sin(th), c = Math.cos(th), q = sec(u, th), d = (q.d || 0) + lift, e = c >= 0 ? ex : exb;
+  const x = Math.sign(s) * Math.abs(s) ** (2 / e) * (q.w + d), y = Math.sign(c) * Math.abs(c) ** (2 / e) * ((c >= 0 ? q.h : q.hb ?? q.h) + d);
+  return F.p.clone().addScaledVector(F.sd, x).addScaledVector(F.up, y);
+}
+// คืน geometry แยกตามชิ้น (split(u, th) → เลขชิ้น) ใช้จุดยอดชุดเดียวกัน ผิวต่อกันสนิท
+function loft(cv, sec, { nU = 48, nT = 32, ex = 2.4, exb = ex, split = null, parts = 1 } = {}) {
+  const pos = [], W = nT + 1, idx = Array.from({ length: parts }, () => []);
+  for (let i = 0; i <= nU; i++) { const u = i / nU, F = frameAt(cv, u); for (let j = 0; j <= nT; j++) { const p = loftPt(cv, u, (j / nT) * PI * 2, sec, ex, exb, 0, F); pos.push(p.x, p.y, p.z); } }
+  for (let i = 0; i < nU; i++) for (let j = 0; j < nT; j++) { const k = split ? split((i + 0.5) / nU, ((j + 0.5) / nT) * PI * 2) : 0, a = i * W + j, b = a + W; idx[k].push(a, b, a + 1, b, b + 1, a + 1); }
+  return idx.map((ix) => {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos.slice(), 3)); g.setIndex(ix); g.computeVertexNormals();
+    const n = g.attributes.normal;   // รอยต่อหน้าตัด (j = 0 กับ j = nT) ให้เงาเนียน
+    for (let i = 0; i <= nU; i++) { const a = i * W, b = a + nT, x = n.getX(a) + n.getX(b), y = n.getY(a) + n.getY(b), z = n.getZ(a) + n.getZ(b), l = Math.hypot(x, y, z) || 1; n.setXYZ(a, x / l, y / l, z / l); n.setXYZ(b, x / l, y / l, z / l); }
+    return g;
+  });
+}
+// เขี้ยว/เล็บ/หนามโค้งปลายแหลม: โค้งไปทาง bend · thin = สัดส่วนความหนาด้านข้าง (น้อย = แบนเป็นใบ)
+function hook(base, dir, bend, len, w, { thin = 1, curl = 0.35, nU = 6, nT = 6 } = {}) {
+  const d = dir.clone().normalize(), bd = bend.clone().normalize();
+  const cv = new THREE.QuadraticBezierCurve3(base.clone(), base.clone().addScaledVector(d, len * 0.6), base.clone().addScaledVector(d, len * 0.9).addScaledVector(bd, len * curl));
+  return loft(cv, (u) => { const r = w * Math.pow(1 - u, 1.15) + 0.0004; return { w: r * thin, h: r }; }, { nU, nT, ex: 2 })[0];
+}
 
 /* ================= สัตว์เลี้ยงแต่ละตัว ================= */
 const BUILD = {
@@ -891,6 +932,251 @@ const BUILD = {
     });
     return { size: 1.0, shadow: 0.7, mouth: group(h, 0, -0.03, 0.1) };
   },
+
+  /* ---------- Celestial (ร้านเพชร): อัคนิส มังกรนิลอัคคี — ปั้นผิวต่อเนื่องทั้งตัว (ไม่ใช้ทรงกลม/กรวยต่อกัน)
+     ลำตัว-คอเป็นผิวเดียว กล้ามไหล่/สะโพก สันหลังคม เกล็ดซ้อนแบบกระเบื้องปั้นลงบนผิว ท้องเป็นปล้องหินหลอม
+     กะโหลกทรงลิ่ม สันคิ้วยื่น เบ้าตาลึก ขากรรไกรอ้าได้ ฟันโค้ง ขาแบบสัตว์เลื้อยคลานพับข้อ เล็บงอ หนามโค้งเป็นใบ ---------- */
+  drake(P) {
+    const lava = '#ff5a1a', ember = '#ffb02a', gold = '#ffcf5a';
+    const SC = T('#2a2136', { emissive: '#14081e', emissiveIntensity: 0.6 });
+    const SC2 = T('#3a2e4e', { emissive: '#1e0c28', emissiveIntensity: 0.5 });
+    const BELLY = T('#d8602a', { emissive: '#ff3a0a', emissiveIntensity: 0.55 });
+    const MOUTH = T('#5a1418', { emissive: '#3a0608', emissiveIntensity: 0.6 });
+    const LAVA = G(lava, 1.3), EMB = G(ember, 1.8);
+    const HORN = metal(gold, 0.3), CLAW = T('#f0e4c8');
+    const FRILL = DS('#a01a24', { emissive: '#5a0a10', emissiveIntensity: 0.6 });
+    const WING = [DS('#3a0a18', { emissive: '#2a0408', emissiveIntensity: 0.6 }), DS('#8a1424', { emissive: '#5a0a10', emissiveIntensity: 0.6 }), DS('#d8202a', { emissive: '#8a1010', emissiveIntensity: 0.6 }), DS('#ff7a2a', { emissive: '#ff4a10', emissiveIntensity: 0.9 })];
+    const m = group(P.body); m.scale.setScalar(0.95);
+    // เกล็ดซ้อน: สูงสุดที่ขอบท้ายของแต่ละเกล็ดแล้วตกลง (ขอบอิสระชี้ไปทางหาง) · เรียงสลับแถว
+    const scaleD = (a, b, amp) => { const row = Math.floor(a), fa = a - row, fb = (((b + (row & 1) * 0.5) % 1) + 1) % 1; return amp * (1 - fa) * Math.pow(Math.sin(PI * fb), 0.6); };
+    const isBelly = (th, k = 0.95) => Math.abs(th - PI) < k;
+    const plate = (a) => { const f = a - Math.floor(a); return -0.006 * Math.max(0, 1 - f / 0.22); };   // ร่องระหว่างปล้องท้อง
+    // หนามโค้งเป็นใบบนผิวท่อ: ฐานจมผิวเล็กน้อย เอนไปทางหาง
+    const finAt = (cv, sec, ex, exb, u, len, w, out, th = 0) => {
+      const F = frameAt(cv, u), p = loftPt(cv, u, th, sec, ex, exb, -0.004, F);
+      out.push(hook(p, F.up.clone().addScaledVector(F.sd, Math.sin(th) * 1.2).addScaledVector(F.tg, -0.8), F.tg.clone().negate(), len, w, { thin: 0.35, curl: 0.3 }));
+    };
+
+    /* ----- ลำตัว + คอ: ผิวเดียวต่อเนื่อง ----- */
+    const b = group(m);
+    const spine = new THREE.CatmullRomCurve3([V(0, 0.3, -0.21), V(0, 0.33, -0.11), V(0, 0.355, -0.01), V(0, 0.37, 0.08), V(0, 0.41, 0.16), V(0, 0.49, 0.215), V(0, 0.57, 0.248), V(0, 0.625, 0.27)]);
+    const sL = spine.getLength();
+    const bW = prof([[0, 0.065], [0.1, 0.086], [0.24, 0.094], [0.42, 0.086], [0.58, 0.098], [0.7, 0.07], [0.84, 0.054], [1, 0.044]]);
+    const bH = prof([[0, 0.065], [0.1, 0.09], [0.24, 0.1], [0.42, 0.094], [0.58, 0.108], [0.7, 0.072], [0.84, 0.055], [1, 0.045]]);
+    const bodySec = (u, th) => {
+      const s = Math.abs(Math.sin(th)), c = Math.cos(th);
+      const w = bW(u) + 0.014 * gauss(u, 0.6, 0.07) * s * Math.max(0, c + 0.3) + 0.012 * gauss(u, 0.22, 0.07) * s;   // กล้ามไหล่ / สะโพก
+      const d = isBelly(th) ? plate((u * sL) / 0.028) : scaleD((u * sL) / 0.034, (th / (2 * PI)) * 14, 0.008 * (bW(u) / 0.09));
+      return { w, h: bH(u) + 0.014 * Math.pow(Math.max(0, c), 12), hb: bH(u) * 0.92, d };
+    };
+    const BX = 2.3, BXB = 2.8;
+    const [bodyG, bellyG] = loft(spine, bodySec, { nU: 84, nT: 56, ex: BX, exb: BXB, split: (u, th) => (isBelly(th) ? 1 : 0), parts: 2 });
+    mesh(bodyG, SC, b); mesh(bellyG, BELLY, b);
+    // รอยแตกลาวาซิกแซกบนสีข้าง
+    for (const s of [-1, 1]) for (const [u0, u1, th0] of [[0.12, 0.3, 1.95], [0.34, 0.52, 2.05], [0.5, 0.66, 1.9], [0.2, 0.4, 2.3], [0.7, 0.86, 1.85]]) {
+      const pts = []; for (let k = 0; k <= 6; k++) pts.push(loftPt(spine, u0 + ((u1 - u0) * k) / 6, s * (th0 + (k % 2 ? 0.14 : -0.1)), bodySec, BX, BXB, 0.002));
+      taper(b, pts, 0.0045, 0.0015, LAVA, { seg: 6 });
+    }
+    // หนามสันหลังหลักเป็นใบโค้ง + หนามรองคู่ + แนวลาวาใต้หนาม
+    const fins = [], fins2 = [];
+    for (const [u, l] of [[0.1, 0.045], [0.2, 0.06], [0.3, 0.07], [0.4, 0.075], [0.5, 0.075], [0.6, 0.068], [0.7, 0.055], [0.79, 0.048], [0.88, 0.04], [0.96, 0.034]]) {
+      finAt(spine, bodySec, BX, BXB, u, l, l * 0.42, fins);
+      for (const s of [-1, 1]) finAt(spine, bodySec, BX, BXB, Math.min(0.98, u + 0.045), l * 0.45, l * 0.22, fins2, s * 0.42);
+    }
+    mesh(merged(fins), SC2, b); mesh(merged(fins2), SC2, b);
+    taper(b, [0.06, 0.2, 0.35, 0.5, 0.65, 0.8, 0.95].map((u) => loftPt(spine, u, 0, bodySec, BX, BXB, -0.002)), 0.006, 0.004, LAVA, { seg: 6 });
+    bake(b);
+    const core = glowSprite(b, lava, 0.38, 0.5, 0, 0.3, 0.12);
+
+    /* ----- ขา: ต้นขามีกล้าม ข้อพับแบบสัตว์เลื้อยคลาน นิ้วเท้า 3 นิ้ว + เล็บงอ ----- */
+    const FW = prof([[0, 0.04], [0.22, 0.044], [0.42, 0.024], [0.62, 0.02], [0.82, 0.017], [1, 0.013]]);
+    const HW = prof([[0, 0.055], [0.25, 0.052], [0.45, 0.026], [0.62, 0.019], [0.82, 0.016], [1, 0.013]]);
+    const legs = [[-1, 0.072, 0.3, 0.1, 0], [1, 0.072, 0.3, 0.1, 0], [-1, 0.082, 0.28, -0.1, 1], [1, 0.082, 0.28, -0.1, 1]].map(([s, x, y, z, hind]) => {
+      const l = group(m, s * x, y, z);
+      const pts = hind ? [V(0, 0.035, 0), V(0, -0.035, 0.05), V(0, -0.095, -0.012), V(0, -0.145, 0.008), V(0, -0.158, 0.03)] : [V(0, 0.035, -0.01), V(0, -0.035, 0.018), V(0, -0.095, 0), V(0, -0.14, 0.025), V(0, -0.152, 0.045)];
+      const cv = new THREE.CatmullRomCurve3(pts), Wf = hind ? HW : FW;
+      mesh(loft(cv, (u, th) => ({ w: Wf(u), h: Wf(u) * 1.15, d: scaleD(u * 6, (th / (2 * PI)) * 9, 0.003) }), { nU: 28, nT: 14, ex: 2.2 })[0], SC, l);
+      const end = cv.getPointAt(1), toes = [], claws = [];
+      for (const k of [-1, 0, 1]) {
+        const dir = V(k * 0.45, -0.35, 1).normalize();
+        const tcv = new THREE.QuadraticBezierCurve3(end.clone().addScaledVector(dir, -0.008), end.clone().addScaledVector(dir, 0.014).add(V(0, 0.004, 0)), end.clone().addScaledVector(dir, 0.032).add(V(0, -0.006, 0)));
+        toes.push(loft(tcv, (u) => ({ w: 0.0105 - u * 0.004, h: 0.009 - u * 0.003 }), { nU: 8, nT: 10 })[0]);
+        claws.push(hook(tcv.getPointAt(1), dir, V(0, -1, 0), 0.03, 0.0065, { thin: 0.6, curl: 0.5 }));
+      }
+      claws.push(hook(end.clone().add(V(0, 0.004, -0.012)), V(0, -0.4, -1), V(0, -1, 0), 0.022, 0.005, { thin: 0.6, curl: 0.5 }));   // เล็บหลัง
+      mesh(merged(toes), SC, l); mesh(merged(claws), CLAW, l);
+      const kn = cv.getPointAt(hind ? 0.3 : 0.34);
+      mesh(hook(kn.clone().add(V(0, 0, -0.016)), V(0, 0.15, -1), V(0, 1, 0), 0.03, 0.008, { thin: 0.45, curl: 0.25 }), SC2, l);   // หนามข้อศอก/เข่า
+      bake(l); return l;
+    });
+
+    /* ----- หาง: ผิวต่อจากลำตัว เรียวลง หนามใบโค้ง ปลายเป็นใบมีดรูปโพดำ ----- */
+    const tl = group(m, 0, 0.3, -0.17);
+    const tc = new THREE.CatmullRomCurve3([V(0, 0.012, 0.07), V(0, 0, 0), V(0.02, -0.05, -0.13), V(0.09, -0.1, -0.26), V(0.2, -0.08, -0.36), V(0.29, 0.005, -0.405)]);
+    const tL = tc.getLength();
+    const tW = prof([[0, 0.078], [0.15, 0.072], [0.4, 0.05], [0.7, 0.03], [0.92, 0.016], [1, 0.01]]);
+    const tailSec = (u, th) => ({ w: tW(u), h: tW(u) * 1.08 + 0.01 * Math.pow(Math.max(0, Math.cos(th)), 12) * (1 - u), hb: tW(u), d: isBelly(th, 0.85) ? plate((u * tL) / 0.024) * 0.85 : scaleD((u * tL) / 0.03, (th / (2 * PI)) * 11, (0.007 * tW(u)) / 0.07) });
+    const [tailG, tailB] = loft(tc, tailSec, { nU: 80, nT: 36, ex: BX, exb: 2.6, split: (u, th) => (isBelly(th, 0.85) ? 1 : 0), parts: 2 });
+    mesh(tailG, SC, tl); mesh(tailB, BELLY, tl);
+    const tf = [];
+    for (const [u, l] of [[0.16, 0.05], [0.28, 0.046], [0.4, 0.042], [0.52, 0.038], [0.63, 0.033], [0.74, 0.028], [0.84, 0.024]]) finAt(tc, tailSec, BX, 2.6, u, l, l * 0.42, tf);
+    mesh(merged(tf), SC2, tl);
+    taper(tl, [0.1, 0.3, 0.5, 0.7, 0.9].map((u) => loftPt(tc, u, 0, tailSec, BX, 2.6, -0.002)), 0.005, 0.0015, LAVA, { seg: 6 });
+    const end = tc.getPointAt(1), dir = tc.getTangentAt(1);
+    const blade = group(tl, end.x, end.y, end.z);
+    blade.quaternion.setFromUnitVectors(V(0, 1, 0), dir);
+    const spade = (k, t) => loft(new THREE.LineCurve3(V(0, -0.012, 0), V(0, 0.15, 0)), (u) => { const w = k * Math.pow(Math.sin(PI * Math.min(1, u * 1.3)), 0.7) * Math.pow(1 - u, 0.45) + 0.0005; return { w, h: w * t }; }, { nU: 24, nT: 16, ex: 2 })[0];
+    mesh(spade(0.05, 0.2), SC2, blade);
+    mesh(spade(0.03, 0.42), LAVA, blade, 0, 0.004, 0, { noOutline: true });
+    mesh(merged([-1, 1].flatMap((k) => [hook(V(0, 0.02, 0), V(k, 0.55, 0), V(0, 1, 0), 0.055, 0.011, { thin: 0.35 }), hook(V(0, -0.012, 0), V(k, 0.25, 0), V(0, 1, 0), 0.04, 0.009, { thin: 0.35 })])), SC2, blade);
+    bake(tl);
+    const tipF = group(blade, 0, 0.13, 0);
+
+    /* ----- ปีกพังผืด: แขน-ข้อศอก-ข้อมือ นิ้วปีก 4 นิ้ว ขอบหลังเว้า ไล่สี 4 ชั้น เส้นเลือดไฟ ----- */
+    const wings = [-1, 1].map((s) => {
+      const pv = group(m, s * 0.08, 0.44, 0.05);
+      const O = V(0, 0, 0), E = V(s * 0.16, 0.12, -0.06), W = V(s * 0.34, 0.22, -0.1), R = V(s * 0.02, -0.08, -0.17);
+      const F = [V(s * 0.62, 0.2, -0.22), V(s * 0.58, 0.02, -0.3), V(s * 0.46, -0.12, -0.3), V(s * 0.28, -0.18, -0.22)];
+      const sag = (a, b2, c, k) => a.clone().add(b2).multiplyScalar(0.5).lerp(c, k);
+      const tri = [[O, E, W, 0], [O, W, F[0], 0]];
+      for (let i = 0; i < 3; i++) { const M = sag(F[i], F[i + 1], W, 0.28); tri.push([W, F[i], M, 1], [W, M, F[i + 1], 1]); }
+      const M4 = sag(F[3], R, E, 0.25);
+      tri.push([W, F[3], E, 0], [E, F[3], M4, 1], [E, M4, R, 1], [O, E, R, 0]);
+      // แยก 4 แถบสีตามระยะจากกระดูกแขน (โหมดพิกเซลอ่านสีจากวัสดุ จึงไม่ใช้สีจุดยอด)
+      const segD = (p, a, c) => { const ac = c.clone().sub(a), t = Math.max(0, Math.min(1, p.clone().sub(a).dot(ac) / ac.lengthSq())); return p.distanceTo(a.clone().add(ac.multiplyScalar(t))); };
+      const band = [[], [], [], []], N = 6;
+      for (const [a, b2, c, eg] of tri) {
+        const Pt = (i, j) => a.clone().multiplyScalar(i / N).add(b2.clone().multiplyScalar(j / N)).add(c.clone().multiplyScalar((N - i - j) / N));
+        const put = (q) => {
+          const ps = q.map(([i, j]) => Pt(i, j)), ctr = ps[0].clone().add(ps[1]).add(ps[2]).multiplyScalar(1 / 3);
+          const d = Math.min(segD(ctr, O, E), segD(ctr, E, W));
+          const k = eg && q.some(([i]) => i === 0) ? 3 : d < 0.07 ? 0 : d < 0.15 ? 1 : 2;
+          for (const p of ps) band[k].push(p.x, p.y, p.z);
+        };
+        for (let i = 0; i < N; i++) for (let j = 0; j < N - i; j++) { put([[i, j], [i + 1, j], [i, j + 1]]); if (j < N - i - 1) put([[i + 1, j], [i + 1, j + 1], [i, j + 1]]); }
+      }
+      band.forEach((ps, k) => { if (!ps.length) return; const mg = new THREE.BufferGeometry(); mg.setAttribute('position', new THREE.Float32BufferAttribute(ps, 3)); mg.computeVertexNormals(); mesh(mg, WING[k], pv, 0, 0, 0, { noOutline: true }); });
+      // กระดูกแขนและนิ้วปีกเป็นผิวต่อเนื่อง (ข้อต่อนูน)
+      const bone = (pts, r0, r1) => loft(new THREE.CatmullRomCurve3(pts), (u) => { const r = r0 + (r1 - r0) * u + 0.004 * gauss(u, 0, 0.08) + 0.003 * gauss(u, 1, 0.08); return { w: r, h: r }; }, { nU: 16, nT: 10, ex: 2 })[0];
+      mesh(merged([bone([O, O.clone().lerp(E, 0.5).add(V(0, 0.012, 0)), E], 0.024, 0.016), bone([E, E.clone().lerp(W, 0.5).add(V(0, 0.01, 0)), W], 0.016, 0.011)].concat(F.map((f) => bone([W, W.clone().lerp(f, 0.5).add(V(0, 0.01, 0)), f], 0.01, 0.002)))), SC, pv);
+      for (let i = 0; i < 3; i++) {
+        const M = sag(F[i], F[i + 1], W, 0.28), a = W.clone().lerp(M, 0.12), c = W.clone().lerp(M, 0.85), k = W.clone().lerp(M, 0.5);
+        taper(pv, [a, k, c], 0.005, 0.0015, LAVA);
+        taper(pv, [k, k.clone().lerp(F[i], 0.45)], 0.003, 0.001, LAVA);
+        taper(pv, [k, k.clone().lerp(F[i + 1], 0.45)], 0.003, 0.001, LAVA);
+      }
+      taper(pv, [E.clone().lerp(M4, 0.1), E.clone().lerp(M4, 0.8)], 0.004, 0.0015, LAVA);
+      // กรงเล็บนิ้วโป้ง หนามข้อศอก เล็บปลายนิ้วปีก (โค้งงอ)
+      mesh(merged([hook(W, V(s * 0.25, 1, 0.35), V(s, 0, 0.6), 0.055, 0.012, { thin: 0.6, curl: 0.45 })].concat(F.map((f) => hook(f, f.clone().sub(W), V(0, -1, 0), 0.03, 0.006, { thin: 0.6, curl: 0.4 })))), HORN, pv);
+      mesh(hook(E, V(s * 0.2, 0.3, -1), V(0, 1, 0), 0.045, 0.011, { thin: 0.45 }), SC2, pv);
+      bake(pv);
+      return pv;
+    });
+
+    /* ----- หัว: กะโหลกทรงลิ่ม สันคิ้วยื่น เบ้าตาลึก โหนกแก้ม ปีกจมูก ----- */
+    const h = group(m, 0, 0.625, 0.275);
+    const hc = new THREE.CatmullRomCurve3([V(0, 0.006, -0.078), V(0, 0.012, -0.02), V(0, 0.004, 0.05), V(0, -0.01, 0.11), V(0, -0.02, 0.17)]);
+    const hWp = prof([[0, 0.03], [0.1, 0.058], [0.28, 0.066], [0.42, 0.058], [0.6, 0.042], [0.82, 0.034], [0.94, 0.028], [1, 0.008]]);
+    const hHp = prof([[0, 0.03], [0.12, 0.06], [0.3, 0.06], [0.45, 0.05], [0.62, 0.034], [0.85, 0.027], [0.95, 0.022], [1, 0.006]]);
+    const HX = 2.6, HXB = 4;
+    const headSec = (u, th) => {
+      const s = Math.sin(th), c = Math.cos(th), as = Math.abs(s), up = Math.max(0, c);
+      const w = hWp(u) + 0.019 * gauss(u, 0.42, 0.07) * up * as + 0.006 * gauss(u, 0.92, 0.04) * up + 0.008 * gauss(u, 0.18, 0.08) * Math.max(0, 0.2 - c) * as;   // สันคิ้ว · ปีกจมูก · โหนกแก้ม
+      const hh = hHp(u) + 0.01 * gauss(u, 0.4, 0.06) * Math.pow(as, 1.5) * up + 0.006 * Math.pow(up, 14) * (1 - u);
+      let d = isBelly(th, 1.05) ? 0 : scaleD(u * 7, (th / (2 * PI)) * 10, 0.0035);
+      d -= 0.008 * gauss(u, 0.5, 0.045) * gauss(Math.abs(Math.atan2(s, c)), 1.05, 0.22);   // เบ้าตา
+      return { w, h: hh, hb: hHp(u) * 0.45, d };
+    };
+    const [headG, palG] = loft(hc, headSec, { nU: 56, nT: 44, ex: HX, exb: HXB, split: (u, th) => (isBelly(th, 1.05) ? 1 : 0), parts: 2 });
+    mesh(headG, SC, h); mesh(palG, MOUTH, h);
+    const hp = (u, th, lift = 0) => loftPt(hc, u, th, headSec, HX, HXB, lift);
+    const hornLoft = (p0, d1, d2, d3, r0) => loft(new THREE.CubicBezierCurve3(p0, p0.clone().add(d1), p0.clone().add(d2), p0.clone().add(d3)), (u) => { const r = r0 * Math.pow(1 - u, 0.9) + 0.0006, f = (u * 9) % 1; return { w: r, h: r * 1.15, d: f < 0.22 && u < 0.8 ? -r * 0.12 : 0 }; }, { nU: 30, nT: 10, ex: 2 })[0];
+    const horns = [], hSpk = [], teeth = [];
+    for (const s of [-1, 1]) {
+      horns.push(hornLoft(hp(0.2, s * 0.55, -0.006), V(s * 0.035, 0.05, -0.05), V(s * 0.045, 0.07, -0.13), V(s * 0.02, 0.125, -0.2), 0.02));   // เขาคู่ใหญ่ มีร่องเป็นปล้อง
+      horns.push(hornLoft(hp(0.14, s * 1.25, -0.004), V(s * 0.035, 0.0, -0.04), V(s * 0.06, -0.01, -0.08), V(s * 0.075, 0.015, -0.13), 0.012));   // เขาคู่เล็ก
+      hSpk.push(hook(hp(0.42, s * 0.8, -0.003), V(s * 0.5, 0.45, -1), V(0, 1, 0), 0.03, 0.007, { thin: 0.45 }));   // หนามสันคิ้ว
+      hSpk.push(hook(hp(0.22, s * 1.95, -0.003), V(s, -0.35, -0.6), V(0, -0.3, -1), 0.045, 0.011, { thin: 0.45 }));   // หนามแก้ม
+      // ฟันบนโค้งตามแนวขอบปาก + เขี้ยว
+      for (let u = 0.5; u <= 0.93; u += 0.062) teeth.push(hook(hp(u, PI - s * 1.05, -0.002), V(0, -1, 0.15), V(0, 0, -1), 0.014, 0.0035, { curl: 0.2 }));
+      teeth.push(hook(hp(0.88, PI - s * 1.0, -0.002), V(0, -1, 0.1), V(0, 0, -1), 0.027, 0.005, { curl: 0.25 }));
+      // ครีบหู: ก้านกระดูก 3 ก้าน + พังผืดแดง
+      const fb = hp(0.12, s * 1.45, -0.004), ft = [fb.clone().add(V(s * 0.072, 0.06, -0.06)), fb.clone().add(V(s * 0.088, -0.003, -0.085)), fb.clone().add(V(s * 0.063, -0.065, -0.065))];
+      hSpk.push(...ft.map((f) => hook(fb, f.clone().sub(fb), V(0, 0, -1), fb.distanceTo(f), 0.0065, { curl: 0.1 })));
+      const fp = []; for (let i = 0; i < 2; i++) { const mid = ft[i].clone().add(ft[i + 1]).multiplyScalar(0.5).lerp(fb, 0.25); for (const p of [fb, ft[i], mid, fb, mid, ft[i + 1]]) fp.push(p.x, p.y, p.z); }
+      const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(fp, 3)); fg.computeVertexNormals();
+      mesh(fg, FRILL, h, 0, 0, 0, { noOutline: true });
+    }
+    hSpk.push(hook(hp(0.86, 0, -0.002), V(0, 1, 0.5), V(0, 0, -1), 0.032, 0.008, { thin: 0.6 }), hook(hp(0.76, 0, -0.002), V(0, 1, 0.2), V(0, 0, -1), 0.017, 0.005, { thin: 0.6 }));   // เขาจมูก
+    hSpk.push(hook(hp(0.08, 0, -0.004), V(0, 0.6, -1), V(0, 0, -1), 0.06, 0.015, { thin: 0.4 }));   // หนามท้ายทอย
+    mesh(merged(horns), HORN, h); mesh(merged(hSpk), SC2, h); mesh(merged(teeth), CLAW, h);
+    bake(h);
+    for (const s of [-1, 1]) {
+      const ep = hp(0.5, s * 1.05, -0.003);
+      glowSprite(h, ember, 0.09, 0.55, ep.x, ep.y, ep.z);
+      const e = group(h, ep.x, ep.y, ep.z); e.rotation.y = s * 0.9;
+      mesh(sph(0.012, 12, 8), G(ember, 2.2), e, 0, 0, 0, { s: [1.25, 0.75, 0.5], keep: true, noOutline: true, shadow: false });
+      mesh(box(0.003, 0.016, 0.004), T('#1a0606'), e, 0, 0, 0.005, { keep: true, noOutline: true, shadow: false });
+      P.eyes.push(e);
+      const np = hp(0.95, s * 0.55, -0.001);
+      mesh(sph(0.006, 6, 4), EMB, h, np.x, np.y, np.z, { keep: true, noOutline: true, shadow: false });
+    }
+    const gp = hp(0.32, 0, 0.001);
+    mesh(oct(0.011), EMB, h, gp.x, gp.y, gp.z, { keep: true, s: [1, 0.5, 1.4], shadow: false });
+
+    /* ----- ขากรรไกรล่าง: ผิวทรงลิ่ม ด้านในปากเรืองไฟ ฟันล่างโค้ง หนามคาง ----- */
+    const jw = group(h, 0, -0.02, -0.03);
+    const jc = new THREE.CatmullRomCurve3([V(0, 0, 0), V(0, -0.008, 0.07), V(0, -0.012, 0.13), V(0, -0.01, 0.195)]);
+    const jW = prof([[0, 0.05], [0.3, 0.044], [0.7, 0.03], [0.92, 0.022], [1, 0.006]]), jH = prof([[0, 0.034], [0.35, 0.024], [0.8, 0.016], [1, 0.006]]);
+    const jawSec = (u, th) => ({ w: jW(u), h: 0.006, hb: jH(u), d: th < 1.1 || th > 2 * PI - 1.1 ? 0 : scaleD(u * 6, (th / (2 * PI)) * 12, 0.003) });
+    const [jawG, tongueG] = loft(jc, jawSec, { nU: 36, nT: 28, ex: 4, exb: 2.4, split: (u, th) => (th < 1.1 || th > 2 * PI - 1.1 ? 1 : 0), parts: 2 });
+    mesh(jawG, SC, jw); mesh(tongueG, LAVA, jw, 0, 0, 0, { noOutline: true });
+    const jp = (u, th, lift = 0) => loftPt(jc, u, th, jawSec, 4, 2.4, lift);
+    const lowT = [], jSpk = [];
+    for (const s of [-1, 1]) {
+      for (let u = 0.38; u <= 0.9; u += 0.07) lowT.push(hook(jp(u, s * 1.1, -0.002), V(0, 1, 0.1), V(0, 0, -1), 0.012, 0.003, { curl: 0.2 }));
+      jSpk.push(hook(jp(0.08, s * 1.9, -0.003), V(s * 0.6, -0.5, -1), V(0, 0, -1), 0.04, 0.01, { thin: 0.45 }));
+      jSpk.push(hook(jp(0.4, s * 2.3, -0.002), V(s * 0.3, -1, -0.6), V(0, 0, -1), 0.024, 0.006, { thin: 0.5 }));
+    }
+    for (const u of [0.32, 0.5, 0.66]) jSpk.push(hook(jp(u, PI, -0.002), V(0, -1, -0.6), V(0, 0, -1), 0.03 - u * 0.02, 0.007, { thin: 0.5 }));   // เคราหนามใต้คาง
+    mesh(merged(lowT), CLAW, jw); mesh(merged(jSpk), SC2, jw);
+    bake(jw);
+    const maw = { material: LAVA };
+    const mouth = group(h, 0, -0.03, 0.16);
+    const aura = glowSprite(P.root, '#ff4a1a', 1.25, 0.16, 0, 0.05, 0);
+    const smoke = [-1, 1].map((s) => { const np = hp(0.95, s * 0.55, 0.004); return group(h, np.x, np.y, np.z); });
+    let roarT = 4;
+    P.on(({ t, dt, run, pk, ev }) => {
+      const fs = run > 0.5 ? 9 : 5.2, fl = Math.sin(t * fs);
+      m.position.y = Math.sin(t * 2.2) * 0.03 - fl * 0.02 - pk * 0.08;
+      m.rotation.x = 0.22 * run + pk * 0.25;
+      wings.forEach((pv, i) => { const s = i ? 1 : -1; pv.rotation.z = s * (0.2 + fl * 0.55); pv.rotation.y = -s * (0.15 + run * 0.2); });
+      tl.rotation.y = Math.sin(t * 1.5) * 0.35;
+      tl.rotation.x = Math.sin(t * 1.5 + 1) * 0.1 - run * 0.15;
+      legs.forEach((l, i) => { l.rotation.x = Math.sin(t * 1.8 + i) * 0.12 + run * 0.5; });
+      // คำรามเป็นระยะ: อ้าปาก ไฟในลำคอสว่างขึ้น
+      roarT -= dt;
+      const roar = roarT < 0 ? Math.sin(Math.min(1, -roarT / 0.9) * PI) : 0;
+      if (roarT < -0.9) roarT = 5 + Math.random() * 3;
+      jw.rotation.x = 0.04 + roar * 0.42 + pk * 0.5;
+      h.rotation.x = -pk * 0.35 - roar * 0.15 + Math.sin(t * 1.1) * 0.04;
+      h.rotation.y = Math.sin(t * 0.6) * 0.22 * (1 - run);
+      maw.material.emissiveIntensity = 1.3 + roar * 1.5 + pk * 1.5;
+      core.material.opacity = 0.42 + Math.sin(t * 3) * 0.12 + roar * 0.3;
+      aura.material.opacity = 0.14 + Math.sin(t * 2) * 0.04 + pk * 0.15;
+      if (Math.random() < dt * 12) P.emit('dot', { pos: P.wp(b, rand(-0.09, 0.09), rand(0.28, 0.45), rand(-0.16, 0.14)), count: 1, vel: () => V(rand(-0.06, 0.06), rand(0.25, 0.5), rand(-0.06, 0.06)), life: [0.4, 0.8], size: [0.04, 0.07], sizeEnd: 0.2, color: ['#ffd34d', '#ff8a2a'], colorEnd: '#c8180a' });
+      if (Math.random() < dt * 20) P.emit('dot', { pos: P.wp(tipF), count: 1, vel: () => V(rand(-0.08, 0.08), rand(0.15, 0.35), rand(-0.08, 0.08)), life: [0.3, 0.6], size: [0.05, 0.09], sizeEnd: 0.2, color: ['#ffe066', '#ff8a2a'], colorEnd: '#ff2a10' });
+      if (Math.random() < dt * 2.5) P.emit('puff', { pos: P.wp(smoke[(Math.random() * 2) | 0]), count: 1, vel: () => V(rand(-0.05, 0.05), rand(0.15, 0.3), rand(-0.05, 0.05)), life: [0.6, 1], size: [0.05, 0.08], sizeEnd: 2, color: '#4a3a4a', alpha: 0.55 });
+      if (roar > 0.5 && Math.random() < dt * 30) P.emit('dot', { pos: P.wp(mouth), count: 1, vel: () => P.wp(h, rand(-0.06, 0.06), -0.05, 0.5).sub(P.wp(mouth)).multiplyScalar(rand(0.8, 1.4)), life: [0.25, 0.4], size: [0.05, 0.09], sizeEnd: 0.3, color: ['#ffe066', '#ffb02a'], colorEnd: '#ff2a10' });
+      if (ev) {
+        // เก็บของ: พ่นไฟพายุ + วงไฟแผ่ออก
+        const a = P.wp(mouth), dirB = P.wp(h, 0, -0.06, 0.6).sub(a);
+        P.emit('dot', { pos: a, count: 36, vel: () => dirB.clone().multiplyScalar(rand(1.2, 2.2)).add(V(rand(-0.3, 0.3), rand(-0.2, 0.3), rand(-0.3, 0.3))), drag: 1.5, life: [0.3, 0.55], size: [0.07, 0.13], sizeEnd: 0.3, color: ['#fff2a0', '#ffb02a', '#ff6a1a'], colorEnd: '#c8180a' });
+        P.emit('ring', { pos: P.wp(b, 0, 0.35, 0), count: 10, speed: [0.5, 1], drag: 2, life: [0.5, 0.8], size: [0.08, 0.14], sizeEnd: 1.4, color: '#ff8a2a' });
+      }
+    });
+    return { hover: 0.38, size: 1.0, shadow: 0.85, mouth, pxDetail: 3.5 };
+  },
 };
 
 /* ================= ตัวสัตว์เลี้ยง ================= */
@@ -915,6 +1201,7 @@ export class PetView {
     this.size = info.size || 0.5;
     this.mouth = info.mouth || this.body;
     this.shadowSize = info.shadow || 0.5;
+    this.pxDetail = info.pxDetail || 1;   // fix47: ความถี่พิกเซลในโหมดสไปรต์ (1 = ปกติ)
     sh.scale.setScalar(this.shadowSize);
     this.root.traverse((o) => { if (o.isMesh && o !== sh) o.castShadow = o.castShadow && !o.material.transparent; });
     this.starFx = null;

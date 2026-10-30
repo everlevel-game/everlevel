@@ -276,6 +276,7 @@ Object.assign(CONSUMABLES, {
   pet_kraken: { name: 'ตั๋วสัตว์เลี้ยง: อบิส', cat: 'pet', rarity: 'mythic', icon: ['petcoin', '#ff4a6a'], effect: 'ใช้แล้วได้สัตว์เลี้ยง อบิส (มีแล้วได้ดาว +1)', use: { pet: 'kraken' }, price: 0, keep: true, from: [['cash', 'ร้านเพชร']], desc: 'เหรียญผูกพันจากร้านเพชร ใช้เพื่อรับสัตว์เลี้ยง อบิส มาอยู่ด้วย' },
   pet_whale: { name: 'ตั๋วสัตว์เลี้ยง: โนวา', cat: 'pet', rarity: 'celestial', icon: ['petcoin', '#8af0ff'], effect: 'ใช้แล้วได้สัตว์เลี้ยง โนวา (มีแล้วได้ดาว +1)', use: { pet: 'whale' }, price: 0, keep: true, from: [['cash', 'ร้านเพชร']], desc: 'เหรียญผูกพันจากร้านเพชร ใช้เพื่อรับสัตว์เลี้ยง โนวา มาอยู่ด้วย' },
   pet_qilin: { name: 'ตั๋วสัตว์เลี้ยง: เทียนหยุน', cat: 'pet', rarity: 'celestial', icon: ['petcoin', '#8af0ff'], effect: 'ใช้แล้วได้สัตว์เลี้ยง เทียนหยุน (มีแล้วได้ดาว +1)', use: { pet: 'qilin' }, price: 0, keep: true, from: [['cash', 'ร้านเพชร']], desc: 'เหรียญผูกพันจากร้านเพชร ใช้เพื่อรับสัตว์เลี้ยง เทียนหยุน มาอยู่ด้วย' },
+  pet_drake: { name: 'ตั๋วสัตว์เลี้ยง: อัคนิส', cat: 'pet', rarity: 'celestial', icon: ['petcoin', '#ff6a2a'], effect: 'ใช้แล้วได้สัตว์เลี้ยง อัคนิส (มีแล้วได้ดาว +1)', use: { pet: 'drake' }, price: 0, keep: true, from: [['cash', 'ร้านเพชร']], desc: 'เหรียญผูกพันจากร้านเพชร ใช้เพื่อรับมังกรนิลอัคคี อัคนิส มาอยู่ด้วย' },
 });
 export const PET_TICKETS = Object.keys(CONSUMABLES).filter((k) => CONSUMABLES[k].use && CONSUMABLES[k].use.pet);
 

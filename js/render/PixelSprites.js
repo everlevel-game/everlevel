@@ -5,7 +5,7 @@
 // แล้วลงสีแบบพิกเซลอาร์ตด้วยเชดเดอร์: แรเงา 4 ระดับ (เงาอมม่วง ไฮไลต์อมเหลือง) · เส้นขอบนอกสีเข้มของชิ้นนั้น ·
 // เส้นในระหว่างชิ้นที่ซ้อนกัน · ลบจุดแสงเดี่ยว ๆ · วาดตาอนิเมะทีละพิกเซล · กระพริบขาวตอนโดนตี
 // ผลลัพธ์เป็นภาพเล็กแปะบนแผ่นป้ายที่หันหาหน้ากล้องเสมอ (ขยายแบบไม่เบลอ) · หันได้ 8 ทิศตามมุมกล้อง
-import { THREE } from './three.js?v=0.93.0-p4.80';
+import { THREE } from './three.js?v=0.93.0-p4.81';
 
 export const PX_LAYER = 1;
 export const PIXEL = { on: true };            // โหมดภาพพิกเซล (ตั้งค่า → กราฟิก) · ใช้กับรูปย่อในหน้าต่างด้วย
@@ -285,7 +285,7 @@ export class PixelSprites {
   attach(key, view, kind, opts = {}) {
     this.detach(key);
     const root = view.root;
-    const size = opts.size || this.measure(root, kind);
+    const size = opts.size || this.measure(root, kind, opts.detail || 1);
     const s = {
       key, view, root, kind, w: size.w, h: size.h, ax: size.ax, ay: size.ay,
       rt: nearestRT(size.w, size.h), t: Math.random() * STEP, dirty: true, meshes: [], scanN: -1, hidden: [], moved: [],
@@ -316,7 +316,8 @@ export class PixelSprites {
   }
 
   // ขนาดภาพ: ประมาณจากกล่องรอบโมเดล (ท่ายืน) แล้วปัดขึ้นเป็นทวีคูณ 8
-  measure(root, kind) {
+  // detail > 1 (fix47): วาดพิกเซลถี่ขึ้นสำหรับตัวที่มีรายละเอียดเยอะ (เช่น สัตว์เลี้ยงมังกร) — ขนาดบนจอเท่าเดิม
+  measure(root, kind, detail = 1) {
     const char = kind === 'char' || kind === 'npc' || kind === 'remote';
     const box = new THREE.Box3();
     root.updateMatrixWorld(true);
@@ -340,12 +341,13 @@ export class PixelSprites {
     box.min.multiplyScalar(k); box.max.multiplyScalar(k);
     const rad = Math.max(Math.abs(box.min.x), Math.abs(box.max.x), Math.abs(box.min.z), Math.abs(box.max.z)) * 1.22 + 0.25 * k;
     const up = box.max.y * 1.12 * Math.cos(PITCH) + rad * Math.sin(PITCH);
-    const needW = (rad * 2 + 0.7) / PX, needA = (up + 0.6) / PX, needB = (rad * Math.sin(PITCH) + 0.35) / PX;
-    const fit = Math.max(1, needW / SCRATCH, (needA + needB) / SCRATCH), q = PX * fit;
+    const P0 = PX / Math.max(1, detail);
+    const needW = (rad * 2 + 0.7) / P0, needA = (up + 0.6) / P0, needB = (rad * Math.sin(PITCH) + 0.35) / P0;
+    const fit = Math.max(1, needW / SCRATCH, (needA + needB) / SCRATCH), q = P0 * fit;
     const w = Math.min(SCRATCH, Math.ceil(needW / fit / 8) * 8);
     const above = Math.ceil(needA / fit), below = Math.ceil(needB / fit);
     const h = Math.min(SCRATCH, Math.ceil((above + below) / 8) * 8);
-    return { w: Math.max(48, w), h: Math.max(48, h), ax: Math.max(48, w) / 2, ay: Math.min(h - 4, above), px: fit > 1 ? q : 0 };
+    return { w: Math.max(48, w), h: Math.max(48, h), ax: Math.max(48, w) / 2, ay: Math.min(h - 4, above), px: q !== PX ? q : 0 };
   }
 
   // แยกชิ้น: ชิ้นทึบ → วาดเป็นพิกเซล (ซ่อนจากฉากหลัก) · เส้นขอบเดิม/หน้าเดิม → ซ่อน · โปร่งแสงจาง ๆ/อนุภาค → คงเป็น 3D

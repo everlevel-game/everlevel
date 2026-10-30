@@ -1,9 +1,9 @@
 // แถบปุ่มลัด 1–0 (หรือ F1–F10): ใช้ยา/สวมใส่อุปกรณ์/ใช้สกิลได้ทันที
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.80';
-import { SKILLS, skillSp, skillCd } from '../data/skills.js?v=0.93.0-p4.80';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.80';
-import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.80';
-import { isSkillKey, validHotkey } from '../entities/Player.js?v=0.93.0-p4.80';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.81';
+import { SKILLS, skillSp, skillCd } from '../data/skills.js?v=0.93.0-p4.81';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.81';
+import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.81';
+import { isSkillKey, validHotkey } from '../entities/Player.js?v=0.93.0-p4.81';
 
 export const HKN = (i) => (i === 9 ? '0' : String(i + 1));   // v0.94 ชื่อปุ่มลัด 1–9, 0
 

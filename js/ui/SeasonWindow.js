@@ -1,8 +1,8 @@
 // v0.76 อันดับประจำฤดูกาล (รีเซ็ตทุกเดือน) — หอคอย · บอสโลก · MVP · ดันเจี้ยนปาร์ตี้ · หอเกียรติยศ
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.80';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.80';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.80';
-import { setSeasonHolders, SEASON_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.80';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.81';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.81';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.81';
+import { setSeasonHolders, SEASON_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.81';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');
