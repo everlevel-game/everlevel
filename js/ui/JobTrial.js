@@ -1,8 +1,8 @@
 // v0.31 หน้าทดลองเล่นอาชีพขั้นที่ 2 (โหลดเฉพาะ job2-trial.html) — ตัวละครทดลอง ไม่บันทึกเข้าบัญชีจริง
-import { SKILLS, jobSkills } from '../data/skills.js?v=0.93.0-p4.79';
-import { JOBS, SECOND_OF } from '../data/progression.js?v=0.93.0-p4.79';
-import { QUESTS, JOB2_QUEST } from '../data/quests.js?v=0.93.0-p4.79';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.79';
+import { SKILLS, jobSkills } from '../data/skills.js?v=0.93.0-p4.80';
+import { JOBS, SECOND_OF } from '../data/progression.js?v=0.93.0-p4.80';
+import { QUESTS, JOB2_QUEST } from '../data/quests.js?v=0.93.0-p4.80';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.80';
 
 const FIRST = {
   swordsman: { w: 'astral_sword', attr: { str: 70, agi: 40, vit: 60, int: 15, dex: 45, luk: 20 } },
