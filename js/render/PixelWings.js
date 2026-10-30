@@ -1,9 +1,9 @@
 // v0.35: ปีกแฟชั่นภาพพิกเซล 8 ทิศ (จาก PixelLab) — แผ่นป้ายหันหากล้อง วางซ้อนหลัง/หน้าตัวละครพิกเซลตามทิศที่หัน
 // แผ่นภาพ assets/fashion/wings/<key>.png : 8 แถว (N·NE·E·SE·S·SW·W·NW) × F คอลัมน์ (เฟรมกระพือ) · ช่องละ cell px
 // ค่าในชิ้นแฟชั่น p = { px: key, cell, frames, fps, lift, scale }
-import { THREE } from './three.js?v=0.93.0-p4.74';
-import { VERSION } from '../config.js?v=0.93.0-p4.74';
-import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.74';
+import { THREE } from './three.js?v=0.93.0-p4.79';
+import { VERSION } from '../config.js?v=0.93.0-p4.79';
+import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.79';
 
 const PXW = 3.55 / 96;   // หน่วยโลกต่อพิกเซล (เท่าตัวละครพิกเซล)
 const ROW = { n: 0, ne: 1, e: 2, se: 3, s: 4, sw: 5, w: 6, nw: 7 };
@@ -213,7 +213,10 @@ export class MeshWings {
     // ประกายรอบปีก (จุดในพื้นที่โลก)
     this.N = 18; this.pos = new Float32Array(this.N * 3); this.vel = []; this.life = new Float32Array(this.N);
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
-    this.pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: sparkTex(), color: p.spark || '#ffffff', size: 0.32, transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+    // fix51 spark เป็นรายการสีได้ (สุ่มสีต่อเม็ด)
+    const multi = Array.isArray(p.spark) && p.spark.length > 0;
+    if (multi) { const cols = new Float32Array(this.N * 3), c = new THREE.Color(); for (let i = 0; i < this.N; i++) { c.set(p.spark[i % p.spark.length]); cols.set([c.r, c.g, c.b], i * 3); } geo.setAttribute('color', new THREE.BufferAttribute(cols, 3)); }
+    this.pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: sparkTex(), color: multi ? '#ffffff' : (p.spark || '#ffffff'), vertexColors: multi, size: 0.32, transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
     this.pts.frustumCulled = false; this.pts.renderOrder = 39; scene.add(this.pts);
     for (let i = 0; i < this.N; i++) { this.vel.push(new THREE.Vector3()); this.pos[i * 3 + 1] = -99; }
     this._c = new THREE.Vector3(); this._d = new THREE.Vector3(); this._w = new THREE.Vector3(); this._f = new THREE.Vector3(); this.spawn = 0;

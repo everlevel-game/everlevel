@@ -3,12 +3,12 @@
 // · ความสำเร็จ: ทำครบแล้วได้ฉายา (ใส่โชว์เหนือหัว) + โบนัสเล็กน้อย (ได้ทุกอันที่ปลดล็อก ไม่ต้องใส่ฉายา)
 // · อัลบั้มการ์ด: เคยได้การ์ดครบชุด → โบนัสชุด (ไม่ต้องใส่การ์ด ไม่เสียการ์ด)
 // · เช็กอินรายวัน: เข้าเกมวันละครั้ง → รางวัลวันที่ 1–7 วนรอบ ส่งเข้ากล่องจดหมาย
-import { ZENY_INCOME } from '../config.js?v=0.93.0-p4.74';
-import { ENDGAME_MONSTERS } from './endgameMonsters.js?v=0.93.0-p4.74';
-import { ASCEND_MONSTERS } from './ascendData.js?v=0.93.0-p4.74';
-import { MONSTERS } from './monsters.js?v=0.93.0-p4.74';
-import { CARDS } from './cards.js?v=0.93.0-p4.74';
-import { MAPS } from './maps/index.js?v=0.93.0-p4.74';
+import { ZENY_INCOME } from '../config.js?v=0.93.0-p4.79';
+import { ENDGAME_MONSTERS } from './endgameMonsters.js?v=0.93.0-p4.79';
+import { ASCEND_MONSTERS } from './ascendData.js?v=0.93.0-p4.79';
+import { MONSTERS } from './monsters.js?v=0.93.0-p4.79';
+import { CARDS } from './cards.js?v=0.93.0-p4.79';
+import { MAPS } from './maps/index.js?v=0.93.0-p4.79';
 
 /* ---------- สมุดมอนสเตอร์ ---------- */
 export const BOOK_TIERS = [100, 500, 1000];
@@ -203,6 +203,7 @@ export const TIER_LABEL = { common: 'ธรรมดา', rare: 'หายาก
 /* ---------- เช็กอินรายวัน (รอบละ 7 วัน) ----------
    ไม่ต้องเข้าติดกัน: เข้าเกมวันไหนก็นับเป็นวันถัดไปของรอบ · วันที่ 7 รางวัลใหญ่แล้วเริ่มรอบใหม่
    lv = เลเวลตัวละคร (ยาเปลี่ยนตามเลเวล) */
+// fix52 ปฏิทินเช็กอิน 30 วัน (ไม่ต้องเข้าติดกัน) · วันที่ 7/14/21/28 รางวัลพิเศษ · วันที่ 30 รางวัลใหญ่ แล้วเริ่มรอบใหม่
 export function loginReward(day, lv) {
   const hp = lv >= 60 ? 'white_potion' : lv >= 25 ? 'orange_potion' : 'red_potion';
   const sp = lv >= 50 ? 'mana_potion' : 'blue_potion';
@@ -210,11 +211,35 @@ export function loginReward(day, lv) {
   return [
     { items: [[hp, 10]], zeny: z(1000) },
     { items: [['return_scroll', 2], ['warp_leaf', 5]], zeny: 0 },
+    { items: [[sp, 5]], zeny: 0 },
     { items: [['exp_15', 1], [hp, 5]], zeny: 0 },
-    { items: [[sp, 5]], zeny: z(3000) },
-    { items: [['drop_15', 1], ['refine_w', 1], ['refine_a', 1]], zeny: 0 },
-    { items: [['exp_2', 1], ['festival_cake', 1]], zeny: 0 },
-    { items: [['refine_luck', 1], ['card_clover', 1], [hp, 20]], zeny: z(10000) },
-  ][Math.max(0, Math.min(6, day - 1))];
+    { items: [['refine_w', 1], ['refine_a', 1]], zeny: 0 },
+    { items: [], zeny: z(3000) },
+    { items: [['exp_2', 1], ['phoenix_feather', 1]], zeny: z(5000) },
+    { items: [[hp, 10]], zeny: 0 },
+    { items: [['drop_15', 1]], zeny: 0 },
+    { items: [[sp, 10]], zeny: 0 },
+    { items: [['adventurer_box', 1]], zeny: 0 },
+    { items: [['job_2', 1]], zeny: 0 },
+    { items: [[hp, 15]], zeny: z(2000) },
+    { items: [['refine_w', 2], ['refine_a', 2], ['egg_spot', 1]], zeny: 0 },
+    { items: [['exp_15', 2]], zeny: 0 },
+    { items: [[sp, 8]], zeny: 0 },
+    { items: [['return_scroll', 3], ['warp_leaf', 5]], zeny: 0 },
+    { items: [['festival_cake', 1]], zeny: 0 },
+    { items: [], zeny: z(5000) },
+    { items: [['drop_2', 1]], zeny: 0 },
+    { items: [['elixir', 1], ['exp_2', 2]], zeny: z(8000) },
+    { items: [[hp, 20]], zeny: 0 },
+    { items: [['adventurer_box', 2]], zeny: 0 },
+    { items: [['refine_w', 2], ['refine_a', 2]], zeny: 0 },
+    { items: [[sp, 10]], zeny: 0 },
+    { items: [['job_2', 1], ['exp_15', 1]], zeny: 0 },
+    { items: [['phoenix_feather', 2]], zeny: 0 },
+    { items: [['egg_moon', 1], ['drop_2', 1]], zeny: z(10000) },
+    { items: [['royal_jelly', 5]], zeny: 0 },
+    { items: [['refine_luck', 1], ['card_clover', 1], ['exp_3', 1], ['elixir', 2], [hp, 30]], zeny: z(30000) },
+  ][Math.max(0, Math.min(29, day - 1))];
 }
-export const LOGIN_DAYS = 7;
+export const LOGIN_DAYS = 30;
+export const LOGIN_MILESTONES = [7, 14, 21, 28];

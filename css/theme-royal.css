@@ -1,0 +1,287 @@
+/* fix52 ธีม UI "Royal Azure" ของ Everlevel — กรอบน้ำเงินกรมท่าขอบทอง · หัวหน้าต่างแถบน้ำเงิน · ปุ่มน้ำเงิน/ทอง · ช่องไอเทมสีกระดาษครีม
+   ทำด้วย CSS ล้วน (ไม่ใช้ภาพ) · ทับ skin.css · ปิดธีมได้โดยลบบรรทัด <link ... theme-royal.css> ใน index.html */
+:root {
+  --ra-navy: #13234a;
+  --ra-navy2: #0b1632;
+  --ra-navy3: #1d3266;
+  --ra-line: #d9b45e;
+  --ra-line2: #f6dc93;
+  --ra-deep: #5b4113;
+  --ra-cream: #f4ead2;
+  --ra-cream2: #e6d6ae;
+  --ra-ink: #2b2112;
+  --panel: rgba(16, 29, 62, 0.94);
+  --panel-solid: #13234a;
+  --edge: rgba(217, 180, 94, 0.55);
+  --edge-strong: rgba(246, 220, 147, 0.9);
+  --gold: #ffd56e;
+  --muted: #b9c6e4;
+}
+
+/* ---------- กรอบหน้าต่าง ---------- */
+.panel {
+  border: 2px solid var(--ra-line) !important; border-image: none !important; border-radius: 10px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38px),
+    radial-gradient(120% 80% at 50% 0%, #1c3170 0%, rgba(28, 49, 112, 0) 70%),
+    linear-gradient(180deg, var(--ra-navy) 0%, var(--ra-navy2) 100%) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(10, 16, 40, 0.9), inset 0 0 0 3px rgba(246, 220, 147, 0.28),
+    0 0 0 1px #3a2a0c, 0 10px 26px rgba(4, 8, 24, 0.6) !important;
+  filter: none !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+body.touch .panel { background: linear-gradient(180deg, var(--ra-navy) 0%, var(--ra-navy2) 100%) !important; }
+/* มุมประดับเพชรทองบนกรอบหน้าต่างใหญ่ (หน้าต่างที่มีหัวเรื่อง) */
+.panel:has(> .st-head) { position: relative; }
+.panel:has(> .st-head)::before, .panel:has(> .st-head)::after {
+  content: ""; position: absolute; top: -7px; width: 12px; height: 12px; transform: rotate(45deg); pointer-events: none; z-index: 2;
+  background: linear-gradient(135deg, var(--ra-line2), var(--ra-line) 55%, var(--ra-deep));
+  box-shadow: 0 0 0 1px #3a2a0c, 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.panel:has(> .st-head)::before { left: -7px; }
+.panel:has(> .st-head)::after { right: -7px; }
+
+/* ---------- หัวหน้าต่าง: แถบน้ำเงินมีเส้นทองใต้หัว ---------- */
+.st-head {
+  margin: -2px -2px 10px; padding: 8px 10px 9px 14px; border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(180deg, #24418c 0%, #172d66 55%, #10224f 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -2px 0 var(--ra-line), 0 2px 0 rgba(0, 0, 0, 0.35);
+  align-items: center !important;
+}
+.st-head h2 {
+  color: #fff6d8 !important; text-shadow: 0 2px 0 #0a1330, 0 0 8px rgba(255, 214, 110, 0.35);
+  letter-spacing: 0.05em;
+}
+.st-head h2::before { content: "◆ "; color: var(--ra-line); font-size: 0.7em; vertical-align: 0.15em; }
+.st-head p { color: #c9d6f5 !important; }
+
+/* ---------- ปุ่มปิด: สี่เหลี่ยมแดงขอบทอง ---------- */
+.st-close {
+  width: 30px !important; height: 30px !important; border-radius: 6px !important; padding: 0 !important;
+  color: #fff !important; font-weight: 700; font-size: 16px; line-height: 1;
+  background: linear-gradient(180deg, #e85a4a 0%, #b42a24 60%, #8a1a18 100%) !important;
+  border: 2px solid var(--ra-line) !important; border-image: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 0 #3a1008, 0 0 0 1px #3a2a0c !important;
+  text-shadow: 0 1px 0 #5a0c08;
+}
+.st-close:hover { filter: brightness(1.15); }
+
+/* ---------- ปุ่มทั่วไป: น้ำเงิน · ปุ่มหลัก: ทอง ---------- */
+.shop-btns button, .stor-foot button, .stor-act .go, .stepper button, .dlg-opt, .tm button:not(.slot):not(.st-close):not([role="tab"]):not(.wk-it),
+.cs-try button:not(.st-close), .d-actions button, .g-actions button, .tools button, .cam-btns button {
+  border: 1.5px solid var(--ra-line) !important; border-image: none !important; border-radius: 7px !important;
+  background: linear-gradient(180deg, #3f69c9 0%, #2a4ea6 50%, #1d3a82 100%) !important;
+  color: #fff !important; text-shadow: 0 1px 0 #0b1a44;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 0 #0a1330 !important;
+  image-rendering: auto !important; filter: none;
+}
+.shop-btns .primary, .stor-act .go, .tm button.primary, .cs-try .primary, .d-actions .primary, .g-actions .primary, .dlg-opt.primary {
+  background: linear-gradient(180deg, #ffe7a0 0%, #f2c55a 45%, #c98f26 100%) !important;
+  color: var(--ra-ink) !important; text-shadow: 0 1px 0 rgba(255, 245, 210, 0.7); border-color: #8a5e14 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 0 #5b3e0c !important; filter: none !important;
+}
+.shop-btns button:hover, .stor-foot button:hover, .d-actions button:hover, .g-actions button:hover, .dlg-opt:hover, .tools button:hover, .cam-btns button:hover { filter: brightness(1.12) !important; }
+.shop-btns button:disabled, .d-actions button:disabled, .g-actions button:disabled { filter: grayscale(0.7) brightness(0.8) !important; }
+.tools button, .menu-btn { min-width: 0; }
+
+/* ---------- แท็บ ---------- */
+.inv-tabs button {
+  border: 1.5px solid rgba(217, 180, 94, 0.55) !important; border-image: none !important; border-radius: 7px !important;
+  background: linear-gradient(180deg, #1f3672, #142757) !important; color: #c9d6f5 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.inv-tabs button[aria-selected="true"] {
+  background: linear-gradient(180deg, #ffe7a0 0%, #f2c55a 50%, #d39a30 100%) !important; color: var(--ra-ink) !important;
+  border-color: #8a5e14 !important; filter: none !important; text-shadow: none;
+}
+
+/* ---------- ช่องไอเทม: กระดาษครีมขอบน้ำตาล (ไอคอนพิกเซลเด่นบนพื้นสว่าง) ---------- */
+.slot {
+  background: linear-gradient(180deg, #fbf3df 0%, var(--ra-cream) 55%, var(--ra-cream2) 100%) !important;
+  border: 1.5px solid #9a7a44 !important; border-radius: 6px !important;
+  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 0 rgba(120, 90, 40, 0.18), 0 1px 0 rgba(0, 0, 0, 0.35) !important;
+  image-rendering: auto !important;
+}
+.slot.empty { opacity: 1 !important; background: linear-gradient(180deg, #2a3f78, #1c2e5e) !important; border-color: rgba(217, 180, 94, 0.35) !important; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35) !important; }
+.slot.sel { outline: 2px solid #ffcf4a !important; outline-offset: 0 !important; box-shadow: 0 0 0 3px rgba(255, 207, 74, 0.35), inset 0 1px 0 #fff !important; filter: none !important; }
+.slot .n, .slot b, .slot .qty { color: #fff; text-shadow: 0 0 2px #000, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000; }
+
+/* ปุ่มลัดสกิล/ไอเทม (แถบล่าง) */
+.hk {
+  background: radial-gradient(circle at 50% 35%, #2e4f9e, #152a5e 70%) !important;
+  border: 1.5px solid var(--ra-line) !important; border-radius: 8px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 0 #0a1330 !important;
+}
+
+/* ---------- แถบเลือด/มานา: หนาขึ้น มีกรอบทอง ---------- */
+.char .bar, .st-levels .bar {
+  height: 11px !important; border-radius: 6px !important; background: #0a1230 !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(217, 180, 94, 0.6) !important;
+}
+.bar.hp > i { background: linear-gradient(180deg, #ff9aa6 0%, #f04a5e 45%, #b81e34 100%) !important; }
+.bar.sp > i { background: linear-gradient(180deg, #a8ceff 0%, #4f8ff5 45%, #2457c4 100%) !important; }
+.char .name { color: #fff6d8 !important; text-shadow: 0 2px 0 #0a1330; }
+
+/* ---------- กรอบรูปอาชีพ: เหรียญทองวงแหวนน้ำเงิน ---------- */
+.crest::after { background: none !important; inset: -4px !important; border-radius: 50%; box-shadow: 0 0 0 3px var(--ra-line), 0 0 0 5px #0b1632, 0 0 0 6px rgba(246, 220, 147, 0.5); }
+
+/* ---------- แถบไอคอนด้านบน ---------- */
+.tb-btn span {
+  background: linear-gradient(180deg, #213d82, #12245a) !important; color: #fff6d8;
+  box-shadow: 0 0 0 1.5px var(--ra-line), 0 2px 0 rgba(0, 0, 0, 0.45) !important; border-radius: 6px !important;
+}
+.tb-badge { background: linear-gradient(180deg, #ff6a5a, #d42a2a) !important; }
+
+/* ---------- แผนที่มุมขวา ---------- */
+.mini.panel #mapName { color: #fff6d8; text-shadow: 0 2px 0 #0a1330; }
+#minimap { border-radius: 6px !important; box-shadow: 0 0 0 2px var(--ra-line), 0 0 0 4px #0b1632 !important; }
+
+/* ---------- แชต / คำอธิบายปุ่ม ---------- */
+.chat.panel, .help.panel { background: linear-gradient(180deg, rgba(14, 26, 58, 0.82), rgba(8, 15, 36, 0.82)) !important; border-width: 1.5px !important; }
+.help kbd { background: linear-gradient(180deg, #2f56b0, #1c3a82); border-color: var(--ra-line); color: #fff; }
+
+/* ---------- ตัวเลื่อน ---------- */
+.panel ::-webkit-scrollbar { width: 9px; height: 9px; }
+.panel ::-webkit-scrollbar-track { background: #0a1230; border-radius: 6px; }
+.panel ::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #f2c55a, #b98328); border-radius: 6px; border: 2px solid #0a1230; }
+
+/* ================= fix52 ปฏิทินเช็กอิน 30 วัน ================= */
+.checkinw { width: 780px; max-height: calc(100% - 90px); top: calc(40px + env(safe-area-inset-top, 0px)); }
+.checkinw .st-head h2::before { content: "📅 "; }
+.ci-info { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 6px 10px; border-radius: 8px; background: var(--ra-cream); color: var(--ra-ink); font-size: 12px; box-shadow: inset 0 0 0 1px #b99a5c; }
+.ci-reset { color: #6a5530; }
+.ci-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; padding: 8px; border-radius: 10px; background: linear-gradient(180deg, #eef3fb, #dfe7f4); box-shadow: inset 0 0 0 1.5px #9fb1d6; }
+.ci-day {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 84px; padding: 5px 3px 6px; border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff, #f0f3f9); color: #22304f; box-shadow: inset 0 0 0 1.5px #c3cee4, 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+.ci-day > b { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.ci-day > b em { font-style: normal; font-size: 10px; padding: 0 5px; border-radius: 4px; background: #d8322e; color: #fff; margin-left: 2px; }
+.ci-rw { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; }
+.ci-it { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.ci-it img { width: 30px; height: 30px; image-rendering: pixelated; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.25)); }
+.ci-it small { font-size: 10.5px; font-weight: 600; color: #22304f; font-variant-numeric: tabular-nums; }
+.ci-coin { display: block; width: 26px; height: 26px; margin: 2px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff4c8, #f2c55a 45%, #b07a1c 100%); box-shadow: inset 0 0 0 2px #8a5e14, inset 0 0 0 4px rgba(255, 240, 190, 0.7); }
+.ci-day.mile { background: linear-gradient(180deg, #fff6dc, #f8e3a8); box-shadow: inset 0 0 0 1.5px #d6a845, 0 1px 0 rgba(0, 0, 0, 0.12); }
+.ci-day.grand { background: linear-gradient(180deg, #ffe7a0, #f2c55a 60%, #d39a30); box-shadow: inset 0 0 0 2px #8a5e14, 0 0 10px rgba(255, 200, 80, 0.6); }
+.ci-day.grand > b { color: #3a2508; }
+.ci-day.done { background: linear-gradient(180deg, #e8f7e4, #c9ebc0); box-shadow: inset 0 0 0 1.5px #6cbf6a; }
+.ci-day.done .ci-rw { opacity: 0.35; }
+.ci-ok { position: absolute; left: 50%; top: 24px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; font-weight: 700; color: #fff; line-height: 1; pointer-events: none; background: radial-gradient(circle at 35% 30%, #7be37a, #2c9a3e); box-shadow: 0 2px 0 #1e6a2a, 0 0 0 2px #fff; }
+.ci-ok small { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 10px; font-weight: 600; padding: 1px 8px; border-radius: 5px; background: #2c9a3e; color: #fff; }
+.ci-day.now { background: linear-gradient(180deg, #f2f7ff, #dbe8ff); box-shadow: inset 0 0 0 2.5px #3f7be0, 0 0 12px rgba(63, 123, 224, 0.55); animation: ciPulse 1.4s ease-in-out infinite; }
+.ci-now { margin-top: auto; font-size: 10.5px; font-weight: 700; padding: 1px 8px; border-radius: 5px; background: linear-gradient(180deg, #4d8df0, #2a5fc4); color: #fff; }
+@keyframes ciPulse { 50% { box-shadow: inset 0 0 0 2.5px #3f7be0, 0 0 20px rgba(63, 123, 224, 0.85); } }
+.ci-foot { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--ra-cream); color: var(--ra-ink); box-shadow: inset 0 0 0 1.5px #b99a5c; }
+.ci-today { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ci-today small { font-size: 11.5px; color: #6a5530; }
+.ci-today .ci-it small { color: var(--ra-ink); }
+.ci-gift { flex: none; width: 40px; height: 40px; border-radius: 8px; background:
+  linear-gradient(90deg, transparent 43%, #ffd56e 43%, #ffd56e 57%, transparent 57%),
+  linear-gradient(180deg, transparent 38%, #ffd56e 38%, #ffd56e 50%, transparent 50%),
+  linear-gradient(180deg, #ef4a4a, #b4222a); box-shadow: inset 0 0 0 2px #6a1010; }
+.ci-prog b { display: block; font-size: 12px; font-weight: 600; }
+.ci-bar { height: 10px; margin: 4px 0 2px; border-radius: 6px; background: #d9cfb6; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3); overflow: hidden; }
+.ci-bar > i { display: block; height: 100%; background: linear-gradient(180deg, #8fc0ff, #3f7be0); border-radius: 6px; }
+.ci-n { font-size: 11px; color: #6a5530; }
+.ci-claim {
+  font: inherit; font-weight: 700; font-size: 15px; padding: 10px 26px; border-radius: 8px; cursor: pointer; color: #fff;
+  border: 2px solid #1c3a82; background: linear-gradient(180deg, #5a95f5, #2f62d0 55%, #2350b0);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 3px 0 #13285c; text-shadow: 0 1px 0 #0b1a44;
+}
+.ci-claim:hover:not(:disabled) { filter: brightness(1.1); }
+.ci-claim:disabled { cursor: default; background: linear-gradient(180deg, #9aa6bd, #77839c); border-color: #5c6680; box-shadow: 0 2px 0 #3f475c; }
+@media (max-width: 760px) {
+  .checkinw { padding: 8px 10px; gap: 6px; }
+  .ci-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 5px; }
+  .ci-day { min-height: 60px; padding: 3px 2px 4px; }
+  .ci-foot { grid-template-columns: minmax(0, 1fr) auto; }
+  .ci-prog { display: none; }
+}
+/* จอไม่สูง (โน้ตบุ๊ก): ตาราง 10 คอลัมน์ × 3 แถว ให้เห็นครบไม่ต้องเลื่อน */
+@media (max-height: 820px) and (min-width: 761px) {
+  .checkinw { width: min(980px, calc(100% - 24px)); top: calc(30px + env(safe-area-inset-top, 0px)); }
+  .ci-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; padding: 6px; }
+  .ci-day { min-height: 0; padding: 3px 2px 5px; }
+  .ci-day > b { font-size: 11px; }
+  .ci-day > b em { display: none; }
+  .ci-rw { flex-wrap: nowrap; }
+  .ci-it img { width: 26px; height: 26px; }
+  .ci-coin { width: 22px; height: 22px; }
+  .ci-ok { top: 20px; width: 30px; height: 30px; font-size: 17px; }
+  .ci-ok small { top: 33px; font-size: 9px; }
+}
+/* มือถือแนวนอน (จอเตี้ย): ตาราง 10 คอลัมน์ × 3 แถว ให้เห็นครบในจอเดียว */
+@media (max-height: 520px) {
+  .checkinw { width: min(900px, calc(100% - 16px)); top: calc(4px + env(safe-area-inset-top, 0px)); max-height: calc(100% - 8px); padding: 6px 10px 8px; gap: 5px; }
+  .checkinw .st-head { padding: 4px 10px 5px 12px; margin-bottom: 2px; }
+  .checkinw .st-head p, .ci-reset { display: none; }
+  .ci-info { padding: 3px 8px; font-size: 11px; }
+  .ci-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; padding: 4px; }
+  .ci-day { min-height: 0; padding: 2px 1px 3px; gap: 1px; }
+  .ci-day > b { font-size: 9.5px; }
+  .ci-day > b em { display: none; }
+  .ci-rw { flex-wrap: nowrap; gap: 0 2px; }
+  .ci-it img { width: 20px; height: 20px; }
+  .ci-coin { width: 16px; height: 16px; margin: 2px; }
+  .ci-it small { font-size: 8.5px; }
+  .ci-ok { top: 14px; width: 26px; height: 26px; font-size: 15px; }
+  .ci-ok small { display: none; }
+  .ci-now { font-size: 9px; padding: 0 4px; }
+  .ci-foot { grid-template-columns: minmax(0, 1fr) auto; padding: 5px 8px; gap: 8px; }
+  .ci-prog { display: none; }
+  .ci-gift { width: 30px; height: 30px; }
+  .ci-claim { padding: 7px 18px; font-size: 13px; }
+}
+
+/* ================= fix52 ปุ่มมือถือ: จอยสติ๊กวงทอง · ปุ่มสกิลกลมเรียงโค้ง · ปุ่มโจมตีใหญ่ ================= */
+body.touch .joystick {
+  background:
+    radial-gradient(circle, rgba(22, 40, 92, 0.15) 0 38%, rgba(16, 30, 72, 0.55) 39% 100%) !important;
+  border: 3px solid rgba(217, 180, 94, 0.85) !important;
+  box-shadow: inset 0 0 0 6px rgba(10, 18, 44, 0.45), inset 0 0 0 7.5px rgba(246, 220, 147, 0.45), 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+/* ลูกศร 4 ทิศรอบจอย */
+body.touch .joystick::before {
+  content: ""; position: absolute; inset: 7px; border-radius: 50%; pointer-events: none;
+  background:
+    linear-gradient(135deg, transparent 47%, rgba(246, 220, 147, 0.9) 47% 53%, transparent 53%) top center / 14px 9px no-repeat;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23f6dc93' stroke='%233a2a0c' stroke-width='1.5'%3E%3Cpath d='M50 3 L58 13 L42 13Z'/%3E%3Cpath d='M50 97 L58 87 L42 87Z'/%3E%3Cpath d='M3 50 L13 42 L13 58Z'/%3E%3Cpath d='M97 50 L87 42 L87 58Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+body.touch .knob {
+  width: 56px !important; height: 56px !important; margin: -28px 0 0 -28px !important;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 6 L22.5 17.5 L34 20 L22.5 22.5 L20 34 L17.5 22.5 L6 20 L17.5 17.5Z' fill='%23eaf3ff' opacity='0.9'/%3E%3C/svg%3E") center / 60% no-repeat,
+    radial-gradient(circle at 38% 32%, #9cc6ff 0%, #3f7be0 45%, #1d3f9a 80%) !important;
+  border: 3px solid var(--ra-line) !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), 0 0 0 2px #0b1632, 0 4px 10px rgba(0, 0, 0, 0.5) !important;
+}
+body.touch .attack-btn {
+  color: #fff6d8 !important; font-weight: 700;
+  background:
+    radial-gradient(circle at 50% 38%, #3a62c4 0%, #1d3a86 55%, #0f2257 100%) !important;
+  border: 3px solid var(--ra-line) !important;
+  box-shadow: inset 0 0 0 4px rgba(10, 18, 44, 0.65), inset 0 0 0 5.5px rgba(246, 220, 147, 0.55), inset 0 3px 0 rgba(255, 255, 255, 0.25), 0 0 0 2px #0b1632, 0 6px 16px rgba(0, 0, 0, 0.5) !important;
+  text-shadow: 0 2px 0 #0a1330, 0 0 10px rgba(255, 214, 110, 0.6);
+}
+body.touch .attack-btn:active { filter: brightness(1.2); }
+#skillArc .hk {
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 36%, #2f55b0 0%, #183375 60%, #0e2155 100%) !important;
+  border: 2.5px solid var(--ra-line) !important;
+  box-shadow: inset 0 0 0 3px rgba(10, 18, 44, 0.55), inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 0 0 1.5px #0b1632, 0 4px 10px rgba(0, 0, 0, 0.45) !important;
+}
+#skillArc .hk img { border-radius: 50%; }
+#skillArc .hk .key {
+  top: -7px !important; padding: 0 5px; border-radius: 6px; font-size: 9px !important; line-height: 13px; color: #fff6d8;
+  background: linear-gradient(180deg, #2f56b0, #172f6c); box-shadow: 0 0 0 1px var(--ra-line);
+}
+#skillArc .hk .qty { bottom: -6px !important; padding: 0 5px; border-radius: 6px; background: rgba(10, 18, 44, 0.9); box-shadow: 0 0 0 1px var(--ra-line); color: #fff; }
+body.touch .hotbar .hk { border-radius: 50% !important; }
+body.touch .menu-btn {
+  background: radial-gradient(circle at 50% 36%, #2f55b0, #0e2155) !important; border: 2.5px solid var(--ra-line) !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 0 0 1.5px #0b1632, 0 4px 10px rgba(0, 0, 0, 0.45) !important; color: #fff6d8 !important;
+}

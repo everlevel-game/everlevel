@@ -1,33 +1,33 @@
 // v0.49 วิกิในเกม — คู่มือผู้เล่นใหม่ + ฐานข้อมูลทุกอย่างในเกม (สร้างจากข้อมูลเกมจริง อัปเดตตามเกมอัตโนมัติ)
 // หมวด: คู่มือ · อุปกรณ์ · การ์ด · มอนสเตอร์ · แผนที่ · ไอเทม · สัตว์เลี้ยง · อาชีพ & สกิล
-import { ITEMS, BASE_ITEMS, RARITY, EQUIP_SLOTS, describeBonus, weaponTypeName } from '../data/items.js?v=0.93.0-p4.74';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.74';
-import { MAPS } from '../data/maps/index.js?v=0.93.0-p4.74';
-import { CARDS, cardSlotName } from '../data/cards.js?v=0.93.0-p4.74';
-import { CARD_SETS } from '../data/collection.js?v=0.93.0-p4.74';
-import { JOBS, STAT_INFO, START_STAT_POINTS, MAX_STAT, MAX_BASE_LEVEL, JOB_CHANGE_JOB_LEVEL, JOB2_JOB_LEVEL, JOB3_JOB_LEVEL, JOB3_BASE_LEVEL, jobTier, STAT_RESET_FREE_LEVEL, baseExpToNext, statPointsForLevel, statCost } from '../data/progression.js?v=0.93.0-p4.74';
-import { SKILLS, KIND_NAME, skillSp } from '../data/skills.js?v=0.93.0-p4.74';
-import { REFINE_RATE, REFINE_MAX, SAFE_LIMIT, BREAK_FROM, LUCK_BONUS, LUCK_CAP, boostedRate, canRefine, refineBonus, refineFee } from '../data/refine.js?v=0.93.0-p4.74';
-import { PETS, PET_ORDER, PET_RARITY, TIER_STATS, STAR_MAX, STAR_BONUS } from '../data/pets.js?v=0.93.0-p4.74';
-import { CONSUMABLES, USE_CATS } from '../data/consumables.js?v=0.93.0-p4.74';
-import { SHOPS, SELL_RATE, SELL_RATE_EQUIP, STORAGE_CAPACITY, sellPrice } from '../data/shops.js?v=0.93.0-p4.74';
-import { WORLD_BOSSES } from '../data/events.js?v=0.93.0-p4.74';
-import { CAVE, TOWER } from '../data/dungeons.js?v=0.93.0-p4.74';
-import { RESPAWN_MUL, SPAWN_MUL } from '../systems/MonsterAI.js?v=0.93.0-p4.74';
-import { rollFits } from '../data/affixes.js?v=0.93.0-p4.74';
-import { statsToBonus } from '../data/affixes.js?v=0.93.0-p4.74';
-import { VIP_PERKS } from './CashShop.js?v=0.93.0-p4.74';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.74';
-import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.74';
-import { petThumb } from '../render/PetThumbs.js?v=0.93.0-p4.74';
+import { ITEMS, BASE_ITEMS, RARITY, EQUIP_SLOTS, describeBonus, weaponTypeName } from '../data/items.js?v=0.93.0-p4.79';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.79';
+import { MAPS } from '../data/maps/index.js?v=0.93.0-p4.79';
+import { CARDS, cardSlotName } from '../data/cards.js?v=0.93.0-p4.79';
+import { CARD_SETS } from '../data/collection.js?v=0.93.0-p4.79';
+import { JOBS, STAT_INFO, START_STAT_POINTS, MAX_STAT, MAX_BASE_LEVEL, JOB_CHANGE_JOB_LEVEL, JOB2_JOB_LEVEL, JOB3_JOB_LEVEL, JOB3_BASE_LEVEL, jobTier, STAT_RESET_FREE_LEVEL, baseExpToNext, statPointsForLevel, statCost } from '../data/progression.js?v=0.93.0-p4.79';
+import { SKILLS, KIND_NAME, skillSp } from '../data/skills.js?v=0.93.0-p4.79';
+import { REFINE_RATE, REFINE_MAX, SAFE_LIMIT, BREAK_FROM, LUCK_BONUS, LUCK_CAP, boostedRate, canRefine, refineBonus, refineFee } from '../data/refine.js?v=0.93.0-p4.79';
+import { PETS, PET_ORDER, PET_RARITY, TIER_STATS, STAR_MAX, STAR_BONUS } from '../data/pets.js?v=0.93.0-p4.79';
+import { CONSUMABLES, USE_CATS } from '../data/consumables.js?v=0.93.0-p4.79';
+import { SHOPS, SELL_RATE, SELL_RATE_EQUIP, STORAGE_CAPACITY, sellPrice } from '../data/shops.js?v=0.93.0-p4.79';
+import { WORLD_BOSSES } from '../data/events.js?v=0.93.0-p4.79';
+import { CAVE, TOWER } from '../data/dungeons.js?v=0.93.0-p4.79';
+import { RESPAWN_MUL, SPAWN_MUL } from '../systems/MonsterAI.js?v=0.93.0-p4.79';
+import { rollFits } from '../data/affixes.js?v=0.93.0-p4.79';
+import { statsToBonus } from '../data/affixes.js?v=0.93.0-p4.79';
+import { VIP_PERKS } from './CashShop.js?v=0.93.0-p4.79';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.79';
+import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.79';
+import { petThumb } from '../render/PetThumbs.js?v=0.93.0-p4.79';
 // v0.77 คู่มือระบบใหม่ (ภารกิจรายวัน · ดันเจี้ยนปาร์ตี้ · อันดับฤดูกาล · ฉายา · หลอมนิรันดร์กาล)
-import { DAILY_TASKS, DAILY_COUNT, DAILY_REROLLS, DAILY_STREAK_BIG } from '../data/daily.js?v=0.93.0-p4.74';
-import { PD, PD_SHOP, PD_REWARD_TEXT } from '../data/partyDungeon.js?v=0.93.0-p4.74';
-import { SEASON_TITLES, SEASON_CAT_NAME, MAX_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.74';
-import { ETERNAL_LINES, ETERNAL_SLOTS, ETERNAL_RECIPE, eternalId, LUCK_STEP, LUCK_MAX, SHARD_DROPS } from '../data/eternal.js?v=0.93.0-p4.74';
-import { AR, AR_TIERS, AR_SHOP, AR_SEASON_REWARD } from '../data/arena.js?v=0.93.0-p4.74';   // v0.78
-import { FESTIVALS, FEST_SHOP, FEST_AURA_COST } from '../data/festivals.js?v=0.93.0-p4.74';   // v0.79
-import { COSTUME_BY_ID } from '../data/costumes.js?v=0.93.0-p4.74';
+import { DAILY_TASKS, DAILY_COUNT, DAILY_REROLLS, DAILY_STREAK_BIG } from '../data/daily.js?v=0.93.0-p4.79';
+import { PD, PD_SHOP, PD_REWARD_TEXT } from '../data/partyDungeon.js?v=0.93.0-p4.79';
+import { SEASON_TITLES, SEASON_CAT_NAME, MAX_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.79';
+import { ETERNAL_LINES, ETERNAL_SLOTS, ETERNAL_RECIPE, eternalId, LUCK_STEP, LUCK_MAX, SHARD_DROPS } from '../data/eternal.js?v=0.93.0-p4.79';
+import { AR, AR_TIERS, AR_SHOP, AR_SEASON_REWARD } from '../data/arena.js?v=0.93.0-p4.79';   // v0.78
+import { FESTIVALS, FEST_SHOP, FEST_AURA_COST } from '../data/festivals.js?v=0.93.0-p4.79';   // v0.79
+import { COSTUME_BY_ID } from '../data/costumes.js?v=0.93.0-p4.79';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = (n) => Math.floor(+n || 0).toLocaleString('en-US');

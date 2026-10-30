@@ -1,14 +1,14 @@
 // สมุดสะสม (v0.18 · ปุ่ม B / 📖) — เป้าหมาย · สมุดมอนสเตอร์ · ความสำเร็จและฉายา · อัลบั้มการ์ด · เช็กอินรายวัน
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.74';
-import { ITEMS, describeBonus } from '../data/items.js?v=0.93.0-p4.74';
-import { CARDS } from '../data/cards.js?v=0.93.0-p4.74';
-import { CARD_COMBOS, effectText } from '../data/cardCatalog.js?v=0.93.0-p4.74';
-import { BOOK, BOOK_ORDER, bookTier, bookTiers, CARD_SETS, CARD_TOTAL, ACHIEVEMENTS, ACH_CATS, TIER_LABEL, loginReward, LOGIN_DAYS } from '../data/collection.js?v=0.93.0-p4.74';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.74';
-import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.74';
-import { localDay } from '../systems/Collection.js?v=0.93.0-p4.74';
-import { honorInner, injectTitleCss } from './TitleFx.js?v=0.93.0-p4.74';
-import { titlesOf, holderTitles, SEASON_TITLES, MAX_TITLES, seasonInfo } from '../data/seasonTitles.js?v=0.93.0-p4.74';   // v0.76
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.79';
+import { ITEMS, describeBonus } from '../data/items.js?v=0.93.0-p4.79';
+import { CARDS } from '../data/cards.js?v=0.93.0-p4.79';
+import { CARD_COMBOS, effectText } from '../data/cardCatalog.js?v=0.93.0-p4.79';
+import { BOOK, BOOK_ORDER, bookTier, bookTiers, CARD_SETS, CARD_TOTAL, ACHIEVEMENTS, ACH_CATS, TIER_LABEL, loginReward, LOGIN_DAYS } from '../data/collection.js?v=0.93.0-p4.79';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.79';
+import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.79';
+import { localDay } from '../systems/Collection.js?v=0.93.0-p4.79';
+import { honorInner, injectTitleCss } from './TitleFx.js?v=0.93.0-p4.79';
+import { titlesOf, holderTitles, SEASON_TITLES, MAX_TITLES, seasonInfo } from '../data/seasonTitles.js?v=0.93.0-p4.79';   // v0.76
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const num = (n) => Math.floor(n).toLocaleString('en-US');
@@ -45,6 +45,7 @@ export class CollectionWindow {
         this.g.hud.log(r === 'full' ? `ใส่ฉายาได้สูงสุด ${MAX_TITLES} อัน — ถอดอันใดอันหนึ่งก่อน` : r === 'on' ? `ใส่ฉายา "${name}" แล้ว` : id ? `ถอดฉายา "${name}" แล้ว` : 'ถอดฉายาทั้งหมดแล้ว', 'sys');
         this.render();
       }
+      if (e.target.closest('[data-ci]')) { this.toggle(false); this.g.checkinWin.toggle(true); return; }
       const m = e.target.closest('[data-mail]');
       if (m) { this.toggle(false); this.g.mailWin.toggle(true); }
     });
@@ -170,18 +171,11 @@ export class CollectionWindow {
 
   /* ---------- เช็กอินรายวัน ---------- */
   tab_daily(col, c) {
-    const ci = c.ci, pl = this.g.player, today = localDay(), checked = ci.last === today;
-    const cells = Array.from({ length: LOGIN_DAYS }, (_, i) => {
-      const d = i + 1, r = loginReward(d, pl.baseLevel);
-      const got = d <= ci.day && ci.day > 0, now = checked && d === ci.day;
-      const items = r.items.map(([id, q]) => `<span title="${esc(ITEMS[id].name)} x${q}"><img alt="" src="${iconURL(id)}"><small>x${q}</small></span>`).join('');
-      return `<div class="cw-day${got ? ' got' : ''}${now ? ' now' : ''}${d === LOGIN_DAYS ? ' big' : ''}"><b>วันที่ ${d}</b><div class="cw-dr">${items}</div>${r.zeny ? `<small>${num(r.zeny)} Z</small>` : ''}${got ? '<i aria-label="รับแล้ว">✔</i>' : ''}</div>`;
-    }).join('');
-    const unread = this.g.mailbox.list().filter((m) => m.sys && !this.g.mailbox.isClaimed(m)).length;
-    return `<section class="cw-sec"><h3>รางวัลเข้าเกม 7 วัน</h3>
-      <p class="cw-hint">เข้าเกมวันละครั้งนับเป็น 1 วัน (ไม่ต้องติดกัน) · วันที่ 7 รางวัลใหญ่แล้วเริ่มรอบใหม่ · ของส่งเข้ากล่องจดหมาย 📬</p>
-      <div class="cw-days">${cells}</div>
-      <p class="cw-today">${checked ? `✔ วันนี้เช็กอินแล้ว (วันที่ ${ci.day}/${LOGIN_DAYS})` : 'วันนี้ยังไม่ได้เช็กอิน'}${unread ? ` · มีรางวัลรอรับ ${unread} ฉบับ <button type="button" class="primary" data-mail="1">เปิดกล่องจดหมาย</button>` : ''}</p></section>
+    // fix52 ย้ายรางวัลไปหน้าปฏิทินเช็กอิน 30 วัน (กดรับในหน้านั้น)
+    const ci = c.ci, claimed = col.claimed();
+    return `<section class="cw-sec"><h3>ปฏิทินเช็กอิน ${LOGIN_DAYS} วัน</h3>
+      <p class="cw-hint">เข้าเกมวันละครั้งนับเป็น 1 วัน (ไม่ต้องติดกัน) · วันที่ 7 / 14 / 21 / 28 รางวัลพิเศษ · วันที่ ${LOGIN_DAYS} รางวัลใหญ่แล้วเริ่มรอบใหม่</p>
+      <p class="cw-today">รอบนี้ ${ci.day}/${LOGIN_DAYS} วัน · ${claimed ? '✔ รับรางวัลวันนี้แล้ว' : '🎁 มีรางวัลวันนี้รอรับ'} <button type="button" class="primary" data-ci="1">เปิดปฏิทินเช็กอิน</button></p></section>
       <section class="cw-sec"><h3>สถิติ</h3><div class="cw-stats"><span><b>${ci.count}</b>เช็กอินรวม (วัน)</span><span><b>${ci.streak}</b>ติดต่อกันตอนนี้</span><span><b>${ci.best}</b>ติดต่อกันสูงสุด</span></div>
       <p class="cw-hint">เช็กอินรวม 7 / 30 / 100 วัน และติดต่อกัน 7 วัน ได้ฉายาในหน้าความสำเร็จ</p></section>`;
   }

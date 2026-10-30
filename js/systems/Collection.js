@@ -1,11 +1,12 @@
-import { jobTier } from '../data/progression.js?v=0.93.0-p4.74';
+import { jobTier } from '../data/progression.js?v=0.93.0-p4.79';
 // ระบบสะสมและเป้าหมายระยะยาว (v0.18) — สมุดมอนสเตอร์ · ความสำเร็จ/ฉายา · อัลบั้มการ์ด · เช็กอินรายวัน
 // ข้อมูลอยู่ในเซฟตัวละคร (player.col) → ไม่ต้องตั้งค่าเซิร์ฟเวอร์เพิ่ม · โบนัสรวมอยู่ที่ player.colBonus (คิดรวมในค่าสถานะ)
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.74';
-import { CARDS } from '../data/cards.js?v=0.93.0-p4.74';
-import { ITEMS, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.74';
-import { titlesOf, holderTitles, MAX_TITLES, SEASON_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.74';   // v0.76
-import { BOOK, BOOK_ORDER, bookTier, bookTiers, CARD_SETS, ACHIEVEMENTS, ACH_BY_ID, ACH_COUNTED, MVP_CARDS, loginReward, LOGIN_DAYS } from '../data/collection.js?v=0.93.0-p4.74';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.79';
+import { CARDS } from '../data/cards.js?v=0.93.0-p4.79';
+import { ITEMS, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.79';
+import { MAX_ZENY } from '../data/shops.js?v=0.93.0-p4.79';
+import { titlesOf, holderTitles, MAX_TITLES, SEASON_TITLES } from '../data/seasonTitles.js?v=0.93.0-p4.79';   // v0.76
+import { BOOK, BOOK_ORDER, bookTier, bookTiers, CARD_SETS, ACHIEVEMENTS, ACH_BY_ID, ACH_COUNTED, MVP_CARDS, loginReward, LOGIN_DAYS } from '../data/collection.js?v=0.93.0-p4.79';
 
 const SET_OF = (o) => Object.keys(o);
 const addTo = (out, o) => { for (const [k, v] of Object.entries(o || {})) out[k] = +(((out[k] || 0) + v).toFixed(4)); return out; };
@@ -35,6 +36,9 @@ export function normCol(c) {
   o.title = o.titles[0] || null;
   const ci = c.ci && typeof c.ci === 'object' ? c.ci : {};
   o.ci = { last: typeof ci.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(ci.last) ? ci.last : '', count: int(ci.count, 99999), day: int(ci.day, LOGIN_DAYS), streak: int(ci.streak, 99999), best: int(ci.best, 99999), vip: typeof ci.vip === 'string' && /^\d{4}-\d\d-\d\d$/.test(ci.vip) ? ci.vip : '' };
+  // fix52 วันที่รับรางวัลเช็กอินล่าสุด (กดรับในหน้าปฏิทิน) · เซฟเก่าไม่มี = ถือว่ารับวันล่าสุดแล้ว (ระบบเดิมส่งเข้าจดหมายไปแล้ว)
+  o.ci.got = typeof ci.got === 'string' && /^\d{4}-\d\d-\d\d$/.test(ci.got) ? ci.got : o.ci.last;
+  if (o.ci.day > LOGIN_DAYS) o.ci.day = LOGIN_DAYS;
   return o;
 }
 
@@ -48,7 +52,7 @@ export class Collection {
 
   get pl() { return this.g.player; }
   get c() { return this.pl.col; }
-  changed() { if (this.onChange) this.onChange(); }
+  changed() { if (this.onChange) this.onChange(); if (this.g.checkinWin) this.g.checkinWin.render(); }   // fix52 ปฏิทินเช็กอิน
 
   // เริ่มเกม/โหลดตัวละครเสร็จ: เก็บการ์ดที่มีอยู่แล้ว · ปลดล็อกความสำเร็จที่ทำครบไว้ก่อนแล้ว (แจ้งรวมครั้งเดียว) · เช็กอินวันนี้
   start() {
@@ -210,17 +214,40 @@ export class Collection {
     c.best = Math.max(c.best, c.streak);
     c.last = today; c.count++;
     c.day = (c.day % LOGIN_DAYS) + 1;
-    const r = loginReward(c.day, this.pl.baseLevel);
-    this.sendMail({
-      id: `ci${c.count}-${today}`, sender: 'ปฏิทินเช็กอิน',
-      title: `รางวัลเช็กอินวันที่ ${c.day}/${LOGIN_DAYS}${c.day === LOGIN_DAYS ? ' 🎉' : ''}`,
-      body: `ขอบคุณที่แวะมาผจญภัยวันนี้! เช็กอินรวม ${c.count} วัน · ติดต่อกัน ${c.streak} วัน\n${c.day === LOGIN_DAYS ? 'ครบรอบ 7 วันแล้ว รับรางวัลใหญ่ไปเลย — พรุ่งนี้เริ่มรอบใหม่' : `อีก ${LOGIN_DAYS - c.day} วันจะได้รางวัลใหญ่วันที่ 7`}`,
-      items: r.items, zeny: r.zeny,
-    });
-    g.hud.log(`📅 เช็กอินวันที่ ${c.day}/${LOGIN_DAYS} (รวม ${c.count} วัน) — รางวัลส่งเข้ากล่องจดหมายแล้ว กด M เพื่อรับ`, 'lv');
+    g.hud.log(`📅 เช็กอินวันที่ ${c.day}/${LOGIN_DAYS} (รวม ${c.count} วัน) — เปิดปฏิทินเช็กอินเพื่อกดรับรางวัล`, 'lv');
+    if (g.checkinWin) setTimeout(() => { if (g.started && !this.claimed()) g.checkinWin.toggle(true); }, 1500);   // fix52 เด้งปฏิทินให้กดรับ
     g.dirty = true;
     this.evalT = 1;
     this.changed();
+  }
+
+  // fix52 รับรางวัลเช็กอินวันนี้ (กดในหน้าปฏิทิน) · กระเป๋าไม่พอ → ส่งเข้ากล่องจดหมายแทน · คืน { ok, msg }
+  claimed() { const c = this.c.ci; return !c.last || c.got === c.last; }
+  claimDay() {
+    const g = this.g, c = this.c.ci, pl = this.pl;
+    if (!c.last || !c.day) return { ok: false, msg: 'ยังไม่ได้เช็กอินวันนี้' };
+    if (this.claimed()) return { ok: false, msg: 'รับรางวัลวันนี้ไปแล้ว พรุ่งนี้มาใหม่นะ' };
+    const r = loginReward(c.day, pl.baseLevel), items = r.items.filter(([id]) => ITEMS[id]);
+    c.got = c.last;
+    let msg;
+    if (!items.length || pl.inventory.fits(items)) {
+      const got = [];
+      for (const [id, q] of items) { const n = pl.inventory.add(id, q, true); if (n) got.push(`${ITEMS[id].name} x${n}`); }
+      if (r.zeny) { pl.zeny = Math.min(MAX_ZENY, pl.zeny + r.zeny); got.push(`${r.zeny.toLocaleString('en-US')} Zeny`); }
+      msg = `📅 รับรางวัลเช็กอินวันที่ ${c.day}: ${got.join(' · ')}`;
+      g.hud.log(msg, 'lv');
+      g.sfx('levelUp', { gap: 0 });
+      g.gfx.floatText(pl, 'รับรางวัลเช็กอิน!', 'loot r-epic', { h: 2.2, life: 1.8, rise: 0.7, drift: false });
+      g.refreshItemsUI(); g.hud.setPlayer(pl); g.status.render();
+    } else {
+      this.sendMail({ id: `ci${c.count}-${c.last}`, sender: 'ปฏิทินเช็กอิน', title: `รางวัลเช็กอินวันที่ ${c.day}/${LOGIN_DAYS}`, body: 'กระเป๋าเต็มตอนกดรับ จึงส่งรางวัลมาทางจดหมาย', items: r.items, zeny: r.zeny });
+      msg = 'กระเป๋าไม่พอ — ส่งรางวัลเข้ากล่องจดหมายแล้ว (กด M)';
+      g.hud.log('📅 ' + msg, 'lv');
+    }
+    g.dirty = true;
+    if (g.saveNow) g.saveNow(false, true);   // บันทึกทันที กันรับซ้ำ
+    this.changed();
+    return { ok: true, msg };
   }
 
   // v0.45 VIP: เช็กอินคูณ 2 → ส่งรางวัลวันนี้ซ้ำอีกชุด (ครั้งเดียวต่อวัน · เรียกเมื่อรู้ว่าเป็น VIP)

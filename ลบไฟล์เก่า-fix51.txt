@@ -1,0 +1,5 @@
+ลบไฟล์เก่าเหล่านี้ออกจาก GitHub (fix51):
+assets/fashion/icons/w_dx_blackflame.png
+assets/fashion/wings/dx_blackflame_glow.png
+assets/fashion/wings/dx_blackflame_wing.png
+supabase/fashion_wings_v50.sql
