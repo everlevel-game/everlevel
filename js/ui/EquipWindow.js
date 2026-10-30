@@ -1,12 +1,12 @@
 // v0.89 หน้าดูตัวละคร — ช่องอุปกรณ์ซ้าย/ขวา ตัวละครยืนอยู่ตรงกลาง (หมุนดูได้ 8 ทิศ) · ความทนทาน · ค่าสถานะรวม
-import { ITEMS, RARITY, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.81';
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.81';
-import { SHEETS, liveSheet } from '../render/SheetChars.js?v=0.93.0-p4.81';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.81';
-import { duraOf, DURA_MAX, DURA_LOW } from '../data/durability.js?v=0.93.0-p4.81';
-import { duraBar } from './SmithWindow.js?v=0.93.0-p4.81';
-import { VERSION } from '../config.js?v=0.93.0-p4.81';
-import { recolorPixels } from '../data/outfits.js?v=0.93.0-p4.81';   // v0.91 สีชุด
+import { ITEMS, RARITY, itemMods, describeBonus } from '../data/items.js?v=0.93.0-p4.82';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.82';
+import { SHEETS, liveSheet } from '../render/SheetChars.js?v=0.93.0-p4.82';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.82';
+import { duraOf, DURA_MAX, DURA_LOW } from '../data/durability.js?v=0.93.0-p4.82';
+import { duraBar } from './SmithWindow.js?v=0.93.0-p4.82';
+import { VERSION } from '../config.js?v=0.93.0-p4.82';
+import { recolorPixels } from '../data/outfits.js?v=0.93.0-p4.82';   // v0.91 สีชุด
 
 const LEFT = [['head', 'หัว', '⛑'], ['weapon', 'อาวุธ', '⚔'], ['garment', 'ผ้าคลุม', '🧣'], ['accessory', 'เครื่องประดับ', '💍']];
 const RIGHT = [['body', 'ชุด', '🛡'], ['shield', 'มือรอง', '◈'], ['shoes', 'รองเท้า', '👢']];

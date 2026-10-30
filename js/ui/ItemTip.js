@@ -1,11 +1,11 @@
 // v0.94 กล่องรายละเอียดไอเทมแบบลอย (ชี้เมาส์ดู · มือถือแตะไอคอน) — ใช้ในตลาดซื้อขาย
-import { ITEMS, EQUIP_SLOTS, RARITY, describeBonus, canJobUse, itemMods, BASE_ITEMS } from '../data/items.js?v=0.93.0-p4.81';
-import { weaponLines, rollLine } from './WeaponInfo.js?v=0.93.0-p4.81';
-import { refineBonus } from '../data/refine.js?v=0.93.0-p4.81';
-import { CARDS, cardSlotName } from '../data/cards.js?v=0.93.0-p4.81';
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.81';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.81';
-import { upgradeInfo } from '../data/gearScore.js?v=0.93.0-p4.81';
+import { ITEMS, EQUIP_SLOTS, RARITY, describeBonus, canJobUse, itemMods, BASE_ITEMS } from '../data/items.js?v=0.93.0-p4.82';
+import { weaponLines, rollLine } from './WeaponInfo.js?v=0.93.0-p4.82';
+import { refineBonus } from '../data/refine.js?v=0.93.0-p4.82';
+import { CARDS, cardSlotName } from '../data/cards.js?v=0.93.0-p4.82';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.82';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.82';
+import { upgradeInfo } from '../data/gearScore.js?v=0.93.0-p4.82';
 
 const TYPE = { usable: 'ของใช้', equip: 'อุปกรณ์', etc: 'ของสะสม', card: 'การ์ด', box: 'กล่อง' };
 const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

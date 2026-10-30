@@ -1,14 +1,14 @@
 // หน้าต่างจดหมาย (v0.15 · ปุ่ม M / 📬) — อ่านจดหมาย · รับของ · เลือกชุดแฟชั่น/สัตว์เลี้ยง
 // แอดมิน: แท็บ "ส่งจดหมาย (GM)" ส่งไอเทม/Zeny/ตัวเลือกถึงทุกคนหรือระบุชื่อตัวละคร
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.81';
-import { SETS, COSTUMES, COSTUME_BY_ID } from '../data/costumes.js?v=0.93.0-p4.81';
-import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.81';
-import { PETS, PET_ORDER, PET_RARITY } from '../data/pets.js?v=0.93.0-p4.81';
-import { FASHION_RARITY } from '../data/fashionBoxes.js?v=0.93.0-p4.81';
-import { PICK_LABEL, MAIL_MAX_ITEMS, MAIL_MAX_ZENY, MAIL_MAX_GEMS, setById, setTier, hasGift } from '../data/mail.js?v=0.93.0-p4.81';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.81';
-import { petThumb } from '../render/PetThumbs.js?v=0.93.0-p4.81';
-import { requestThumb } from '../render/CostumeThumbs.js?v=0.93.0-p4.81';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.82';
+import { SETS, COSTUMES, COSTUME_BY_ID } from '../data/costumes.js?v=0.93.0-p4.82';
+import { TIER_RANK } from '../data/fashionBoxes.js?v=0.93.0-p4.82';
+import { PETS, PET_ORDER, PET_RARITY } from '../data/pets.js?v=0.93.0-p4.82';
+import { FASHION_RARITY } from '../data/fashionBoxes.js?v=0.93.0-p4.82';
+import { PICK_LABEL, MAIL_MAX_ITEMS, MAIL_MAX_ZENY, MAIL_MAX_GEMS, setById, setTier, hasGift } from '../data/mail.js?v=0.93.0-p4.82';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.82';
+import { petThumb } from '../render/PetThumbs.js?v=0.93.0-p4.82';
+import { requestThumb } from '../render/CostumeThumbs.js?v=0.93.0-p4.82';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtDate = (t) => (t ? new Date(t).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '');

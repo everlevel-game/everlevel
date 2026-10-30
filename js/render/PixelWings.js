@@ -1,9 +1,9 @@
 // v0.35: ปีกแฟชั่นภาพพิกเซล 8 ทิศ (จาก PixelLab) — แผ่นป้ายหันหากล้อง วางซ้อนหลัง/หน้าตัวละครพิกเซลตามทิศที่หัน
 // แผ่นภาพ assets/fashion/wings/<key>.png : 8 แถว (N·NE·E·SE·S·SW·W·NW) × F คอลัมน์ (เฟรมกระพือ) · ช่องละ cell px
 // ค่าในชิ้นแฟชั่น p = { px: key, cell, frames, fps, lift, scale }
-import { THREE } from './three.js?v=0.93.0-p4.81';
-import { VERSION } from '../config.js?v=0.93.0-p4.81';
-import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.81';
+import { THREE } from './three.js?v=0.93.0-p4.82';
+import { VERSION } from '../config.js?v=0.93.0-p4.82';
+import { lerpAngle, damp } from '../core/util.js?v=0.93.0-p4.82';
 
 const PXW = 3.55 / 96;   // หน่วยโลกต่อพิกเซล (เท่าตัวละครพิกเซล)
 const ROW = { n: 0, ne: 1, e: 2, se: 3, s: 4, sw: 5, w: 6, nw: 7 };
@@ -192,8 +192,9 @@ export class MeshWings {
     this.root = new THREE.Group(); scene.add(this.root);        // เอียงตามแผ่นตัวละคร (แกนตั้ง = แกนขึ้นของกล้อง)
     this.turn = new THREE.Group(); this.root.add(this.turn);     // หันตามทิศที่ตัวละครหัน
     this.back = new THREE.Group(); this.turn.add(this.back);     // จุดกลางแผ่นหลัง (สเกลพิกเซล → โลก)
-    const [w, h] = p.size || [116, 119], [px, py] = p.pivot || [28, 55];
-    this.geo = new THREE.PlaneGeometry(w * PXW, h * PXW); this.geo.translate((w / 2 - px) * PXW, (py - h / 2) * PXW, 0);   // โคนปีกที่จุดหมุน
+    // fix54 res = จำนวนพิกเซลภาพต่อ 1 พิกเซลเกม (2 = ละเอียดขึ้น 2 เท่า ขนาดบนจอเท่าเดิม)
+    const [w, h] = p.size || [116, 119], [px, py] = p.pivot || [28, 55], kr = PXW / (p.res || 1);
+    this.geo = new THREE.PlaneGeometry(w * kr, h * kr); this.geo.translate((w / 2 - px) * kr, (py - h / 2) * kr, 0);   // โคนปีกที่จุดหมุน
     this.sides = [1, -1].map((s) => {
       const pivot = new THREE.Group(); pivot.position.set(s * 4.5 * PXW, 0, 0); this.back.add(pivot);   // สะบักซ้าย/ขวา
       const wing = new THREE.Mesh(this.geo, this.mat), glow = new THREE.Mesh(this.geo, this.gmat);
@@ -287,7 +288,7 @@ export class MeshWings {
       const i = (Math.random() * this.N) | 0, sd = this.sides[(Math.random() * 2) | 0];
       this._w.set((10 + Math.random() * 60) * PXW, (Math.random() * 60 - 40) * PXW, 0); sd.wing.localToWorld(this._w);
       this.pos[i * 3] = this._w.x; this.pos[i * 3 + 1] = this._w.y; this.pos[i * 3 + 2] = this._w.z;
-      this.vel[i].set((Math.random() - 0.5) * 0.2, 0.15 + Math.random() * 0.25, (Math.random() - 0.5) * 0.2); this.life[i] = 1 + Math.random();
+      this.vel[i].set((Math.random() - 0.5) * 0.2, (p.fall ? -1 : 1) * (0.15 + Math.random() * 0.25), (Math.random() - 0.5) * 0.2); this.life[i] = 1 + Math.random();
     }
     for (let i = 0; i < this.N; i++) {
       if (this.life[i] <= 0) { this.pos[i * 3 + 1] = -99; continue; }
