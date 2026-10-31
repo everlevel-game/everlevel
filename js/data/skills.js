@@ -6,9 +6,9 @@
 //       ดาเมจจริงต่อฮิต = (ตัวคูณของฮิตนั้นในเอฟเฟกต์ / ref) × mult(lv)
 //       lock = วินาทีที่ยืนนิ่งระหว่างท่า · delay = หน่วงก่อนใช้สกิลถัดไป (after-cast delay)
 // fx (แบบเก่า v0.6) ยังใช้กับสกิลที่ไม่มี vfx: strike | nova | bolt | storm | arrows | rain | heal | buff
-import { JOBS } from './progression.js?v=0.93.0-p4.86';
-import { JOB2_SKILLS, LEGACY_JOB2 } from './job2Skills.js?v=0.93.0-p4.86';
-import { job3Skills, JOB3_PARTY } from './job3Skills.js?v=0.93.0-p4.86';   // v0.85 อาชีพคลาส 3
+import { JOBS } from './progression.js?v=0.93.0-p4.88';
+import { JOB2_SKILLS, LEGACY_JOB2 } from './job2Skills.js?v=0.93.0-p4.88';
+import { job3Skills, JOB3_PARTY } from './job3Skills.js?v=0.93.0-p4.88';   // v0.85 อาชีพคลาส 3
 export { LEGACY_JOB2 };
 
 export function healAmount(lv, pl) {
@@ -51,10 +51,10 @@ export const SKILLS = {
   triple_slash: {
     job: 'swordsman', name: 'ฟันสามจังหวะ', maxLv: 10, kind: 'active', target: 'enemy', icon: ['tripleslash', '#ff7a3a'],
     sp: (lv) => 7 + lv, cast: 0, cd: 0.6, range: 'weapon', vfx: 'sw_triple_slash', ref: 1, lock: 0.6, delay: 0.35, engage: true, element: 'fire', hitBonus: (lv) => lv * 4,
-    mult: (lv) => 0.6 + lv * 0.08,
+    mult: (lv) => 0.5 + lv * 0.06,   // fix59 เดิม 0.6 + lv×0.08 (คุ้ม SP สุดในเกม)
     nf: { anim: 'melee', animDur: 0.6, hits: [{ t: 0.18, m: 1 }, { t: 0.4, m: 1 }, { t: 0.65, r: 1.6, m: 2.6, shake: 0.35, stop: 0.07 }] },
     desc: 'ก้าวเข้าประชิดแล้วฟันเพลิง 3 จังหวะ ฟันสุดท้ายแรงที่สุดและลามโดนศัตรูข้างเป้า — สกิลโจมตีหลัก',
-    effect: (lv) => `${pct(0.6 + lv * 0.08)}% + ${pct(0.6 + lv * 0.08)}% + ${pct((0.6 + lv * 0.08) * 2.6)}% ATK (ฟันสุดท้ายรอบเป้า 1.6 ช่อง) · HIT +${lv * 4}`,
+    effect: (lv) => `${pct(0.5 + lv * 0.06)}% + ${pct(0.5 + lv * 0.06)}% + ${pct((0.5 + lv * 0.06) * 2.6)}% ATK (ฟันสุดท้ายรอบเป้า 1.6 ช่อง) · HIT +${lv * 4}`,
   },
   flame_wave: {
     job: 'swordsman', name: 'คลื่นดาบเพลิง', maxLv: 10, kind: 'active', target: 'enemy', icon: ['flamewave', '#ff5a2a'], req: { triple_slash: 3 },
@@ -233,7 +233,7 @@ export const SKILLS = {
   },
   healing_pillar: {
     job: 'acolyte', name: 'ลำแสงฟื้นฟู', maxLv: 10, kind: 'active', target: 'self', icon: ['pillar', '#fff0a0'],
-    sp: (lv) => 12 + lv * 3, cast: 0, cd: 1, vfx: 'ac_healing_pillar', lock: 0.3, delay: 0.21, heal: (lv, pl) => Math.round(healAmount(lv, pl) * 1.4),
+    sp: (lv) => 12 + lv * 3, cast: 0, cd: 3, vfx: 'ac_healing_pillar', lock: 0.3, delay: 0.21, heal: (lv, pl) => Math.round(healAmount(lv, pl) * 1.4),
     nf: { at: 'self', anim: 'cast', flashes: [{ t: 0.28, a: 0.12, color: '#ffe496' }], heals: [0.32] },
     desc: 'ลำแสงทองส่องลงจากฟ้าตรงร่าง ขนนกแสงโปรยรอบตัว ฟื้นฟูบาดแผลก้อนใหญ่ ยิ่ง Base Lv และ INT สูงยิ่งฟื้นมาก — ฮีลหลัก',
     effect: (lv, pl) => `ฟื้น HP ${Math.round(healAmount(lv, pl) * 1.4)}`,

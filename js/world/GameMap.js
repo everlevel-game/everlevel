@@ -1,8 +1,8 @@
 // แผนที่ (ตรรกะ): พื้น, จุดชน, วัตถุ, ประตูมิติ — ไม่ยุ่งกับการวาด
-import { TILE } from '../config.js?v=0.93.0-p4.86';
-import { T, TILE_INFO } from '../data/tileTypes.js?v=0.93.0-p4.86';
-import { footprint } from '../data/objects.js?v=0.93.0-p4.86';
-import { rng } from '../core/util.js?v=0.93.0-p4.86';
+import { TILE } from '../config.js?v=0.93.0-p4.88';
+import { T, TILE_INFO } from '../data/tileTypes.js?v=0.93.0-p4.88';
+import { footprint } from '../data/objects.js?v=0.93.0-p4.88';
+import { rng } from '../core/util.js?v=0.93.0-p4.88';
 
 export const EDGE = { WALL_FACE: 1, SHADOW: 2, BANK: 4 };
 
@@ -44,6 +44,7 @@ export class GameMap {
         return true;
       });
     }
+    objs = this.tidy(objs, def);   // fix59 จัดของไม่ให้ทับกัน/เบียดกัน
     this.objects = objs.map((o) => this.placeObject(o));
     this.portals = (def.portals || []).map((p) => ({
       ...p, inside: false,
@@ -51,6 +52,52 @@ export class GameMap {
       cx: (p.x + p.w / 2) * TILE, cy: (p.y + p.h / 2) * TILE,
     }));
     this.spawn = { x: def.spawn.x * TILE, y: def.spawn.y * TILE };
+  }
+
+  // fix59 จัดวางของให้เรียบร้อยอัตโนมัติ (ทุกแผนที่ · ไม่ขยับสิ่งปลูกสร้างหลัก):
+  //  · ของชิ้นเล็ก (ลัง/ถัง/หีบ) ที่ทับกัน → ขยับไปช่องว่างข้าง ๆ (ไม่ได้ = เอาออก)
+  //  · ต้นไม้/พุ่ม/หิน ที่ทับของอื่น ขวางประตูมิติ เบียดชิดสิ่งปลูกสร้าง/NPC หรือเบียดกันเองเกินไป (เฉพาะด้านใน ไม่รวมแนวป่าขอบแผนที่) → เอาออก
+  tidy(objs, def) {
+    const DECOR = new Set(['tree', 'pine', 'bush', 'stump', 'boulder', 'bigshroom', 'icecrystal', 'obsidian']);
+    const TREE = new Set(['tree', 'pine']), SMALL = new Set(['crate', 'barrel', 'chest']);
+    const W = this.w, H = this.h, occ = new Uint8Array(W * H), B = 5;
+    const fp = (o) => footprint(o);
+    const free = (x, y, fw, fh) => { for (let j = y; j < y + fh; j++) for (let i = x; i < x + fw; i++) { if (!this.inBounds(i, j) || occ[this.idx(i, j)] || TILE_INFO[this.ground[this.idx(i, j)]].solid) return false; } return true; };
+    const mark = (x, y, fw, fh) => { for (let j = y; j < y + fh; j++) for (let i = x; i < x + fw; i++) if (this.inBounds(i, j)) occ[this.idx(i, j)] = 1; };
+    for (const p of def.portals || []) mark(p.x, p.y, p.w, p.h);
+    const keep = new Array(objs.length).fill(true), out = objs.slice(), big = [];
+    // 1) สิ่งปลูกสร้าง/ของใช้ — วางก่อน ทับกันเฉพาะของชิ้นเล็กจะถูกขยับ
+    objs.forEach((o, k) => {
+      if (DECOR.has(o.kind)) return;
+      const { fw, fh } = fp(o);
+      let anyOcc = false; for (let j = o.y; j < o.y + fh && !anyOcc; j++) for (let i = o.x; i < o.x + fw; i++) if (this.inBounds(i, j) && occ[this.idx(i, j)]) { anyOcc = true; break; }
+      if (anyOcc && SMALL.has(o.kind) && !o.keep) {
+        let moved = null;
+        for (let r = 1; r <= 2 && !moved; r++) for (const [dx, dy] of [[r, 0], [-r, 0], [0, r], [0, -r], [r, r], [-r, r], [r, -r], [-r, -r]]) if (free(o.x + dx, o.y + dy, fw, fh)) { moved = { ...o, x: o.x + dx, y: o.y + dy }; break; }
+        if (!moved) { keep[k] = false; return; }
+        out[k] = o = moved;
+      }
+      mark(o.x, o.y, fw, fh);
+      if (o.kind !== 'fence') big.push([o.x, o.y, fw, fh]);
+    });
+    // 2) ต้นไม้/ของตกแต่ง
+    const trees = [], npcs = (def.npcs || []).map((n) => [n.x + 0.5, n.y + 0.5]);
+    objs.forEach((o, k) => {
+      if (!DECOR.has(o.kind) || o.keep) { if (DECOR.has(o.kind)) { const { fw, fh } = fp(o); mark(o.x, o.y, fw, fh); } return; }
+      const { fw, fh } = fp(o), cx = o.x + fw / 2, cy = o.y + fh / 2;
+      const inner = o.x >= B && o.y >= B && o.x < W - B && o.y < H - B;
+      let bad = false;
+      for (let j = o.y; j < o.y + fh && !bad; j++) for (let i = o.x; i < o.x + fw; i++) if (this.inBounds(i, j) && occ[this.idx(i, j)]) { bad = true; break; }
+      if (!bad && inner && TREE.has(o.kind)) {
+        if (trees.some(([x, y]) => Math.hypot(x - cx, y - cy) < 1.5)) bad = true;
+        else if (big.some(([x, y, w, h]) => Math.hypot(Math.max(x - cx, 0, cx - x - w), Math.max(y - cy, 0, cy - y - h)) < 1.2)) bad = true;
+        else if (npcs.some(([x, y]) => Math.hypot(x - cx, y - cy) < 2)) bad = true;
+      }
+      if (bad) { keep[k] = false; return; }
+      mark(o.x, o.y, fw, fh);
+      if (inner && TREE.has(o.kind)) trees.push([cx, cy]);
+    });
+    return out.filter((_, k) => keep[k]);
   }
 
   idx(x, y) { return y * this.w + x; }

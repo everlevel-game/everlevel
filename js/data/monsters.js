@@ -3,12 +3,12 @@
 // attackDelay = วินาทีต่อการโจมตี 1 ครั้ง | respawn = [ต่ำสุด, สูงสุด] วินาที
 // baseExp / jobExp = EXP ที่ผู้เล่นได้เมื่อกำจัด
 // drops = [ไอเทม, โอกาสดรอป 0..1] สุ่มแยกกันทีละชิ้น
-import { ENDGAME_MONSTERS } from './endgameMonsters.js?v=0.93.0-p4.86';
-import { ASCEND_MONSTERS } from './ascendData.js?v=0.93.0-p4.86';   // v0.46 Lv.100–150
-import { BASE_ITEMS } from './items.js?v=0.93.0-p4.86';
-import { WEAPON_DEFS } from './weapons.js?v=0.93.0-p4.86';
-import { OFFHAND_DROPS } from './offhand.js?v=0.93.0-p4.86';
-import { FEST_MONSTERS } from './festivals.js?v=0.93.0-p4.86';   // v0.79 มอนเทศกาล
+import { ENDGAME_MONSTERS } from './endgameMonsters.js?v=0.93.0-p4.88';
+import { ASCEND_MONSTERS } from './ascendData.js?v=0.93.0-p4.88';   // v0.46 Lv.100–150
+import { BASE_ITEMS } from './items.js?v=0.93.0-p4.88';
+import { WEAPON_DEFS } from './weapons.js?v=0.93.0-p4.88';
+import { OFFHAND_DROPS } from './offhand.js?v=0.93.0-p4.88';
+import { FEST_MONSTERS } from './festivals.js?v=0.93.0-p4.88';   // v0.79 มอนเทศกาล
 export const MONSTERS = {
   ...ENDGAME_MONSTERS,
   ...ASCEND_MONSTERS,
@@ -179,8 +179,10 @@ for (const m of Object.values(MONSTERS)) {
   if (!m.mvp && !m.worldBoss) continue;
   // ค่าระดับ v0.85 (เลือด ×5 ตีแรง ×2) เก็บไว้ให้ดันเจี้ยน/หอคอย/เทศกาลใช้ — ส่วนนั้นไม่ยากขึ้นตามรอบนี้
   m.dgBase = { hp: Math.round(m.hp * 5), atk: m.atk.map((v) => Math.round(v * 2)), def: m.def || 0, mdef: m.mdef || 0, hit: m.hit || 0, boss: m.boss ? JSON.parse(JSON.stringify(m.boss)) : null };
-  m.hp = Math.round(m.hp * BOSS_HARD.hp);
-  m.atk = m.atk.map((v) => Math.round(v * BOSS_HARD.atk));
+  // fix59 MVP เลเวลต่ำ (ต่ำกว่า Lv.60) เลือด ×5 ตี ×2 — เดิม ×10/×3 ตีทีเดียวตาย ผู้เล่นเลเวลเท่ากันสู้ไม่ได้ (เลือดจริงที่เซิร์ฟเวอร์: supabase/balance_fix59.sql)
+  const low = m.mvp && !m.worldBoss && (m.level || 0) < 60;
+  m.hp = Math.round(m.hp * (low ? 5 : BOSS_HARD.hp));
+  m.atk = m.atk.map((v) => Math.round(v * (low ? 2 : BOSS_HARD.atk)));
   m.def = Math.round((m.def || 0) * BOSS_HARD.def); m.mdef = Math.round((m.mdef || 0) * BOSS_HARD.def);
   m.hit = Math.round((m.hit || 0) * BOSS_HARD.hit);
   if (m.boss) for (const sk of Object.values(m.boss)) {   // ท่าพิเศษแรงขึ้นและใช้ถี่ขึ้น

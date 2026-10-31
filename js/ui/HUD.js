@@ -1,8 +1,8 @@
 // หน้าจอข้อมูล (DOM): สถานะตัวละคร, แชท, ชื่อแผนที่, FPS, บัฟ
-import { SKILLS } from '../data/skills.js?v=0.93.0-p4.86';
-import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.86';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.86';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.86';
+import { SKILLS } from '../data/skills.js?v=0.93.0-p4.88';
+import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.88';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.88';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.88';
 // v0.94 หลอดเลือดใหญ่เฉพาะบอส/ผู้เล่นในสนามประลอง · มอนทั่วไปดูหลอดเล็กใต้ตัว (มีตัวเลข)
 const bigMob = (mob) => !!(mob && mob.data && (mob.data.mvp || mob.data.boss || mob.data.worldBoss || mob.data.dgBoss || mob.data.festBoss || mob.arenaProxy || mob.worldRun || mob.pdRun));
 
@@ -170,12 +170,15 @@ export class HUD {
     const user = !!who || /\b(pc|world|party|guild|whisper|shout|chat)\b/.test(type);
     line.classList.add(user ? 'u' : 'k');
     const box = this.el.chat;
-    const near = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    // fix59 วัดตำแหน่งเลื่อนครั้งเดียวต่อเฟรม (เดิมวัดทุกบรรทัด = บังคับคำนวณเลย์เอาต์ซ้ำ ๆ ตอนฆ่ามอนรัว ๆ มือถือกระตุก)
+    if (this._near === undefined) this._near = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    const near = this._near;
     box.append(line);
     const lim = user ? 150 : 80, cls = user ? 'u' : 'k';
     let n = 0; for (const el of box.children) if (el.classList.contains(cls)) n++;
     for (let el = box.firstElementChild; n > lim && el;) { const nx = el.nextElementSibling; if (el.classList.contains(cls)) { el.remove(); n--; } el = nx; }
-    if (near || user) box.scrollTop = box.scrollHeight;   // อยู่ล่างสุด = เลื่อนตาม · กำลังเลื่อนอ่านย้อนหลัง = ไม่กระโดด
+    if (near || user) this._stick = true;   // อยู่ล่างสุด = เลื่อนตาม · กำลังเลื่อนอ่านย้อนหลัง = ไม่กระโดด
+    if (!this._logRaf) this._logRaf = requestAnimationFrame(() => { this._logRaf = 0; if (this._stick) box.scrollTop = box.scrollHeight; this._stick = false; this._near = undefined; });
   }
 
   setCoords(tx, ty) {

@@ -132,7 +132,7 @@ export const STAT_KEYS = ['str', 'agi', 'vit', 'int', 'dex', 'luk'];
 
 // รีเซ็ตสเตตัส (v0.10): ฟรีจนถึง Base Lv.40 จากนั้นเสีย Zeny ตามเลเวล
 export const STAT_RESET_FREE_LEVEL = 40;
-export const statResetCost = (lv) => (lv <= STAT_RESET_FREE_LEVEL ? 0 : (lv - STAT_RESET_FREE_LEVEL) * 1500);
+export const statResetCost = (lv) => (lv <= STAT_RESET_FREE_LEVEL ? 0 : (lv - STAT_RESET_FREE_LEVEL) * 5000);   // fix59 เดิม ×1,500 (Lv150 = 165k → 550k)
 
 export const STAT_INFO = {
   str: { label: 'STR', name: 'พลังกาย', desc: 'เพิ่มพลังโจมตีระยะประชิด' },

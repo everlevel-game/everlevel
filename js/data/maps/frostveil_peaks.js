@@ -1,6 +1,6 @@
 // ข้อมูลแผนที่ Frostveil Peaks — ยอดเขาหิมะทางเหนือของ Whisperwood Forest (v0.11)
 // มอนสเตอร์ Lv.20–37 และ MVP Lv.45 "กลาเซีย ราชินีหิมะ" ที่บัลลังก์น้ำแข็งทางเหนือสุด
-import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.86';
+import { borderTrees, scatterTrees, scaleMap, FIELD_SCALE } from './helpers.js?v=0.93.0-p4.88';
 
 const W = 84, H = 64;
 
@@ -94,7 +94,7 @@ const RAW = {
     { kind: 'sign', x: 40, y: 60, text: '⬇ Whisperwood' },
     { kind: 'sign', x: 40, y: 37, text: '⬅ ทุ่งจิ้งจอก · ภูเขาไฟ ➡' },
     { kind: 'sign', x: 40, y: 16, text: '⚠ MVP บัลลังก์น้ำแข็ง' },
-    { kind: 'sign', x: 81, y: 39, text: 'Ember Caldera ➡' },
+    { kind: 'sign', x: 80, y: 37, text: 'Ember Caldera ➡' },
     // บัลลังก์ราชินีหิมะ
     ...thronePillars,
     // หน้าผาหินของค้างคาว

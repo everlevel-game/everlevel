@@ -134,10 +134,10 @@ export const JOB2_SKILLS = {
   twin_shadow: {
     job: 'hunter', name: 'ศรเงาคู่', maxLv: 10, kind: 'active', target: 'enemy', bow: true, icon: ['twinshadow', '#c48cff'], req: { hawk_bond: 1 },
     sp: (lv) => 12 + lv, cast: 0, cd: 0.5, range: 10, vfx: 'hn_twin_shadow', ref: 1, lock: 0.4, delay: 0.3, engage: true, element: 'shadow', hitBonus: (lv) => 10 + lv * 3,
-    mult: (lv) => 0.95 + lv * 0.13,
+    mult: (lv) => 0.76 + lv * 0.104,   // fix59 −20% (เดิม 0.95 + lv×0.13 · แรงสุดในเกมทั้งที่ยิงไกล)
     nf: { anim: 'shoot', hits: [{ t: 0.61, m: 1 }, { t: 0.68, r: 1.2, m: 1, shake: 0.1, stop: 0.05 }] },
     desc: 'ยิงศรเงา 2 ดอกพันเกลียวกันเข้าเป้า โดนสองจังหวะติดกัน ดอกที่สองลามศัตรูข้างเป้า — สกิลยิงหลักของนักล่า',
-    effect: (lv) => `2 ดอก × ${pct(0.95 + lv * 0.13)}% ATK (ดอกที่ 2 รอบเป้า 1.2 ช่อง) · ธาตุเงา · HIT +${10 + lv * 3}`,
+    effect: (lv) => `2 ดอก × ${pct(0.76 + lv * 0.104)}% ATK (ดอกที่ 2 รอบเป้า 1.2 ช่อง) · ธาตุเงา · HIT +${10 + lv * 3}`,
   },
   moon_hawk: {
     job: 'hunter', name: 'เหยี่ยวจันทรา', maxLv: 10, kind: 'active', target: 'enemy', bow: true, icon: ['moonhawk', '#d8b0ff'], req: { twin_shadow: 3 },

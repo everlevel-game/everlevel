@@ -2535,3 +2535,8 @@ body.cam2d #rotL, body.cam2d #rotR { display: none !important; }
 @media (orientation: landscape) {
   body.touch #chatWrap:not(.open) { left: var(--chatLc, 160px); width: var(--chatWc, min(36%, 320px)); right: auto; }
 }
+
+/* fix59 ประสิทธิภาพ: หน้าโหลดที่ซ่อนแล้วหยุดแอนิเมชัน (เดิมยังวิ่งอยู่เบื้องหลังตลอดเกม) · กล่องแชตแยกการวาดออกจากหน้าจอ · ตัวอักษรไล่สีในแชตบนมือถือไม่ขยับ (ขยับ = วาดกล่องแชตใหม่ทุกเฟรม) */
+#game.ready .loading, #game.ready .loading * { animation: none !important; }
+#chatWrap .chat { contain: content; }
+body.touch .chat .f-mythic, body.touch .chat .f-celestial { animation: none; }

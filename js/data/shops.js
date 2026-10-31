@@ -1,7 +1,7 @@
 // ร้านค้า · เงิน Zeny · คลังเก็บของ · เส้นทางวาร์ป
 // ปรับเศรษฐกิจของเกมได้จากไฟล์นี้
-import { ITEMS } from './items.js?v=0.93.0-p4.86';
-import { CONSUMABLES } from './consumables.js?v=0.93.0-p4.86';
+import { ITEMS } from './items.js?v=0.93.0-p4.88';
+import { CONSUMABLES } from './consumables.js?v=0.93.0-p4.88';
 
 export const START_ZENY = 200;          // เงินเริ่มต้นของตัวละครใหม่
 export const MAX_ZENY = 999999999;
@@ -77,7 +77,7 @@ WARP_ROUTES.town.push(ancientRoute,hauntedRoute);
 WARP_ROUTES.ember.push(ancientRoute,hauntedRoute);
 WARP_ROUTES.ancient=[WARP_ROUTES.ember[0],WARP_ROUTES.town.find(r=>r.map==='ember_caldera'),hauntedRoute];
 WARP_ROUTES.haunted=[WARP_ROUTES.ember[0],ancientRoute];
-SHOPS.endgame={...SHOPS.ember,name:'เสบียงดินแดนระดับสูง'};
+SHOPS.endgame={...SHOPS.ember,name:'เสบียงดินแดนระดับสูง',items:['white_potion','royal_jelly','grand_elixir','mana_potion','blue_potion','refine_w','refine_a']};   // fix59 ยา Lv.100+
 // v0.46 ดินแดนเหนือขีดจำกัด Lv.100–150
 const coastRoute={label:'Sunken Coast · ค่ายริมหาด',hint:'Lv.100–117',map:'sunken_coast',arrive:{x:5.5,y:31.5,angle:Math.PI/2},cost:4500};
 const crystalRoute={label:'Crystal Valley · ค่ายผลึก',hint:'Lv.118–134',map:'crystal_valley',arrive:{x:5.5,y:31.5,angle:Math.PI/2},cost:6000};

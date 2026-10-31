@@ -1,5 +1,5 @@
 // สูตรการต่อสู้ (แบบเรียบง่าย — ระบบค่าสถานะเต็มรูปแบบจะมาใน v0.3)
-import { clamp } from '../core/util.js?v=0.93.0-p4.86';
+import { clamp } from '../core/util.js?v=0.93.0-p4.88';
 
 // คืนค่า { miss, crit, amount }
 export function rollAttack(att, def, rnd = Math.random) {
@@ -20,12 +20,13 @@ export function rollSkill(att, def, { mult = 1, magic = false, hitBonus = 0, cri
     const [lo, hi] = att.matk || [1, 1];
     const base = lo + Math.floor(rnd() * (hi - lo + 1));
     if (crit) return { miss: false, crit: true, amount: Math.max(1, Math.round(base * mult * 1.5 * (att.critDmg || 1))) };
-    return { miss: false, crit: false, amount: Math.max(1, Math.round(base * mult) - (def.mdef ?? 0)) };
+    return { miss: false, crit: false, amount: Math.max(1, Math.round(base * mult - (def.mdef ?? 0) * Math.min(1, mult))) };
   }
   const hitChance = clamp((att.hit ?? 90) + hitBonus - (def.flee ?? 5), 30, 100) / 100;
   if (!crit && rnd() > hitChance) return { miss: true, crit: false, amount: 0 };
   const [lo, hi] = att.atk;
   const base = lo + Math.floor(rnd() * (hi - lo + 1));
   if (crit) return { miss: false, crit: true, amount: Math.max(1, Math.round(base * mult * 1.5 * (att.critDmg || 1))) };
-  return { miss: false, crit: false, amount: Math.max(1, Math.round(base * mult) - (def.def ?? 0)) };
+  // fix59 สกิลตีหลายครั้ง (ตัวคูณต่อครั้ง < 1) หัก DEF ตามสัดส่วน ไม่หักเต็มทุกครั้ง — สายตีใกล้ไม่ตกหนักช่วง Lv.100+
+  return { miss: false, crit: false, amount: Math.max(1, Math.round(base * mult - (def.def ?? 0) * Math.min(1, mult))) };
 }

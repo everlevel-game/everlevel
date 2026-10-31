@@ -23,7 +23,7 @@ export const boostedRate = (base, bonus) => (bonus > 0 ? Math.max(base, Math.min
 
 export const canRefine = (it) => !!it && it.type === 'equip' && REFINABLE.includes(it.slot);
 export const refineMaterial = (it) => (it.slot === 'weapon' ? 'refine_w' : 'refine_a');
-export const refineFee = (target) => 200 * target + 60 * target * target;   // +1 = 260 z · +5 = 2,500 z · +10 = 8,000 z
+export const refineFee = (target) => (200 * target + 60 * target * target) * (target >= 8 ? 5 : 1);   // +1 = 260 z · +5 = 2,500 z · +7 = 4,340 z · fix59 +8 ขึ้นไป ×5 (+8 = 27,200 z · +10 = 40,000 z) เป็นที่ใช้เงินช่วงท้ายเกม
 export const refineRate = (target) => REFINE_RATE[target] || 0;
 export const failResult = (target, guarded) => (target <= SAFE_LIMIT ? 'none' : target >= BREAK_FROM && !guarded ? 'break' : 'down');
 
