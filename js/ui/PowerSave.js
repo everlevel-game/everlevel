@@ -1,6 +1,6 @@
 // fix61 โหมดประหยัดพลังงาน — ไม่แตะจอตามเวลาที่ตั้ง → จอดำแสดงสรุปตัวละคร · เกมเดินต่อ (ตีออโต้/เก็บของ/เซฟ) แต่ไม่วาดภาพ 3D
 // ตั้งค่า: powerSave (เปิด/ปิด) · powerSaveMin (นาที) · ปุ่ม "เปิดเลย" ในหน้าตั้งค่า · กลับเข้าเกม = เลื่อนปุ่ม (มือถือ) หรือกดปุ่มใดก็ได้ (คอม)
-import { HP_POTS, SP_POTS } from '../systems/AutoHunt.js?v=0.93.0-p4.90';
+import { HP_POTS, SP_POTS } from '../systems/AutoHunt.js?v=0.93.0-p4.91';
 
 const pad = (n) => String(n).padStart(2, '0');
 const fmt = (n) => Math.round(n).toLocaleString('en-US');
