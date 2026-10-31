@@ -2508,3 +2508,25 @@ body.touch #chatWrap.open[data-size="s"] .chat { max-height: 90px; }
 
 /* fix36 กล้องแบบเกม 2D: ไม่มีปุ่มหมุนกล้อง */
 body.cam2d #rotL, body.cam2d #rotR { display: none !important; }
+
+/* fix57 มือถือแนวนอน: แชตที่ขยายอยู่ระหว่างกรอบตัวละครกับแผนที่ย่อ (ตำแหน่งคำนวณใน ChatBox.placeOpen) · ตัวอักษรไม่ใหญ่เกิน */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.touch #chatWrap.open { left: var(--chatL, 150px); right: var(--chatR, 150px); width: auto; top: var(--chatTop, 6px); bottom: auto; z-index: 8; }
+  body.touch #chatWrap.open .chat, body.touch #chatWrap.open[data-size] .chat { max-height: var(--chatMaxH, 120px); font-size: 12px; line-height: 1.45; }
+  body.touch #chatWrap.open .chat-tabs button { padding: 3px 8px; font-size: 11.5px; }
+  body.touch #chatWrap.open .chat-form input { font-size: 16px; padding: 5px 10px; }
+}
+
+/* fix57 แจ้งให้หมุนจอเป็นแนวนอน (มือถือถือแนวตั้ง) */
+.rotate-hint { position: fixed; inset: 0; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center;
+  background: radial-gradient(circle at 50% 40%, rgba(32, 52, 104, 0.97), rgba(9, 16, 38, 0.98)); color: #fff6e0; font-family: var(--font, sans-serif); }
+.rotate-hint.show { display: flex; }
+.rotate-hint svg { width: 120px; height: 120px; filter: drop-shadow(0 0 14px rgba(255, 210, 120, 0.35)); }
+.rotate-hint .rh-phone { transform-origin: 60px 60px; animation: rhTurn 2.4s ease-in-out infinite; }
+@keyframes rhTurn { 0%, 20% { transform: rotate(0deg); } 50%, 80% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
+.rotate-hint h2 { margin: 0; font-size: 21px; color: #ffd774; letter-spacing: 0.02em; }
+.rotate-hint p { margin: 0; max-width: 300px; font-size: 14px; line-height: 1.55; color: #dfe6ff; }
+.rotate-hint .rh-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; width: min(260px, 80vw); }
+.rotate-hint button { font: 600 15px/1 var(--font, sans-serif); padding: 12px 16px; border-radius: 12px; cursor: pointer; color: #1b1406; background: linear-gradient(#ffe7a0, #e0a83a); border: 1px solid #fff0c0; }
+.rotate-hint button.rh-skip { color: #dfe6ff; background: transparent; border-color: rgba(220, 230, 255, 0.35); font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .rotate-hint .rh-phone { animation: none; transform: rotate(-90deg); } }

@@ -62,6 +62,7 @@ export class ChatBox {
     this.input.addEventListener('focus', () => { this.wrap.classList.add('typing'); this.onOpen(); });
     this.input.addEventListener('blur', () => this.wrap.classList.remove('typing'));
     this.toggleBtn.addEventListener('click', () => this.toggle());
+    addEventListener('resize', () => { if (this.expanded) this.placeOpen(); });   // fix57 หมุนจอ
     // แตะกล่องแชตบนมือถือ = ขยาย
     this.box.addEventListener('click', () => { if (document.body.classList.contains('touch') && !this.expanded) this.toggle(true); });
     // v0.13: มือถือ — ข้อความใหม่แสดงชัด แล้วจางลงหลัง 6 วินาที (ไม่บังจอ)
@@ -105,6 +106,22 @@ export class ChatBox {
     let top = 0;
     for (const sel of ['.panel.char', '.panel.mini']) { const el = this.root.querySelector(sel); if (el && el.offsetParent) top = Math.max(top, el.getBoundingClientRect().bottom); }
     const host = this.root.getBoundingClientRect();
+    const z = parseFloat(getComputedStyle(this.wrap).zoom) || 1;
+    // fix57 มือถือแนวนอน: วางกล่องแชตระหว่างกรอบตัวละคร (ซ้าย) กับแผนที่ย่อ/ปุ่มออโต้ (ขวา) ไม่ทับกัน
+    if (innerWidth > innerHeight) {
+      const r = (sel) => { const el = this.root.querySelector(sel); return el && el.offsetParent ? el.getBoundingClientRect() : null; };
+      const ch = r('.panel.char'), mi = r('.panel.mini'), au = r('.auto-dock');
+      const L = (ch ? ch.right : 150) + 8 - host.left;
+      let R = host.right - (mi ? mi.left : host.right - 150) + 8;
+      if (au && au.top < innerHeight * 0.5) R = Math.max(R, host.right - au.left + 8);
+      const s = this.wrap.style;
+      s.setProperty('--chatL', `${Math.round(L / z)}px`);
+      s.setProperty('--chatR', `${Math.round(R / z)}px`);
+      s.setProperty('--chatTop', `${Math.round(6 / z)}px`);
+      // ความสูงข้อความ = ครึ่งจอลบแถบแท็บ/ช่องพิมพ์ — ไม่ล้นลงไปทับจอยสติ๊ก/ปุ่มสกิล
+      s.setProperty('--chatMaxH', `${Math.max(60, Math.round((innerHeight * 0.52 - 80) / z))}px`);
+      return;
+    }
     if (top) this.wrap.style.setProperty('--chatTop', `${Math.round(top - host.top + 6)}px`);
   }
 

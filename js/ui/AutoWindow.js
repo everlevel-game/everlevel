@@ -1,12 +1,12 @@
 // หน้าต่างตีมอนออโต้ (v0.14 · ปุ่ม H) + ปุ่ม AUTO ลอยบนจอ (กดเริ่ม/หยุดได้ทันที)
 // ตั้งค่า: ยาเพิ่ม HP/SP อัตโนมัติ · ระยะการตี · ติ๊กมอนที่จะตี (มีรูปมอน) · ตีตัวที่โจมตีเราก่อน · สกิลที่ใช้ (v0.17.1: เอาเก็บของอัตโนมัติออก)
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.84';
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.84';
-import { SKILLS, skillSp } from '../data/skills.js?v=0.93.0-p4.84';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.84';
-import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.84';
-import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.84';
-import { AUTO_RANGE, HP_POTS, SP_POTS, potHeal, mapMonsters, autoSkillRole, buyPotFor } from '../systems/AutoHunt.js?v=0.93.0-p4.84';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.85';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.85';
+import { SKILLS, skillSp } from '../data/skills.js?v=0.93.0-p4.85';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.85';
+import { skillIconURL } from '../render/SkillIcons.js?v=0.93.0-p4.85';
+import { monsterThumb } from '../render/MonsterThumbs.js?v=0.93.0-p4.85';
+import { AUTO_RANGE, HP_POTS, SP_POTS, potHeal, mapMonsters, autoSkillRole, buyPotFor } from '../systems/AutoHunt.js?v=0.93.0-p4.85';
 
 const ROLE_LABEL = { attack: 'โจมตีเป้าหมาย', aoe: 'โจมตีรอบตัว', buff: 'บัฟ · ใช้ใหม่เมื่อหมดเวลา', heal: 'รักษา · ใช้เมื่อ HP ต่ำกว่าที่ตั้ง' };
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -24,6 +24,18 @@ export class AutoWindow {
     dock.innerHTML = `<button type="button" class="ad-go" aria-pressed="false" title="เริ่ม/หยุดตีมอนออโต้ (Z)"><i aria-hidden="true">⚔</i><b>AUTO</b></button>`
       + `<button type="button" class="ad-set" aria-label="ตั้งค่าตีมอนออโต้" title="ตั้งค่าตีมอนออโต้ (H)">⚙</button><span class="ad-st" aria-live="polite"></span>`;
     host.append(dock);
+    // fix57 มือถือแนวนอน: วางปุ่ม AUTO ใต้แผนที่ย่อ + ป้ายกลางวัน/กลางคืน ไม่ทับกัน
+    const place = () => {
+      dock.style.top = '';
+      if (!document.body.classList.contains('touch') || innerWidth <= innerHeight || innerHeight > 520) return;
+      const mi = root.querySelector('.panel.mini'); if (!mi || !mi.offsetParent) return;
+      let bottom = mi.getBoundingClientRect().bottom;
+      const day = mi.querySelector('.day-badge'); if (day && day.offsetParent) bottom = Math.max(bottom, day.getBoundingClientRect().bottom);
+      const z = parseFloat(getComputedStyle(dock).zoom) || 1, hb = (dock.offsetParent || root).getBoundingClientRect();
+      dock.style.top = `${Math.round((bottom - hb.top + 8) / z)}px`;
+    };
+    addEventListener('resize', () => setTimeout(place, 60));
+    for (const t of [300, 1500, 4000]) setTimeout(place, t);
     dock.querySelector('.ad-go').addEventListener('click', () => this.g.auto.toggle());
     dock.querySelector('.ad-set').addEventListener('click', () => this.toggle());
 
