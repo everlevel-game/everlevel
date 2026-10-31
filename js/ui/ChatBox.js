@@ -62,7 +62,9 @@ export class ChatBox {
     this.input.addEventListener('focus', () => { this.wrap.classList.add('typing'); this.onOpen(); });
     this.input.addEventListener('blur', () => this.wrap.classList.remove('typing'));
     this.toggleBtn.addEventListener('click', () => this.toggle());
-    addEventListener('resize', () => { if (this.expanded) this.placeOpen(); });   // fix57 หมุนจอ
+    addEventListener('resize', () => setTimeout(() => { if (this.expanded) this.placeOpen(); this.placeClosed(); }, 60));   // fix57 หมุนจอ
+    for (const t of [500, 2000, 5000]) setTimeout(() => this.placeClosed(), t);   // fix58 จอยสติ๊กโผล่หลังแตะจอครั้งแรก
+    addEventListener('touchstart', () => setTimeout(() => this.placeClosed(), 120), { once: true, passive: true });
     // แตะกล่องแชตบนมือถือ = ขยาย
     this.box.addEventListener('click', () => { if (document.body.classList.contains('touch') && !this.expanded) this.toggle(true); });
     // v0.13: มือถือ — ข้อความใหม่แสดงชัด แล้วจางลงหลัง 6 วินาที (ไม่บังจอ)
@@ -123,6 +125,21 @@ export class ChatBox {
       return;
     }
     if (top) this.wrap.style.setProperty('--chatTop', `${Math.round(top - host.top + 6)}px`);
+  }
+
+  // fix58 มือถือแนวนอน: กล่องแชตตอนย่ออยู่ขวาของจอยสติ๊ก ไม่ทับปุ่มเดิน · กว้างไม่เกินแถบสกิลกลางจอ
+  placeClosed() {
+    const s = this.wrap.style;
+    if (!document.body.classList.contains('touch') || innerWidth <= innerHeight) { s.removeProperty('--chatLc'); s.removeProperty('--chatWc'); return; }
+    const r = (sel) => { const el = this.root.querySelector(sel); return el && el.offsetParent ? el.getBoundingClientRect() : null; };
+    const js = r('#joystick'), hb = r('.hotbar'), host = this.root.getBoundingClientRect();
+    if (!js) return;
+    const z = parseFloat(getComputedStyle(this.wrap).zoom) || 1;
+    const L = js.right + 8 - host.left;
+    let W = Math.min(innerWidth * 0.36, 320 * z);
+    if (hb && hb.left > L + 80) W = Math.min(W, hb.left - 8 - L - host.left);
+    s.setProperty('--chatLc', `${Math.round(L / z)}px`);
+    s.setProperty('--chatWc', `${Math.max(120, Math.round(W / z))}px`);
   }
 
   toggle(force) {

@@ -2530,3 +2530,8 @@ body.cam2d #rotL, body.cam2d #rotR { display: none !important; }
 .rotate-hint button { font: 600 15px/1 var(--font, sans-serif); padding: 12px 16px; border-radius: 12px; cursor: pointer; color: #1b1406; background: linear-gradient(#ffe7a0, #e0a83a); border: 1px solid #fff0c0; }
 .rotate-hint button.rh-skip { color: #dfe6ff; background: transparent; border-color: rgba(220, 230, 255, 0.35); font-weight: 500; }
 @media (prefers-reduced-motion: reduce) { .rotate-hint .rh-phone { animation: none; transform: rotate(-90deg); } }
+
+/* fix58 มือถือแนวนอน: แชตตอนย่อ ขยับไปขวาของจอยสติ๊ก (ตำแหน่งคำนวณใน ChatBox.placeClosed) */
+@media (orientation: landscape) {
+  body.touch #chatWrap:not(.open) { left: var(--chatLc, 160px); width: var(--chatWc, min(36%, 320px)); right: auto; }
+}
