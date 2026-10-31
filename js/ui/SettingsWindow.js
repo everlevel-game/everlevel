@@ -80,6 +80,16 @@ export class SettingsWindow {
     toggle(ui, 'showFps', 'แสดง FPS');
     toggle(ui, 'showHelp', 'แสดงแผงคำแนะนำปุ่ม', 'เฉพาะคอมพิวเตอร์');
     toggle(ui, 'showOthers', 'แสดงผู้เล่นคนอื่น', 'โหมดออนไลน์');
+    // fix61 จอดำประหยัดแบต: เปิด/ปิด · เลือกเวลา · ปุ่มเปิดทันที
+    toggle(ui, 'powerSave', '🔋 จอดำประหยัดแบต', 'ไม่แตะจอตามเวลาที่ตั้ง → จอดำ เกมยังเล่นต่อ (ออโต้/เก็บของ) แต่ไม่วาดภาพ');
+    const prow = document.createElement('div'); prow.className = 'set-row set-ps';
+    prow.innerHTML = '<span>เข้าโหมดเมื่อ</span><select aria-label="เวลาที่ไม่แตะจอ"></select><button type="button" class="ps-now">เปิดเลย</button>';
+    const sel = prow.querySelector('select');
+    for (const m of [1, 3, 5, 10, 15, 30]) { const o = document.createElement('option'); o.value = String(m); o.textContent = `ไม่แตะ ${m} นาที`; sel.append(o); }
+    sel.value = String(this.s.powerSaveMin || 3);
+    sel.addEventListener('change', () => this.act.change('powerSaveMin', +sel.value));
+    prow.querySelector('.ps-now').addEventListener('click', () => { this.toggle && this.toggle(false); dispatchEvent(new Event('el-powersave')); });
+    ui.append(prow);
     toggle(ui, 'dayCycle', 'กลางวัน · ตอนเย็น · กลางคืน', 'ปิด = สว่างแบบกลางวันตลอด');
     toggle(ui, 'questNav', 'ลูกศรนำทางเควส', 'ชี้ทางไปเป้าหมายเควส');
     toggle(ui, 'partyInvites', 'รับคำเชิญเข้าปาร์ตี้', 'ปิด = ปฏิเสธอัตโนมัติ');

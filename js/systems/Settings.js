@@ -23,6 +23,8 @@ export const DEFAULT_SETTINGS = {
   chatSys: true,        // v0.86 แสดงข้อความระบบในกล่องแชต
   chatSize: 'm',        // v0.86 ขนาดกล่องแชต s | m | l
   partyInvites: true,   // v0.38 รับคำเชิญปาร์ตี้
+  powerSave: true,      // fix61 จอดำประหยัดพลังงานเมื่อไม่แตะจอ
+  powerSaveMin: 3,      // fix61 นาทีที่ไม่แตะจอก่อนเข้าโหมดประหยัด
 };
 
 export function loadSettings() {
@@ -35,6 +37,7 @@ export function loadSettings() {
   for (const k of ['master', 'music', 'sfx']) out[k] = Math.min(1, Math.max(0, out[k]));
   if (!['auto', '0', '1', '2', '3'].includes(String(out.quality))) out.quality = 'auto';
   if (!['auto', '30', '45', '60', '0'].includes(String(out.fpsCap))) out.fpsCap = 'auto';
+  if (![1, 3, 5, 10, 15, 30].includes(out.powerSaveMin)) out.powerSaveMin = 3;
   return out;
 }
 
