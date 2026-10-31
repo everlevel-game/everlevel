@@ -1,4 +1,4 @@
-import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.83';
+import { FASHION_COLLECTION, FASHION_SETS } from './fashionCollection.js?v=0.93.0-p4.84';
 // แคตตาล็อกชุดแฟชั่น (v0.9) — ได้จากการเปิดกล่องแฟชั่นสุ่ม (data/fashionBoxes.js) — ชิ้นแฟชั่นเป็น "ชุดทับ" ไม่เพิ่มค่าสถานะ ใส่ทับอุปกรณ์จริงได้
 // slot: wings | outfit | head | face | back | weapon | aura | pet · kind = ชื่อตัวสร้างใน render/Costumes.js · p = ค่าปรับแต่ง
 // rarity: common ธรรมดา | rare หายาก | epic ล้ำค่า | legend ตำนาน | mythic | celestial
@@ -367,6 +367,8 @@ COSTUMES[COSTUMES.length - 1].cash = true;
 COSTUMES.push(PX('wings', 'w_dx_storm', 'ปีกพายุฟ้า', 'Azure Storm Wings', 'mythic', 'ขนเมฆสีฟ้าขาว สายฟ้าสีเหลืองแลบรอบปีก', { mesh: 'dx_storm', size: [116, 119], pivot: [28, 55], cols: 8, flick: true, fps: 10, above: 40, spark: '#fff27a' }));
 // fix54 ปีกจักรพรรดิสุริยัน (ผู้เล่นส่งมา) — ภาพละเอียด 2 เท่า (res: 2) · ขนพลิ้ว 8 เฟรม · ราคาใน supabase/fashion_wings_v54.sql
 COSTUMES.push(PX('wings', 'w_dx_solar', 'ปีกจักรพรรดิสุริยัน', 'Solar Sovereign Wings', 'mythic', 'ปีกขนนกขาวปลายทองสามชั้น แขนปีกเป็นเกราะทองสลักลาย มีครีบทองและตราสุริยันฝังไพลินที่ข้อปีก ขนหางนกยูงสีม่วงประดับตาไพลิน แสงทองกวาดผ่านปีก ขนพลิ้วเป็นระลอก วงรัศมีทองเหนือหัว และวงตะวันใต้เท้า', { mesh: 'dx_solar', res: 2, size: [320, 227], pivot: [49, 120], cols: 8, flick: true, fps: 8, above: 40, spark: ['#fff2a8', '#ffffff', '#8ac8ff'], halo: '#ffd84a', ground: true }));
+// fix56 ปีกมารทมิฬ (ผู้เล่นส่งมา) — ภาพละเอียด 3 เท่า (res: 3) · เปลวมืดพลิ้ว 8 เฟรม · ราคาใน supabase/fashion_wings_v56.sql
+COSTUMES.push(PX('wings', 'w_dx_demon', 'ปีกมารทมิฬ', 'Demon Darkness Wings', 'mythic', 'ปีกความมืดสีดำสนิท ขนเป็นเปลวมืดม้วนปลายขึ้นฟ้า ขอบบนเงาวาวเหลือบม่วงเงิน ลายเส้นขนละเอียด แสงเงาไหลไปตามขน เปลวมืดลุกไหวตามแนวบนของปีก เศษความมืดปลิวออกจากปลายขน บ่อความมืดวงไฟแดงหม่นใต้เท้า', { mesh: 'dx_demon', res: 3, size: [415, 385], pivot: [44, 266], cols: 8, flick: true, fps: 8, above: 40, spark: ['#ff3a4a', '#ff8a5a', '#b04aff'], ground: true }));
 COSTUMES[COSTUMES.length - 1].cash = true;
 // fix46 ออร่าภาพพิกเซล 2 ชั้น 12 แบบ (ร้านเพชร) — ตัวสร้าง LayeredAura ใน render/PixelWings.js · ราคาใน supabase/fashion_aura_v46.sql
 COSTUMES.push(PX('aura', 'a_la_inferno', 'ออร่าเปลวเพลิง', 'Inferno Blaze', 'mythic', 'เปลวไฟลุกห่อตัว ไล่สีแดงส้มทอง ประกายไฟลอยขึ้น วงความร้อนใต้เท้า', { laura: 'la_inferno', fps: 10, rim: '#ff7a2a' }));
