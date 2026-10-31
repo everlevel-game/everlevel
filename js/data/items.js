@@ -6,17 +6,17 @@
 // v0.9: type box = กล่องแฟชั่นสุ่ม (ข้อมูลอยู่ใน data/fashionBoxes.js)
 // v0.10: slots = ช่องการ์ด · type card = การ์ดมอนสเตอร์ (data/cards.js) · วัสดุตีบวก (data/refine.js)
 //        อุปกรณ์ที่ตีบวก/ใส่การ์ดแล้วใช้ "คีย์" แทน id เช่น 'iron_blade*7*card_barkwolf' (ดู itemKey ด้านล่าง)
-import { ENDGAME_ITEMS } from './endgameItems.js?v=0.93.0-p4.88';
-import { ASCEND_ITEMS } from './ascendData.js?v=0.93.0-p4.88';   // v0.46 Lv.100–150
-import { ETERNAL_ITEMS, ETERNAL_MATS } from './eternal.js?v=0.93.0-p4.88';
-import { FEST_ITEMS } from './festivals.js?v=0.93.0-p4.88';   // v0.79 ของสะสมเทศกาล   // v0.77 อุปกรณ์นิรันดร์กาล (หลอม)
-import { parentJob, jobAncestry } from './progression.js?v=0.93.0-p4.88';
-import { BOX_ITEMS } from './fashionBoxes.js?v=0.93.0-p4.88';
-import { CARD_ITEMS, CARDS, cardFits } from './cards.js?v=0.93.0-p4.88';
-import { REFINE_ITEMS, refineBonus, REFINE_MAX } from './refine.js?v=0.93.0-p4.88';
-import { CONSUMABLES } from './consumables.js?v=0.93.0-p4.88';
-import { WEAPON_ITEMS, decodeRoll, rollBonus, rollCode, FORM_TH, extraRollPool, gearRollPool, GEAR_ROLL_SLOTS } from './affixes.js?v=0.93.0-p4.88';
-import { OFFHAND_ITEMS, OFFHAND_FORM_TH } from './offhand.js?v=0.93.0-p4.88';   // v0.25.2: ของมือรองตามอาชีพ   // v0.25: อาวุธ 48 ชิ้น + ค่าสุ่ม   // v0.13: ใบวาร์ป ใบคูณ ยาบัฟ ไข่สัตว์เลี้ยง ฯลฯ
+import { ENDGAME_ITEMS } from './endgameItems.js?v=0.93.0-p4.89';
+import { ASCEND_ITEMS } from './ascendData.js?v=0.93.0-p4.89';   // v0.46 Lv.100–150
+import { ETERNAL_ITEMS, ETERNAL_MATS } from './eternal.js?v=0.93.0-p4.89';
+import { FEST_ITEMS } from './festivals.js?v=0.93.0-p4.89';   // v0.79 ของสะสมเทศกาล   // v0.77 อุปกรณ์นิรันดร์กาล (หลอม)
+import { parentJob, jobAncestry } from './progression.js?v=0.93.0-p4.89';
+import { BOX_ITEMS } from './fashionBoxes.js?v=0.93.0-p4.89';
+import { CARD_ITEMS, CARDS, cardFits } from './cards.js?v=0.93.0-p4.89';
+import { REFINE_ITEMS, refineBonus, REFINE_MAX } from './refine.js?v=0.93.0-p4.89';
+import { CONSUMABLES } from './consumables.js?v=0.93.0-p4.89';
+import { WEAPON_ITEMS, decodeRoll, rollBonus, rollCode, FORM_TH, extraRollPool, gearRollPool, GEAR_ROLL_SLOTS } from './affixes.js?v=0.93.0-p4.89';
+import { OFFHAND_ITEMS, OFFHAND_FORM_TH } from './offhand.js?v=0.93.0-p4.89';   // v0.25.2: ของมือรองตามอาชีพ   // v0.25: อาวุธ 48 ชิ้น + ค่าสุ่ม   // v0.13: ใบวาร์ป ใบคูณ ยาบัฟ ไข่สัตว์เลี้ยง ฯลฯ
 
 export const EQUIP_SLOTS = [
   { id: 'head', name: 'หัว' },
@@ -219,7 +219,7 @@ export const START_HOTBAR = ['red_potion', 'herb', 'skill:first_aid', null, null
 export const BONUS_LABEL = {
   atk: 'ATK', matk: 'MATK', def: 'DEF', mdef: 'MDEF', hit: 'HIT', flee: 'FLEE', crit: 'CRIT', maxHp: 'Max HP', maxSp: 'Max SP',
   str: 'STR', agi: 'AGI', vit: 'VIT', int: 'INT', dex: 'DEX', luk: 'LUK',
-  maxHpPct: 'Max HP', maxSpPct: 'Max SP', atkPct: 'ATK', defPct: 'DEF', aspdPct: 'ASPD',
+  defPierce: 'เจาะเกราะ', procBolt: 'โอกาสสายฟ้าตอนตี', maxHpPct: 'Max HP', maxSpPct: 'Max SP', atkPct: 'ATK', defPct: 'DEF', aspdPct: 'ASPD',
   matkPct: 'MATK', mdefPct: 'MDEF', speedPct: 'ความเร็วเดิน', regenPct: 'ฟื้น HP', spRegenPct: 'ฟื้น SP',
   // v0.25
   critDmgPct: 'CRIT DMG', castPct: 'Cast Time', delayPct: 'After-cast Delay', healPct: 'Heal Power', rangedPct: 'Ranged DMG', meleePct: 'Melee DMG',
@@ -227,7 +227,7 @@ export const BONUS_LABEL = {
   expPct: 'EXP ที่ได้รับ', dropPct: 'โอกาสดรอปไอเทม', spKill: 'ฟื้น SP เมื่อกำจัด',   // v0.29 การ์ด
 };
 const TRAIT = { beast: 'สัตว์', plant: 'พืช', insect: 'แมลง', formless: 'ไร้รูป', undead: 'อันเดด', demon: 'ปีศาจ', dragon: 'มังกร', neutral: 'ไร้ธาตุ', earth: 'ธาตุดิน', water: 'ธาตุน้ำ', fire: 'ธาตุไฟ', wind: 'ธาตุลม', holy: 'ธาตุศักดิ์สิทธิ์', shadow: 'ธาตุมืด', small: 'ขนาดเล็ก', medium: 'ขนาดกลาง', large: 'ขนาดใหญ่' };
-const PCT = new Set(['critDmgPct', 'healPct', 'rangedPct', 'meleePct', 'dmgReduce', 'lifesteal', 'spDrain']);
+const PCT = new Set(['defPierce', 'procBolt', 'critDmgPct', 'healPct', 'rangedPct', 'meleePct', 'dmgReduce', 'lifesteal', 'spDrain']);
 const sg = (v) => (v < 0 ? '−' + Math.abs(v) : '+' + v);
 export function bonusText(k, v) {
   if (k === 'crit') return `CRIT ${sg(+(v * 100).toFixed(1))}%`;

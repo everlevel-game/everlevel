@@ -1,17 +1,17 @@
 // หน้าต่างกระเป๋า + อุปกรณ์ที่สวมใส่ (เปิดด้วย I หรือ Alt+E)
-import { upgradeInfo } from '../data/gearScore.js?v=0.93.0-p4.88';   // v0.94 เทียบอุปกรณ์
-import { ITEMS, EQUIP_SLOTS, RARITY, describeBonus, canJobUse, itemMods, BASE_ITEMS } from '../data/items.js?v=0.93.0-p4.88';
-import { duraOf, DURA_MAX, DURA_LOW } from '../data/durability.js?v=0.93.0-p4.88';   // v0.89
-import { weaponLines, rollLine } from './WeaponInfo.js?v=0.93.0-p4.88';
-import { refineBonus, canRefine } from '../data/refine.js?v=0.93.0-p4.88';
-import { CARDS, cardSlotName } from '../data/cards.js?v=0.93.0-p4.88';
-import { socketTargets } from '../systems/Forge.js?v=0.93.0-p4.88';
-import { JOBS } from '../data/progression.js?v=0.93.0-p4.88';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.88';
-import { sellPrice, fmtZ } from '../data/shops.js?v=0.93.0-p4.88';
-import { BOX_ODDS, FASHION_RARITY, FASHION_TIERS, fmtPct } from '../data/fashionBoxes.js?v=0.93.0-p4.88';
-import { fmtDur } from '../data/consumables.js?v=0.93.0-p4.88';
-import { PET_EGGS, PET_RARITY, PET_TIERS } from '../data/pets.js?v=0.93.0-p4.88';
+import { upgradeInfo } from '../data/gearScore.js?v=0.93.0-p4.89';   // v0.94 เทียบอุปกรณ์
+import { ITEMS, EQUIP_SLOTS, RARITY, describeBonus, canJobUse, itemMods, BASE_ITEMS } from '../data/items.js?v=0.93.0-p4.89';
+import { duraOf, DURA_MAX, DURA_LOW } from '../data/durability.js?v=0.93.0-p4.89';   // v0.89
+import { weaponLines, rollLine } from './WeaponInfo.js?v=0.93.0-p4.89';
+import { refineBonus, canRefine } from '../data/refine.js?v=0.93.0-p4.89';
+import { CARDS, cardSlotName } from '../data/cards.js?v=0.93.0-p4.89';
+import { socketTargets } from '../systems/Forge.js?v=0.93.0-p4.89';
+import { JOBS } from '../data/progression.js?v=0.93.0-p4.89';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.89';
+import { sellPrice, fmtZ } from '../data/shops.js?v=0.93.0-p4.89';
+import { BOX_ODDS, FASHION_RARITY, FASHION_TIERS, fmtPct } from '../data/fashionBoxes.js?v=0.93.0-p4.89';
+import { fmtDur } from '../data/consumables.js?v=0.93.0-p4.89';
+import { PET_EGGS, PET_RARITY, PET_TIERS } from '../data/pets.js?v=0.93.0-p4.89';
 
 const TABS = [
   { id: 'all', name: 'ทั้งหมด', test: () => true },

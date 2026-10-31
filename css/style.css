@@ -2540,3 +2540,8 @@ body.cam2d #rotL, body.cam2d #rotR { display: none !important; }
 #game.ready .loading, #game.ready .loading * { animation: none !important; }
 #chatWrap .chat { contain: content; }
 body.touch .chat .f-mythic, body.touch .chat .f-celestial { animation: none; }
+
+/* fix60 ขั้นสเตตัสสุ่ม: ธรรมดา ขาว · ดี เขียว · หายาก ฟ้า · หายากมาก ม่วง · ตำนาน ทอง */
+.rt.t1 { color: #e6e6e6; } .rt.t2 { color: #8ff08f; } .rt.t3 { color: #7cc8ff; } .rt.t4 { color: #d49bff; font-weight: 600; }
+.rt.t5 { color: #ffd45e; font-weight: 700; text-shadow: 0 0 6px rgba(255, 200, 80, 0.55); }
+.rg.g5, .rgx.g5 { background: linear-gradient(90deg, rgba(255, 120, 60, 0.35), rgba(255, 210, 80, 0.35)); color: #ffe27a; text-shadow: 0 0 6px rgba(255, 200, 80, 0.6); }

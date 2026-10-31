@@ -1,6 +1,6 @@
 // v0.25.0: สเตตัสรอง (ค่าสุ่ม) · ธาตุ/เผ่า/ขนาดมอนสเตอร์ · แปลงอาวุธจาก weapons.js เป็นไอเทมในเกม
-import { WEAPON_DEFS, WEAPON_FORMS } from './weapons.js?v=0.93.0-p4.88';
-import { OFFHAND_BLOODMOON } from './offhand.js?v=0.93.0-p4.88';
+import { WEAPON_DEFS, WEAPON_FORMS } from './weapons.js?v=0.93.0-p4.89';
+import { OFFHAND_BLOODMOON } from './offhand.js?v=0.93.0-p4.89';
 
 // ชื่อสเตตัสในสเปก → คีย์โบนัสในเกม (scale = ตัวคูณตอนแปลง)
 export const STAT_DEF = {
@@ -12,6 +12,22 @@ export const STAT_DEF = {
   'HP Regen%': { key: 'regenPct' }, 'SP Regen%': { key: 'spRegenPct' }, 'Heal Power%': { key: 'healPct' },
   'Ranged DMG%': { key: 'rangedPct' }, 'Melee DMG%': { key: 'meleePct' }, 'ลดดาเมจรับ%': { key: 'dmgReduce' },
   'ดูดเลือด%': { key: 'lifesteal' }, 'ดูด SP%': { key: 'spDrain' }, Range: { key: 'rangeTiles' },
+  'เจาะเกราะ%': { key: 'defPierce' }, 'โอกาสสายฟ้า%': { key: 'procBolt' },   // fix60 สเตตัสระดับตำนาน
+};
+// fix60 ระดับของสเตตัสสุ่ม 5 ขั้น (ธรรมดา → ตำนาน) · ยิ่งขั้นสูงยิ่งสุ่มได้ยาก · ของหายากมีโอกาสได้ขั้นสูงมากขึ้น
+export const ROLL_TIERS = [
+  null,
+  { name: 'ธรรมดา', cls: 't1' }, { name: 'ดี', cls: 't2' }, { name: 'หายาก', cls: 't3' }, { name: 'หายากมาก', cls: 't4' }, { name: 'ตำนาน', cls: 't5' },
+];
+const T1 = new Set(['STR', 'AGI', 'VIT', 'INT', 'DEX', 'LUK', 'DEF', 'MaxSP']);
+const T2 = new Set(['ATK', 'MATK', 'atk', 'matk', 'HIT', 'FLEE', 'MaxHP', 'HP Regen%', 'SP Regen%']);
+const T3 = new Set(['CRIT', 'ASPD%', 'Cast Time -%', 'CRIT DMG%', 'After-cast Delay -%', 'MaxHP%', 'MaxSP%', 'Heal Power%', 'Range']);
+const T5 = new Set(['เจาะเกราะ%', 'โอกาสสายฟ้า%']);
+export const statTier = (stat) => (T5.has(stat) ? 5 : T1.has(stat) ? 1 : T2.has(stat) ? 2 : T3.has(stat) ? 3 : 4);
+// น้ำหนักสุ่มขั้น [ขั้น1..ขั้น5] ตามความหายากของไอเทม
+const TIER_W = {
+  common: [60, 30, 9, 1, 0], uncommon: [55, 30, 12, 3, 0], rare: [48, 30, 16, 5, 1], epic: [42, 30, 19, 7, 2],
+  legend: [36, 30, 22, 9, 3], mythic: [30, 30, 24, 12, 4], celestial: [28, 29, 25, 13, 5], abyssal: [27, 29, 25, 13, 6], divine: [25, 28, 26, 14, 7],
 };
 export const TRAIT_TH = {
   beast: 'สัตว์', plant: 'พืช', insect: 'แมลง', formless: 'ไร้รูป', undead: 'อันเดด', demon: 'ปีศาจ', dragon: 'มังกร',
@@ -95,6 +111,32 @@ export function extraRollPool(it) {
     P('ATK', -k * 2, k * 4), P('MATK', -k * 2, k * 4), P('HIT', -k, k * 2), P('FLEE', -k, k * 2), P('DEF', -h, k),
     P('CRIT', -1, Math.max(1, Math.ceil(k / 3))), P('MaxHP', -k * 15, k * 30), P('MaxSP', -k * 5, k * 10),
     P('ASPD%', -2, Math.max(2, h)), P('Cast Time -%', -2, Math.max(2, h)),
+    ...rarePool(it, k, 'weapon'),
+  ];
+}
+// fix60 สเตตัสขั้นหายาก–ตำนาน (ต่อท้าย pool เท่านั้น → รหัสค่าสุ่มของของเก่ายังอ่านได้ตรง)
+const RACES = ['beast', 'plant', 'insect', 'formless', 'undead', 'demon', 'dragon'], ELEMS = ['earth', 'water', 'fire', 'wind', 'holy', 'shadow'], SIZES = ['small', 'medium', 'large'];
+const hashId = (s) => { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+function rarePool(it, k, kind) {
+  const P = (stat, min, max) => ({ stat, min, max: Math.max(min, Math.round(max)), extra: true, tier: statTier(stat) });
+  const h = hashId(it.id || it.name), cap = (v, c) => Math.min(c, v);
+  const race = RACES[h % RACES.length], el = ELEMS[(h >> 3) % ELEMS.length], size = SIZES[(h >> 6) % SIZES.length];
+  if (kind === 'weapon') {
+    const staff = it.wtype === 'staff', bow = it.wtype === 'bow';
+    return [
+      P('CRIT DMG%', 1, Math.max(3, cap(k * 2, 30))), P('After-cast Delay -%', 1, Math.max(2, cap(Math.ceil(k / 2), 8))), P('MaxHP%', 1, Math.max(2, cap(Math.ceil(k / 2), 8))),
+      P('DMG vs ' + race, 1, Math.max(3, cap(k + 2, 15))), P('DMG vs ' + el, 1, Math.max(3, cap(k + 2, 15))), P('DMG vs ' + size, 1, Math.max(3, cap(k + 2, 15))),
+      P(staff ? 'MATK%' : 'ATK%', 1, Math.max(2, cap(Math.ceil(k / 2.5), 8))), P(staff ? 'Heal Power%' : bow ? 'Ranged DMG%' : 'Melee DMG%', 1, Math.max(2, cap(Math.ceil(k / 2), 10))),
+      P(staff ? 'ดูด SP%' : 'ดูดเลือด%', 1, Math.max(1, cap(Math.ceil(k / 6), 3))),
+      P('เจาะเกราะ%', 2, Math.max(5, cap(k * 1.5, 25))), P('โอกาสสายฟ้า%', 1, Math.max(2, cap(Math.ceil(k / 3), 6))),
+    ];
+  }
+  return [
+    P('MaxHP%', 1, Math.max(2, cap(Math.ceil(k / 2), 6))), P('MaxSP%', 1, Math.max(2, cap(Math.ceil(k / 2), 6))), P('CRIT DMG%', 1, Math.max(2, cap(k, 15))),
+    P('After-cast Delay -%', 1, Math.max(1, cap(Math.ceil(k / 3), 5))), P('Heal Power%', 1, Math.max(2, cap(k, 10))),
+    P('ลดดาเมจรับ%', 1, Math.max(1, cap(Math.ceil(k / 4), 6))), P('DMG vs ' + race, 1, Math.max(2, cap(k, 10))),
+    P('ATK%', 1, Math.max(1, cap(Math.ceil(k / 4), 4))), P('MATK%', 1, Math.max(1, cap(Math.ceil(k / 4), 4))),
+    P('เจาะเกราะ%', 1, Math.max(2, cap(Math.ceil(k / 2), 10))),
   ];
 }
 // ---------- v0.58 ค่าสุ่มพิเศษของอุปกรณ์สวมใส่ทุกชิ้น (หัว ชุด มือรอง ผ้าคลุม รองเท้า เครื่องประดับ) ----------
@@ -108,6 +150,7 @@ export function gearRollPool(it) {
     P('DEF', -h, k + 1), P('FLEE', -k, k * 2), P('MaxHP', -k * 12, k * 25), P('MaxSP', -k * 4, k * 8),
     P('ATK', -k, k * 2), P('MATK', -k, k * 2), P('HIT', -k, k), P('CRIT', -1, Math.max(1, Math.ceil(k / 4))),
     P('ASPD%', -1, sm), P('Cast Time -%', -1, sm), P('HP Regen%', -2, Math.max(2, k)), P('SP Regen%', -2, Math.max(2, k)),
+    ...rarePool(it, k, 'gear'),
   ];
 }
 const GEAR_FIT = {
@@ -124,25 +167,41 @@ const FIT = {
   bow: ['DEX', 'AGI', 'LUK', 'STR', 'ATK', 'HIT', 'CRIT', 'ASPD%', 'FLEE'],
 };
 export const rollFits = (it, stat) => {
-  if (!STAT_DEF[stat]) return true;
+  if (!STAT_DEF[stat] || statTier(stat) >= 4) return true;   // fix60 ขั้นหายากมาก/ตำนาน ใช้ได้ทุกสาย
   if (it && it.slot && it.slot !== 'weapon') return it.slot === 'accessory' || (GEAR_FIT[it.slot] || []).includes(stat);
   return (FIT[it && it.wtype === 'staff' ? 'staff' : it && it.wtype === 'bow' ? 'bow' : 'melee'] || []).includes(stat);
 };
 // คะแนนค่าสุ่ม: ค่าบวกเต็ม = +1 ต่อบรรทัด · ค่าลบเต็ม = −1 · ไม่ตรงสายนับครึ่ง
 export function rollScore(it, rolled) {
   let s = 0;
-  for (const r of rolled || []) { const f = r.value >= 0 ? (r.max > 0 ? r.value / r.max : 0) : (r.min < 0 ? -r.value / r.min : 0); s += f * (rollFits(it, r.stat) ? 1 : 0.5); }
+  for (const r of rolled || []) {
+    const f = r.value >= 0 ? (r.max > 0 ? r.value / r.max : 0) : (r.min < 0 ? -r.value / r.min : 0);
+    const tw = r.value > 0 ? [1, 1, 1.15, 1.5, 2, 2.6][statTier(r.stat)] : 1;   // fix60 ขั้นสูง = คะแนนสูงขึ้น
+    s += f * tw * (rollFits(it, r.stat) ? 1 : 0.5);
+  }
   return s;
 }
-export const rollGrade = (s) => (s >= 2 ? ['ยอดเยี่ยม', 'g4'] : s >= 1.1 ? ['ดีมาก', 'g3'] : s >= 0.4 ? ['ดี', 'g2'] : s >= 0 ? ['ธรรมดา', 'g1'] : ['แย่', 'g0']);
+export const rollGrade = (s) => (s >= 4.5 ? ['ในตำนาน', 'g5'] : s >= 2 ? ['ยอดเยี่ยม', 'g4'] : s >= 1.1 ? ['ดีมาก', 'g3'] : s >= 0.4 ? ['ดี', 'g2'] : s >= 0 ? ['ธรรมดา', 'g1'] : ['แย่', 'g0']);
 
 export function rollCode(it, rnd = Math.random) {
   const R = it && it.rolls; if (!R) return '';
-  if (R.v2) {   // v0.52: 1–3 ค่าเสมอ (หายากขึ้นได้หลายค่าบ่อยขึ้น) สุ่มจาก pool ทั้งหมด
+  if (R.v2) {   // v0.52: 1–3 ค่าเสมอ (หายากขึ้นได้หลายค่าบ่อยขึ้น)
     const up = { epic: 0.08, legend: 0.12, mythic: 0.16, celestial: 0.2, abyssal: 0.22, divine: 0.25 }[it.rarity] || 0;
     const x = rnd(), n = Math.min(R.pool.length, x < 0.15 + up ? 3 : x < 0.5 + up ? 2 : 1);
-    const idx = R.pool.map((_, i) => i).sort(() => rnd() - 0.5).slice(0, n).sort((a, b) => a - b);
-    const pick = (p) => { const z = p.min <= 0 && p.max >= 0, n = p.max - p.min + 1 - (z ? 1 : 0); let v = p.min + Math.floor(rnd() * n); if (z && v >= 0) v += 1; return v; };   // ไม่ออก 0
+    // fix60 สุ่มขั้นก่อน (ธรรมดา → ตำนาน ตามความหายากของไอเทม) แล้วสุ่มสเตตัสในขั้นนั้น · ค่าเป็นบวกเสมอ
+    const W = TIER_W[it.rarity] || TIER_W.common, used = new Set(), idx = [];
+    const byTier = (t) => R.pool.map((p, i) => [p, i]).filter(([p, i]) => !used.has(i) && statTier(p.stat) === t && p.max > 0);
+    for (let c = 0; c < n; c++) {
+      let r = rnd() * W.reduce((a, b) => a + b, 0), t = 1;
+      for (let j = 0; j < 5; j++) { r -= W[j]; if (r < 0) { t = j + 1; break; } }
+      let opts = byTier(t);
+      for (let d = t - 1; !opts.length && d >= 1; d--) opts = byTier(d);
+      for (let d = t + 1; !opts.length && d <= 5; d++) opts = byTier(d);
+      if (!opts.length) break;
+      const [, i] = opts[Math.floor(rnd() * opts.length)]; used.add(i); idx.push(i);
+    }
+    idx.sort((a, b) => a - b);
+    const pick = (p) => { const lo = Math.max(1, p.min); return lo + Math.floor(rnd() * (p.max - lo + 1)); };
     return idx.map((i) => b36(i) + b36(pick(R.pool[i]))).join('.');
   }
   const [lo, hi] = R.count;
@@ -158,7 +217,7 @@ export function decodeRoll(it, code) {
   for (const s of code.split('.')) {
     const p = it.rolls.pool[parseInt(s[0], 36)], v = parseInt(s.slice(1), 36);
     if (!p || !Number.isFinite(v) || v < p.min || v > p.max) return null;
-    out.push({ stat: p.stat, value: v, min: p.min, max: p.max });
+    out.push({ stat: p.stat, value: v, min: v < 0 ? p.min : Math.max(1, p.min), max: p.max, tier: statTier(p.stat) });
   }
   return out;
 }

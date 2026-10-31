@@ -1,8 +1,8 @@
 // fix52 ปฏิทินเช็กอิน 30 วัน — ตารางรางวัล 6×5 · วันพิเศษ 7/14/21/28 · วันที่ 30 รางวัลใหญ่ · กดรับรางวัลวันนี้ที่แถบล่าง
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.88';
-import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.88';
-import { loginReward, LOGIN_DAYS, LOGIN_MILESTONES } from '../data/collection.js?v=0.93.0-p4.88';
-import { localDay } from '../systems/Collection.js?v=0.93.0-p4.88';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.89';
+import { iconURL } from '../render/ItemIcons.js?v=0.93.0-p4.89';
+import { loginReward, LOGIN_DAYS, LOGIN_MILESTONES } from '../data/collection.js?v=0.93.0-p4.89';
+import { localDay } from '../systems/Collection.js?v=0.93.0-p4.89';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const short = (n) => (n >= 1e6 ? +(n / 1e6).toFixed(1) + 'M' : n >= 1000 ? +(n / 1000).toFixed(1) + 'k' : String(n));

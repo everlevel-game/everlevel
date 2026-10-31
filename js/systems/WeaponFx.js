@@ -1,6 +1,6 @@
 // v0.25.0: ผลของอาวุธระหว่างต่อสู้ — ธาตุ/เผ่า/ขนาด, Melee/Ranged DMG%, ดูดเลือด/ดูด SP, พาสซีฟเกรดทอง/แดง
-import { ITEMS } from '../data/items.js?v=0.93.0-p4.88';
-import { mobTraits, elementMul, ELEMENT_COLOR } from '../data/affixes.js?v=0.93.0-p4.88';
+import { ITEMS } from '../data/items.js?v=0.93.0-p4.89';
+import { mobTraits, elementMul, ELEMENT_COLOR } from '../data/affixes.js?v=0.93.0-p4.89';
 
 const weaponOf = (pl) => (pl.equip.weapon && ITEMS[pl.equip.weapon]) || null;
 const avg = (r) => (r ? (r[0] + r[1]) / 2 : 0);
@@ -28,6 +28,15 @@ export function afterHit(game, m, r, opts = {}) {
   let healed = false;
   if (B.lifesteal) { const h = Math.max(1, Math.round(r.amount * B.lifesteal / 100)); pl.hp = Math.min(pl.maxHp, pl.hp + h); healed = true; }
   if (B.spDrain && Math.random() < 0.5) { pl.sp = Math.min(pl.maxSp, pl.sp + Math.max(1, Math.round(r.amount * B.spDrain / 100))); healed = true; }
+  // fix60 สเตตัสตำนาน "โอกาสสายฟ้า%": ตีโดนมีโอกาสเรียกสายฟ้าฟาดเป้า 120% ATK/MATK
+  if (B.procBolt && !m.dead && Math.random() * 100 < Math.min(15, B.procBolt)) {
+    const amt = Math.max(1, Math.round(avg(opts.magic ? pl.stats.matk : pl.stats.atk) * 1.2));
+    game.schedule(0.12, () => {
+      if (m.dead) return;
+      game.gfx.lightning?.(m.x, m.y, '#9ad8ff');
+      game.damageMonster(m, { miss: false, crit: false, amount: amt }, { magic: true, element: 'wind', proc: true });
+    });
+  }
   const w = weaponOf(pl), P = w && w.passive;
   if (P) {
     const roll = () => Math.random() * 100 < (P.chance || 0);

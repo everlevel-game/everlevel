@@ -1,8 +1,8 @@
 // v0.25.0: รายละเอียดอาวุธชุดใหม่ในหน้าต่างกระเป๋า (ประเภท ธาตุ ค่าสุ่ม พาสซีฟ เซ็ต ตีบวก แหล่งดรอป)
-import { describeBonus, bonusText, weaponTypeName } from '../data/items.js?v=0.93.0-p4.88';
-import { TRAIT_TH, ELEMENT_COLOR, statToBonus, setInfo, statsToBonus, rollFits, rollScore, rollGrade } from '../data/affixes.js?v=0.93.0-p4.88';
-import { REFINE_RATE } from '../data/refine.js?v=0.93.0-p4.88';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.88';
+import { describeBonus, bonusText, weaponTypeName } from '../data/items.js?v=0.93.0-p4.89';
+import { TRAIT_TH, ELEMENT_COLOR, statToBonus, setInfo, statsToBonus, rollFits, rollScore, rollGrade, statTier, ROLL_TIERS } from '../data/affixes.js?v=0.93.0-p4.89';
+import { REFINE_RATE } from '../data/refine.js?v=0.93.0-p4.89';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.89';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const one = (stat, v) => { const o = statToBonus(stat, v); const [k, x] = Object.entries(o)[0] || []; return k ? bonusText(k, x) : stat; };
@@ -10,10 +10,10 @@ const one = (stat, v) => { const o = statToBonus(stat, v); const [k, x] = Object
 // v0.52 บรรทัดค่าสุ่ม: สีเขียว = ดี · แดง = ติดลบ · ✦ ตรงสายอาวุธ · พร้อมเกรดรวม
 export function rollLine(it) {
   if (!it.rolls) return '';
-  if (!it.rolled) return `<span class="wi-roll">ค่าสุ่มพิเศษ: ได้ 1–3 ค่าตอนดรอป/ซื้อ (มีทั้งค่าดีและค่าติดลบ)</span>`;
+  if (!it.rolled) return `<span class="wi-roll">ค่าสุ่มพิเศษ: ได้ 1–3 ค่าตอนดรอป/ซื้อ · ขั้น <span class="rt t1">ธรรมดา</span> <span class="rt t2">ดี</span> <span class="rt t3">หายาก</span> <span class="rt t4">หายากมาก</span> <span class="rt t5">ตำนาน</span></span>`;
   if (!it.rolled.length) return '<span class="wi-roll muted">ค่าสุ่ม: ไม่ได้สักค่า</span>';
   const [g, cls] = rollGrade(rollScore(it, it.rolled));
-  return `<span class="wi-roll">ค่าสุ่ม <b class="rg ${cls}">${g}</b>: ${it.rolled.map((r) => `<span class="${r.value < 0 ? 'rbad' : 'rgood'}">${rollFits(it, r.stat) ? '✦' : ''}${esc(one(r.stat, r.value))}</span> <small>[${r.min}~${r.max}]</small>`).join(' · ')}</span>`;
+  return `<span class="wi-roll">ค่าสุ่ม <b class="rg ${cls}">${g}</b>: ${it.rolled.map((r) => { const t = ROLL_TIERS[statTier(r.stat)]; return `<span class="${r.value < 0 ? 'rbad' : 'rgood rt ' + t.cls}" title="ขั้น${t.name}">${rollFits(it, r.stat) ? '✦' : ''}${esc(one(r.stat, r.value))}</span> <small>[${r.min}~${r.max}]</small>`; }).join(' · ')}</span>`;
 }
 
 export function weaponLines(it, player) {
