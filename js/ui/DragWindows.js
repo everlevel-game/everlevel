@@ -16,7 +16,8 @@ export function enableWindowDrag(root) {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     const hit = panelOf(e.target); if (!hit) return;
     const { el } = hit, r = el.getBoundingClientRect(), op = el.offsetParent || hud, h = op.getBoundingClientRect();
-    const k = op.offsetWidth ? h.width / op.offsetWidth : 1;   // หน้าต่างถูกย่อ/ขยายตามขนาด UI (--ui) → แปลงพิกเซลจอเป็นพิกเซล CSS
+    // หน้าต่างถูกย่อ/ขยายตามขนาด UI (--ui) และอาจถูกย่อเพิ่มให้พอดีจอ (fix62) → แปลงพิกเซลจอเป็นพิกเซล CSS ด้วยตัวคูณรวม
+    const k = (op.offsetWidth ? h.width / op.offsetWidth : 1) * (parseFloat(el.style.zoom) || 1);
     // ตรึงตำแหน่งปัจจุบันเป็นพิกเซล (เลิกใช้ left:50% + translate ของ CSS)
     const set = (k, v) => el.style.setProperty(k, v, 'important');   // ชนะกฎจัดกลางจอของ CSS (บางหน้าต่างใช้ !important)
     set('left', `${(r.left - h.left) / k}px`); set('top', `${(r.top - h.top) / k}px`); set('right', 'auto'); set('bottom', 'auto'); set('transform', 'none'); set('translate', 'none'); set('scale', 'none'); set('margin', '0');
@@ -28,6 +29,7 @@ export function enableWindowDrag(root) {
   document.addEventListener('pointermove', (e) => {
     if (!drag || e.pointerId !== drag.id) return;
     if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) return;
+    if (!drag.moved) drag.el.dataset.dragged = '1';   // fix64 ผู้เล่นย้ายเองแล้ว → ระบบจัดให้พอดีจอไม่ไปยุ่ง
     drag.moved = true;
     const { h, k } = drag, keep = 60;   // เหลือหัวหน้าต่างให้เห็นอย่างน้อย 60px เสมอ (ลากหลุดจอไม่ได้)
     const vw = innerWidth, vh = innerHeight;
@@ -43,5 +45,6 @@ export function enableWindowDrag(root) {
   document.addEventListener('dblclick', (e) => {
     const hit = panelOf(e.target); if (!hit) return;
     for (const k of ['left', 'top', 'right', 'bottom', 'transform', 'translate', 'scale', 'margin']) hit.el.style.removeProperty(k);
+    delete hit.el.dataset.dragged; dispatchEvent(new Event('resize'));   // fix64 กลับตำแหน่งเดิม → จัดให้พอดีจอใหม่
   }, true);
 }

@@ -21,7 +21,9 @@ export function setupFitWindows(root) {
 }
 
 function fit(el) {
-  if (el.hidden || !el.offsetParent || SKIP.test(el.className)) { if (el.dataset.fit) reset(el); return; }
+  if (el.classList.contains('dragging')) return;   // fix64 กำลังลากอยู่ ห้ามขยับ (เดิมเด้งขึ้นไปด้านบน)
+  if (el.hidden || !el.offsetParent || SKIP.test(el.className)) { if (el.dataset.fit && !el.dataset.dragged) reset(el); return; }
+  if (el.dataset.dragged) return;   // ผู้เล่นย้ายหน้าต่างเองแล้ว คงขนาด/ตำแหน่งไว้
   const cs = getComputedStyle(el);
   if (cs.position !== 'absolute' && cs.position !== 'fixed') return;
   reset(el);
