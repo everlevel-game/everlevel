@@ -584,9 +584,9 @@ body.touch .dlg { z-index: 5; }
 .dmg.skillname { font-family: var(--font); font-weight: 600; font-size: 15px; letter-spacing: 0; -webkit-text-stroke-width: 0; color: #fff3c4; background: none; text-shadow: 0 1px 0 #2a1a00, 0 0 6px rgba(0, 0, 0, 0.85), 0 0 12px rgba(255, 200, 90, 0.6); filter: none; }
 .dmg.buff { font-family: var(--font); font-weight: 600; font-size: 16px; letter-spacing: 0; -webkit-text-stroke-width: 0; color: #ffe08a; background: none; text-shadow: 0 1px 0 #2a1a00, 0 0 6px rgba(0, 0, 0, 0.85); filter: none; }
 .dmg.hit.magic { background-image: linear-gradient(#ffffff 30%, #efe0ff 60%, #c8a6ff); -webkit-text-stroke-color: #2a1640; }
-.dmg.status { font-family: var(--font); font-weight: 600; font-size: 15px; letter-spacing: 0; -webkit-text-stroke-width: 0; background: none; filter: none; text-shadow: 0 1px 0 #10202a, 0 0 6px rgba(0, 0, 0, 0.85); }
-.dmg.status.ice { color: #bfeeff; }
-.dmg.status.stun { color: #ffe08a; }
+.dmg.cc { font-family: var(--font); font-weight: 600; font-size: 15px; letter-spacing: 0; -webkit-text-stroke-width: 0; background: none; filter: none; text-shadow: 0 1px 0 #10202a, 0 0 6px rgba(0, 0, 0, 0.85); }
+.dmg.cc.ice { color: #bfeeff; }
+.dmg.cc.stun { color: #ffe08a; }
 
 /* แถบร่ายสกิลเหนือหัว */
 .castbar { position: absolute; left: 0; top: 0; width: 84px; pointer-events: none; will-change: transform; text-align: center; }
@@ -681,7 +681,7 @@ body.touch .dlg { z-index: 5; }
 .hpbar-mvp { width: 96px; height: 8px; }
 .dmg.taken.big { font-size: 38px; background-image: linear-gradient(#fff0d0 10%, #ff8a3a 55%, #c81e2a); }
 .dmg.mvp { font-family: var(--display); font-weight: 700; font-size: 46px; letter-spacing: 0.08em; background-image: linear-gradient(#fffbe0 10%, #ffd36b 50%, #e07a1a); }
-.dmg.status.root { color: #e8c890; }
+.dmg.cc.root { color: #e8c890; }
 .dmg.boss-skill { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: 0.04em; background-image: linear-gradient(#ffffff 10%, #ffd0a0 50%, #ff5a3a); }   /* v0.94 ชื่อท่าบอส */
 @media (max-width: 900px) {
   .bossbar { width: auto; left: 12px; right: 12px; transform: none; min-width: 0; top: calc(276px + env(safe-area-inset-top, 0px)); }
@@ -2585,3 +2585,8 @@ body.touch .chat .f-mythic, body.touch .chat .f-celestial { animation: none; }
 .set-ps .ps-now { padding: 6px 12px; }
 @media (orientation: portrait) { .psave { flex-direction: column; justify-content: center; } .ps-left, .ps-right { width: min(92%, 420px); } .ps-scene { display: none; } }
 @media (max-height: 420px) { .ps-scene { height: 70px; } .ps-name { font-size: 16px; } .ps-bar { height: 20px; } .ps-bar span { line-height: 17px; font-size: 12px; } .ps-right { gap: 4px; } }
+
+/* fix65 มือถือ: ตัวเลขดาเมจไม่ใช้ filter เงาซ้อน 2 ชั้น (iOS วาดช้ามากเมื่อมีหลายชิ้น) และเล็กลงเล็กน้อย */
+body.touch .dmg { filter: none; will-change: transform; isolation: auto; -webkit-text-stroke-width: 1.3px; }
+body.touch .dmg:not(.cc):not(.lvup) { font-size: 24px; }
+body.touch .dmg.crit { font-size: 30px; }

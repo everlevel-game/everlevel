@@ -7,9 +7,9 @@
 //   cross   ลำแสงตามแนวกากบาท/ดาว (ยืนในช่องว่าง)  shield โล่ลดดาเมจ 75% ชั่วครู่ (หยุดตี/ใช้บัฟ)
 //   adds    เรียกลูกน้อง                         cataclysm  ถล่มทั้งลาน เว้นวงปลอดภัย (บอสโลก)
 // รายบอสอยู่ใน BOSS_KITS · ค่า mult เทียบกับพลังโจมตีบอส (ผ่าน rollSkill เดิม · หลบ Miss ได้)
-import { TILE } from '../config.js?v=0.93.0-p4.93';
-import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.93';
-import { rollSkill } from './Combat.js?v=0.93.0-p4.93';
+import { TILE } from '../config.js?v=0.93.0-p4.94';
+import { MONSTERS } from '../data/monsters.js?v=0.93.0-p4.94';
+import { rollSkill } from './Combat.js?v=0.93.0-p4.94';
 
 const TAU = Math.PI * 2;
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -157,11 +157,11 @@ export class BossSkills {
   status(m, sk) {
     const g = this.g, pl = g.player;
     if (sk.effect === 'burn') {
-      g.gfx.floatText(pl, 'ไหม้!', 'status root', { h: 2.2, life: 1.2, rise: 0.5, drift: false });
+      g.gfx.floatText(pl, 'ไหม้!', 'cc root', { h: 2.2, life: 1.2, rise: 0.5, drift: false });
       for (let k = 1; k <= (sk.secs || 3); k++) g.schedule(k, () => { if (!pl.dead) g.damagePlayer(Math.max(1, Math.round(pl.maxHp * 0.03)), m, false); });
     } else if (sk.effect === 'freeze' || sk.effect === 'root') {
       pl.rootedUntil = g.time + (sk.secs || 1.2); pl.path = [];
-      g.gfx.floatText(pl, sk.effect === 'freeze' ? 'แช่แข็ง!' : 'ติดราก!', 'status root', { h: 2.2, life: 1.2, rise: 0.5, drift: false });
+      g.gfx.floatText(pl, sk.effect === 'freeze' ? 'แช่แข็ง!' : 'ติดราก!', 'cc root', { h: 2.2, life: 1.2, rise: 0.5, drift: false });
     }
   }
   sfxOf(kit) { const t = kit.theme; return t === 'ice' || t === 'crystal' ? 'iceBlast' : t === 'fire' || t === 'void' || t === 'blood' ? 'explosion' : 'slam'; }
